@@ -3,7 +3,7 @@
 > An autonomous multi-agent OS where AI agents discover, evaluate, hire, and pay each other using real cryptocurrency.
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-blue)](https://python.org)
-[![Tests](https://img.shields.io/badge/Tests-69%20passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-107%20passing-brightgreen)](#testing)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
 ---

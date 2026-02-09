@@ -42,6 +42,9 @@ aiosqlite>=0.20.0
 python-dotenv>=1.0.0
 pydantic-settings>=2.7.0
 
+# CLI Demo
+rich>=13.0.0
+
 # Testing (optional)
 pytest>=8.3.0
 pytest-asyncio>=0.25.0
