@@ -5,6 +5,8 @@ Provides REST endpoints for:
 - Agent registry browsing
 - Spending/budget dashboard
 - Health checks
+
+Uses SQLite for durable task persistence.
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ from pydantic import BaseModel
 from src.config import get_chat_client, get_settings
 from src.mcp_servers.registry_server import registry
 from src.mcp_servers.payment_hub import ledger
+from src.storage import get_storage
 from src.workflows.sequential import run_sequential
 from src.workflows.concurrent import run_concurrent
 from src.workflows.group_chat import run_group_chat
@@ -67,7 +70,7 @@ class TaskResponse(BaseModel):
     result: dict[str, Any] | None = None
 
 
-# --- In-memory task store ---
+# --- In-memory task store (also persisted to SQLite) ---
 
 @dataclass
 class TaskRecord:
@@ -90,9 +93,26 @@ _WORKFLOW_RUNNERS = {
 }
 
 
+def _persist_task(record: TaskRecord) -> None:
+    """Persist a task record to SQLite."""
+    try:
+        get_storage().save_task(
+            task_id=record.task_id,
+            description=record.description,
+            workflow=record.workflow.value,
+            budget_usd=record.budget_usd,
+            status=record.status.value,
+            created_at=record.created_at,
+            result=record.result,
+        )
+    except Exception:
+        logger.debug("Failed to persist task %s to SQLite", record.task_id)
+
+
 async def _execute_task(record: TaskRecord) -> None:
     """Run the workflow for a task in the background, updating status."""
     record.status = TaskStatus.RUNNING
+    _persist_task(record)
     try:
         runner = _WORKFLOW_RUNNERS[record.workflow]
         chat_client = get_chat_client()
@@ -104,6 +124,7 @@ async def _execute_task(record: TaskRecord) -> None:
         record.status = TaskStatus.FAILED
         record.result = {"error": str(exc)}
     finally:
+        _persist_task(record)
         _background_tasks.pop(record.task_id, None)
 
 
@@ -155,6 +176,7 @@ async def submit_task(submission: TaskSubmission):
         budget_usd=submission.budget_usd,
     )
     _tasks[task_id] = record
+    _persist_task(record)
 
     # Allocate budget in the payment ledger
     ledger.allocate_budget(task_id, submission.budget_usd)

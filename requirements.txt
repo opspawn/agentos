@@ -35,6 +35,9 @@ eth-account>=0.14.0
 # Web Search
 ddgs>=9.0.0
 
+# SQLite (async)
+aiosqlite>=0.20.0
+
 # Utilities
 python-dotenv>=1.0.0
 pydantic-settings>=2.7.0

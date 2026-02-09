@@ -6,3 +6,6 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+data/agentos.db
+data/agentos.db-wal
+data/agentos.db-shm

@@ -2,6 +2,8 @@
 
 Provides tools for managing payments, tracking budgets,
 and handling x402 micropayment flows.
+
+Uses SQLite for durable persistence with in-memory caching.
 """
 
 from __future__ import annotations
@@ -13,6 +15,8 @@ from typing import Any
 
 from mcp.server import Server
 from mcp.types import TextContent, Tool
+
+from src.storage import get_storage
 
 
 @dataclass
@@ -43,17 +47,63 @@ class Budget:
 
 
 class PaymentLedger:
-    """In-memory ledger for tracking payments and budgets."""
+    """Ledger for tracking payments and budgets, backed by SQLite."""
 
     def __init__(self) -> None:
         self._transactions: list[PaymentRecord] = []
         self._budgets: dict[str, Budget] = {}
         self._tx_counter: int = 0
+        self._persist = True  # Can be disabled for tests
+
+    def _storage(self):
+        """Lazy access to storage singleton."""
+        return get_storage()
+
+    def _sync_from_db(self) -> None:
+        """Load state from SQLite into memory."""
+        if not self._persist:
+            return
+        try:
+            storage = self._storage()
+            # Load payments
+            rows = storage.get_payments()
+            self._transactions = [
+                PaymentRecord(
+                    tx_id=r["tx_id"],
+                    from_agent=r["from_agent"],
+                    to_agent=r["to_agent"],
+                    amount_usdc=r["amount_usdc"],
+                    task_id=r["task_id"],
+                    timestamp=r["timestamp"],
+                    status=r["status"],
+                    tx_hash=r["tx_hash"],
+                )
+                for r in rows
+            ]
+            self._tx_counter = len(self._transactions)
+
+            # Load budgets
+            self._budgets = {}
+            for task_row in storage.list_tasks():
+                budget_data = storage.get_budget(task_row["task_id"])
+                if budget_data:
+                    self._budgets[budget_data["task_id"]] = Budget(
+                        task_id=budget_data["task_id"],
+                        allocated=budget_data["allocated"],
+                        spent=budget_data["spent"],
+                    )
+        except Exception:
+            pass  # Graceful fallback to in-memory on DB errors
 
     def allocate_budget(self, task_id: str, amount: float) -> Budget:
         """Allocate a budget for a task."""
         budget = Budget(task_id=task_id, allocated=amount)
         self._budgets[task_id] = budget
+        if self._persist:
+            try:
+                self._storage().save_budget(task_id, amount)
+            except Exception:
+                pass
         return budget
 
     def get_budget(self, task_id: str) -> Budget | None:
@@ -86,6 +136,24 @@ class PaymentLedger:
         if budget:
             budget.spent += amount
 
+        # Persist to SQLite
+        if self._persist:
+            try:
+                self._storage().save_payment(
+                    tx_id=record.tx_id,
+                    from_agent=record.from_agent,
+                    to_agent=record.to_agent,
+                    amount_usdc=record.amount_usdc,
+                    task_id=record.task_id,
+                    timestamp=record.timestamp,
+                    status=record.status,
+                    tx_hash=record.tx_hash,
+                )
+                if budget:
+                    self._storage().update_budget_spent(task_id, amount)
+            except Exception:
+                pass
+
         return record
 
     def get_transactions(self, task_id: str | None = None) -> list[PaymentRecord]:
@@ -97,6 +165,18 @@ class PaymentLedger:
     def total_spent(self) -> float:
         """Total USDC spent across all tasks."""
         return sum(t.amount_usdc for t in self._transactions if t.status == "completed")
+
+    def clear(self) -> None:
+        """Clear all ledger state (in-memory and SQLite)."""
+        self._transactions.clear()
+        self._budgets.clear()
+        self._tx_counter = 0
+        if self._persist:
+            try:
+                self._storage().clear_payments()
+                self._storage().clear_budgets()
+            except Exception:
+                pass
 
 
 # Global ledger instance

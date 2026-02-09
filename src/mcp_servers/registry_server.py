@@ -2,6 +2,8 @@
 
 Provides tools for discovering agents, registering capabilities,
 and matching tasks to the best available agent.
+
+Uses SQLite for durable persistence with in-memory caching.
 """
 
 from __future__ import annotations
@@ -13,6 +15,8 @@ from typing import Any
 from mcp.server import Server
 from mcp.types import TextContent, Tool
 from pydantic import BaseModel
+
+from src.storage import get_storage
 
 
 @dataclass
@@ -31,18 +35,44 @@ class AgentCard:
 
 
 class AgentRegistry:
-    """In-memory registry of available agents."""
+    """Registry of available agents, backed by SQLite."""
 
     def __init__(self) -> None:
         self._agents: dict[str, AgentCard] = {}
+        self._persist = True  # Can be disabled for tests
+
+    def _storage(self):
+        """Lazy access to storage singleton."""
+        return get_storage()
 
     def register(self, card: AgentCard) -> None:
         """Register an agent in the registry."""
         self._agents[card.name] = card
+        if self._persist:
+            try:
+                self._storage().save_agent(
+                    name=card.name,
+                    description=card.description,
+                    skills=card.skills,
+                    price_per_call=card.price_per_call,
+                    endpoint=card.endpoint,
+                    protocol=card.protocol,
+                    payment=card.payment,
+                    is_external=card.is_external,
+                    metadata=card.metadata,
+                )
+            except Exception:
+                pass
 
     def unregister(self, name: str) -> bool:
         """Remove an agent from the registry."""
-        return self._agents.pop(name, None) is not None
+        removed = self._agents.pop(name, None) is not None
+        if self._persist and removed:
+            try:
+                self._storage().remove_agent(name)
+            except Exception:
+                pass
+        return removed
 
     def get(self, name: str) -> AgentCard | None:
         """Get an agent by name."""
