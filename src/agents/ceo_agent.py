@@ -11,6 +11,9 @@ from typing import Any
 from agent_framework import ChatAgent, tool
 
 from src.config import get_chat_client, get_settings
+from src.learning.feedback import FeedbackRecord, get_feedback_collector
+from src.learning.scorer import AgentScorer
+from src.learning.optimizer import HiringOptimizer
 from src.mcp_servers.payment_hub import ledger
 from src.mcp_servers.tool_server import tool_registry
 
@@ -43,6 +46,12 @@ Decision framework:
 - If an internal agent can't handle it, search the marketplace for an external agent
 - Use discover_tools to find MCP tools that can augment agent capabilities
 - Always check budget before hiring external agents
+
+Learning & Feedback:
+- After EVERY task completion, call record_task_feedback to log the outcome
+- Before hiring, call get_hiring_recommendation to get data-driven suggestions
+- The system uses Thompson sampling to balance proven agents vs exploring new ones
+- Agent scores use exponential decay — recent performance matters more
 
 When you receive a task, respond with a structured plan:
 1. Task breakdown (subtasks)
@@ -255,6 +264,102 @@ async def discover_tools(query: str = "", tag: str = "") -> dict[str, Any]:
         return {"tools_found": 0, "tools": [], "error": str(e)}
 
 
+@tool(
+    name="record_task_feedback",
+    description="Record feedback after a task is completed to improve future hiring",
+)
+async def record_task_feedback(
+    task_id: str,
+    agent_id: str,
+    outcome: str,
+    quality_score: float,
+    latency_ms: float = 0.0,
+    cost_usdc: float = 0.0,
+) -> dict[str, Any]:
+    """Record feedback for a completed task.
+
+    Called by the CEO after a sub-agent finishes work. This data feeds
+    into the scoring and optimization systems.
+
+    Args:
+        task_id: Unique identifier of the completed task.
+        agent_id: The agent that performed the work.
+        outcome: "success", "partial", or "failure".
+        quality_score: Quality rating from 0.0 to 1.0.
+        latency_ms: How long the task took in milliseconds.
+        cost_usdc: How much the task cost in USDC.
+    """
+    try:
+        collector = get_feedback_collector()
+        record = FeedbackRecord(
+            task_id=task_id,
+            agent_id=agent_id,
+            outcome=outcome,
+            quality_score=max(0.0, min(1.0, quality_score)),
+            latency_ms=latency_ms,
+            cost_usdc=cost_usdc,
+        )
+        collector.record_feedback(record)
+
+        # Recompute the agent's score
+        scorer = AgentScorer(collector)
+        score = scorer.compute_score(agent_id)
+
+        return {
+            "status": "recorded",
+            "task_id": task_id,
+            "agent_id": agent_id,
+            "outcome": outcome,
+            "updated_score": score.composite_score,
+            "confidence": score.confidence,
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+@tool(
+    name="get_hiring_recommendation",
+    description="Get an AI-optimized agent recommendation for a task",
+)
+async def get_hiring_recommendation(
+    candidate_ids: str,
+    skill: str = "",
+    budget: float = 1.0,
+) -> dict[str, Any]:
+    """Recommend the best agent for a task using learning-based optimization.
+
+    Uses Thompson sampling to balance exploiting proven agents with
+    exploring undersampled ones.
+
+    Args:
+        candidate_ids: Comma-separated list of agent IDs to choose from.
+        skill: Optional skill requirement for the task.
+        budget: Maximum budget in USDC.
+    """
+    try:
+        candidates = [c.strip() for c in candidate_ids.split(",") if c.strip()]
+        if not candidates:
+            return {"status": "error", "error": "No candidates provided"}
+
+        collector = get_feedback_collector()
+        optimizer = HiringOptimizer(collector)
+        rec = optimizer.recommend_agent(candidates, skill=skill or None, budget=budget)
+
+        if rec is None:
+            return {"status": "no_recommendation", "candidates": candidates}
+
+        return {
+            "status": "recommended",
+            "agent_id": rec.agent_id,
+            "expected_score": rec.expected_score,
+            "confidence_interval": [rec.confidence_lower, rec.confidence_upper],
+            "reason": rec.reason,
+            "is_exploration": rec.is_exploration,
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
 def create_ceo_agent(chat_client=None) -> ChatAgent:
     """Create and return the CEO agent.
 
@@ -270,5 +375,12 @@ def create_ceo_agent(chat_client=None) -> ChatAgent:
         name="CEO",
         description="Orchestrator agent that analyzes tasks, manages budget, and delegates work",
         instructions=CEO_INSTRUCTIONS,
-        tools=[analyze_task, check_budget, approve_hire, discover_tools],
+        tools=[
+            analyze_task,
+            check_budget,
+            approve_hire,
+            discover_tools,
+            record_task_feedback,
+            get_hiring_recommendation,
+        ],
     )
