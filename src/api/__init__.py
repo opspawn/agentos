@@ -1,1 +1,1 @@
-"""AgentOS API server."""
+"""AgentOS API — dashboard and task server."""
