@@ -1,0 +1,46 @@
+# Microsoft AI Dev Days Hackathon - AgentOS
+# Python dependencies
+
+# Core Agent Framework (preview version required)
+agent-framework>=0.1.0.dev
+
+# Azure Services
+azure-ai-agents>=1.0.0
+azure-identity>=1.19.0
+azure-cosmos>=4.9.0
+azure-monitor-opentelemetry>=1.8.0
+opentelemetry-api>=1.30.0
+opentelemetry-sdk>=1.30.0
+
+# Azure AI
+azure-ai-inference>=1.0.0b6
+azure-core>=1.33.0
+
+# Model Context Protocol
+mcp>=1.1.0
+
+# Web Framework (for dashboard API)
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.0
+
+# HTTP Client
+aiohttp>=3.11.0
+httpx>=0.28.0
+
+# Crypto/Payments (x402 support)
+web3>=7.6.0
+eth-account>=0.14.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic-settings>=2.7.0
+
+# Testing (optional)
+pytest>=8.3.0
+pytest-asyncio>=0.25.0
+
+# Development
+black>=24.10.0
+ruff>=0.8.0
+mypy>=1.14.0
