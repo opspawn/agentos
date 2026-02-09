@@ -12,6 +12,7 @@ from agent_framework import ChatAgent, tool
 
 from src.config import get_chat_client, get_settings
 from src.mcp_servers.payment_hub import ledger
+from src.mcp_servers.tool_server import tool_registry
 
 CEO_INSTRUCTIONS = """You are the CEO Agent of AgentOS, an autonomous agent operating system.
 
@@ -30,11 +31,17 @@ Available internal agents:
 - Builder Agent: Writes code, runs tests, deploys services
 - Research Agent: Searches the web, analyzes data, produces reports
 
+Available MCP tools (via Tool Server):
+- Use discover_tools to find external tools by capability or tag
+- Azure tools: resource checking, DevOps work items, Key Vault secrets
+- Tools can be composed into workflows (chains of tools)
+
 Decision framework:
 - If the task is purely research, delegate to Research Agent
 - If the task requires code, delegate to Builder Agent
 - For complex tasks, use sequential (research first, then build) or parallel execution
 - If an internal agent can't handle it, search the marketplace for an external agent
+- Use discover_tools to find MCP tools that can augment agent capabilities
 - Always check budget before hiring external agents
 
 When you receive a task, respond with a structured plan:
@@ -215,6 +222,39 @@ async def approve_hire(
     }
 
 
+@tool(name="discover_tools", description="Discover available MCP tools by capability or tag")
+async def discover_tools(query: str = "", tag: str = "") -> dict[str, Any]:
+    """Search the MCP tool registry for available tools.
+
+    Agents use this to find external tools they can invoke.
+    Search by free-text query or by tag (e.g., 'azure', 'security').
+    """
+    from dataclasses import asdict
+
+    try:
+        if tag:
+            tools = tool_registry.search_by_tag(tag)
+        elif query:
+            tools = tool_registry.search(query)
+        else:
+            tools = tool_registry.list_all()
+
+        return {
+            "tools_found": len(tools),
+            "tools": [
+                {
+                    "name": t.name,
+                    "description": t.description,
+                    "provider": t.provider,
+                    "tags": t.tags,
+                }
+                for t in tools
+            ],
+        }
+    except Exception as e:
+        return {"tools_found": 0, "tools": [], "error": str(e)}
+
+
 def create_ceo_agent(chat_client=None) -> ChatAgent:
     """Create and return the CEO agent.
 
@@ -230,5 +270,5 @@ def create_ceo_agent(chat_client=None) -> ChatAgent:
         name="CEO",
         description="Orchestrator agent that analyzes tasks, manages budget, and delegates work",
         instructions=CEO_INSTRUCTIONS,
-        tools=[analyze_task, check_budget, approve_hire],
+        tools=[analyze_task, check_budget, approve_hire, discover_tools],
     )

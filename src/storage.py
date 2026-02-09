@@ -65,6 +65,17 @@ CREATE TABLE IF NOT EXISTS budgets (
     allocated REAL NOT NULL,
     spent REAL NOT NULL DEFAULT 0.0
 );
+
+CREATE TABLE IF NOT EXISTS tools (
+    name TEXT PRIMARY KEY,
+    description TEXT NOT NULL,
+    input_schema TEXT NOT NULL DEFAULT '{}',   -- JSON blob
+    output_schema TEXT NOT NULL DEFAULT '{}',  -- JSON blob
+    provider TEXT NOT NULL DEFAULT 'local',
+    version TEXT NOT NULL DEFAULT '1.0.0',
+    tags TEXT NOT NULL DEFAULT '[]',           -- JSON array
+    registered_at REAL NOT NULL
+);
 """
 
 
@@ -479,6 +490,98 @@ class SQLiteStorage:
         }
 
     # ------------------------------------------------------------------
+    # Tools (MCP Tool Server)
+    # ------------------------------------------------------------------
+
+    def save_tool(
+        self,
+        name: str,
+        description: str,
+        input_schema: dict[str, Any],
+        output_schema: dict[str, Any] | None = None,
+        provider: str = "local",
+        version: str = "1.0.0",
+        tags: list[str] | None = None,
+        registered_at: float | None = None,
+    ) -> None:
+        """Register or update a tool."""
+        conn = self._get_conn()
+        try:
+            conn.execute(
+                """INSERT OR REPLACE INTO tools
+                   (name, description, input_schema, output_schema,
+                    provider, version, tags, registered_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    name,
+                    description,
+                    json.dumps(input_schema),
+                    json.dumps(output_schema or {}),
+                    provider,
+                    version,
+                    json.dumps(tags or []),
+                    registered_at or time.time(),
+                ),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def get_tool(self, name: str) -> dict[str, Any] | None:
+        """Get a tool by name."""
+        conn = self._get_conn()
+        try:
+            row = conn.execute(
+                "SELECT * FROM tools WHERE name = ?", (name,)
+            ).fetchone()
+            if row is None:
+                return None
+            return self._row_to_tool(row)
+        finally:
+            conn.close()
+
+    def remove_tool(self, name: str) -> bool:
+        """Remove a tool. Returns True if found and deleted."""
+        conn = self._get_conn()
+        try:
+            cursor = conn.execute("DELETE FROM tools WHERE name = ?", (name,))
+            conn.commit()
+            return cursor.rowcount > 0
+        finally:
+            conn.close()
+
+    def list_tools(self) -> list[dict[str, Any]]:
+        """List all tools."""
+        conn = self._get_conn()
+        try:
+            rows = conn.execute("SELECT * FROM tools").fetchall()
+            return [self._row_to_tool(r) for r in rows]
+        finally:
+            conn.close()
+
+    def clear_tools(self) -> None:
+        """Delete all tools (for testing)."""
+        conn = self._get_conn()
+        try:
+            conn.execute("DELETE FROM tools")
+            conn.commit()
+        finally:
+            conn.close()
+
+    @staticmethod
+    def _row_to_tool(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "name": row["name"],
+            "description": row["description"],
+            "input_schema": json.loads(row["input_schema"]),
+            "output_schema": json.loads(row["output_schema"]),
+            "provider": row["provider"],
+            "version": row["version"],
+            "tags": json.loads(row["tags"]),
+            "registered_at": row["registered_at"],
+        }
+
+    # ------------------------------------------------------------------
     # Async wrappers (via aiosqlite)
     # ------------------------------------------------------------------
 
@@ -555,6 +658,7 @@ class SQLiteStorage:
         self.clear_payments()
         self.clear_budgets()
         self.clear_agents()
+        self.clear_tools()
 
     def close(self) -> None:
         """No-op — connections are opened/closed per operation."""
