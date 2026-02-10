@@ -53,7 +53,10 @@ def _banner() -> None:
 def _summary(name: str, result: dict) -> None:
     status = result.get("status", "unknown")
     elapsed = result.get("elapsed_s", 0)
-    colour = _GREEN if "complete" in status.lower() or "success" in status.lower() else _YELLOW
+    status_lower = status.lower()
+    is_ok = ("complete" in status_lower or "success" in status_lower
+             or "idle" in status_lower)
+    colour = _GREEN if is_ok else _YELLOW
 
     print(f"\n{_BOLD}--- {name} Summary ---{_RESET}")
     print(f"  Status  : {colour}{status}{_RESET}")
@@ -63,6 +66,16 @@ def _summary(name: str, result: dict) -> None:
         print(f"  Budget  : ${b['allocated']:.2f} allocated, "
               f"${b['spent']:.2f} spent, "
               f"${b['remaining']:.2f} remaining")
+    if "token_usage" in result:
+        tu = result["token_usage"]
+        prompt_tok = tu.get("prompt_tokens", 0)
+        completion_tok = tu.get("completion_tokens", 0)
+        total_tok = tu.get("total_tokens", 0)
+        cost_input = prompt_tok * 2.50 / 1_000_000
+        cost_output = completion_tok * 10.00 / 1_000_000
+        print(f"  Tokens  : {total_tok:,} total "
+              f"({prompt_tok:,} prompt + {completion_tok:,} completion)")
+        print(f"  Cost    : ${cost_input + cost_output:.4f}")
     output = result.get("output", "")
     if output:
         preview = output[:300].replace("\n", "\n    ")

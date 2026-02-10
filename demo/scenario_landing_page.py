@@ -19,7 +19,7 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
-from src.config import get_chat_client, get_settings
+from src.config import get_chat_client, get_settings, _resolve_provider, ModelProvider
 from src.mcp_servers.payment_hub import ledger
 from src.workflows.sequential import create_sequential_workflow, _extract_output_text
 
@@ -78,8 +78,11 @@ async def run_landing_page_scenario() -> dict:
     """
     _header("HireWire Demo: Build a Landing Page")
 
-    provider = get_settings().model_provider.value
-    _info(f"Model provider: {provider}")
+    settings = get_settings()
+    provider = _resolve_provider(settings)
+    _info(f"Model provider: {provider.value}")
+    if provider == ModelProvider.AZURE_OPENAI:
+        _info(f"Azure deployment: {settings.azure_openai_deployment}")
     _info(f"Task: {TASK_DESCRIPTION}")
     print()
 
@@ -127,8 +130,28 @@ async def run_landing_page_scenario() -> dict:
     _info(f"Remaining : ${budget.remaining:.2f} USDC")
     print()
 
-    # 5 — Save output
-    _step(6, "Saving output")
+    # 5 — Token usage (Azure OpenAI only)
+    token_usage = {}
+    if hasattr(client, "usage_summary"):
+        token_usage = client.usage_summary
+        _step(6, "Token usage (Azure OpenAI GPT-4o)")
+        prompt_tok = token_usage.get("prompt_tokens", 0)
+        completion_tok = token_usage.get("completion_tokens", 0)
+        total_tok = token_usage.get("total_tokens", 0)
+        # GPT-4o pricing: $2.50/1M input, $10.00/1M output
+        cost_input = prompt_tok * 2.50 / 1_000_000
+        cost_output = completion_tok * 10.00 / 1_000_000
+        cost_total = cost_input + cost_output
+        _info(f"Prompt tokens     : {prompt_tok:,}")
+        _info(f"Completion tokens : {completion_tok:,}")
+        _info(f"Total tokens      : {total_tok:,}")
+        _info(f"Estimated cost    : ${cost_total:.4f} "
+              f"(input ${cost_input:.4f} + output ${cost_output:.4f})")
+        print()
+
+    # 6 — Save output
+    step_n = 7 if token_usage else 6
+    _step(step_n, "Saving output")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / "landing_page_result.txt"
     out_path.write_text(output_text, encoding="utf-8")
@@ -136,7 +159,7 @@ async def run_landing_page_scenario() -> dict:
 
     _header("Demo Complete")
 
-    return {
+    result_dict = {
         "task": TASK_DESCRIPTION,
         "workflow": "sequential",
         "status": str(result.get_final_state()),
@@ -148,6 +171,9 @@ async def run_landing_page_scenario() -> dict:
         },
         "elapsed_s": round(elapsed, 3),
     }
+    if token_usage:
+        result_dict["token_usage"] = token_usage
+    return result_dict
 
 
 if __name__ == "__main__":
