@@ -189,6 +189,46 @@
   .kb-entry-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
   .kb-entry-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
   .kb-entry-meta { display: flex; gap: 10px; margin-top: 6px; }
+  /* Live Demo Pipeline Overlay */
+  .pipeline-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 150; backdrop-filter: blur(6px); }
+  .pipeline-overlay.active { display: flex; }
+  .pipeline-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; width: 620px; max-width: 92vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+  .pipeline-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .pipeline-header h2 { font-size: 17px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .pipeline-header .live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
+  .pipeline-body { padding: 20px 24px; }
+  .pipeline-task { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+  .pipeline-task-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
+  .pipeline-task-text { font-size: 14px; color: var(--text); font-weight: 500; line-height: 1.4; }
+  .pipeline-stages { display: flex; flex-direction: column; gap: 0; }
+  .pipeline-stage { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; position: relative; }
+  .pipeline-stage:not(:last-child) { border-bottom: none; }
+  .pipeline-stage-line { position: absolute; left: 15px; top: 36px; bottom: -12px; width: 2px; background: var(--border); }
+  .pipeline-stage:last-child .pipeline-stage-line { display: none; }
+  .pipeline-stage-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; transition: all 0.4s ease; z-index: 1; background: var(--bg); }
+  .pipeline-stage.waiting .pipeline-stage-dot { border-color: var(--border); color: var(--text-muted); }
+  .pipeline-stage.active .pipeline-stage-dot { border-color: var(--accent); color: var(--accent-light); background: var(--accent-glow); animation: pulse 1s infinite; }
+  .pipeline-stage.done .pipeline-stage-dot { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .pipeline-stage.done .pipeline-stage-line { background: var(--green); }
+  .pipeline-stage-content { flex: 1; min-width: 0; }
+  .pipeline-stage-name { font-size: 13px; font-weight: 600; color: var(--text-muted); transition: color 0.3s; }
+  .pipeline-stage.active .pipeline-stage-name, .pipeline-stage.done .pipeline-stage-name { color: var(--text); }
+  .pipeline-stage-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; opacity: 0; transition: opacity 0.4s; }
+  .pipeline-stage.active .pipeline-stage-detail, .pipeline-stage.done .pipeline-stage-detail { opacity: 1; }
+  .pipeline-stage-time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; opacity: 0; transition: opacity 0.3s; }
+  .pipeline-stage.done .pipeline-stage-time { opacity: 1; color: var(--green); }
+  .pipeline-result { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-top: 16px; display: none; }
+  .pipeline-result.visible { display: block; animation: slideIn 0.3s ease; }
+  .pipeline-result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .pipeline-result-title { font-size: 13px; font-weight: 600; color: var(--green); }
+  .pipeline-result-stats { display: flex; gap: 16px; }
+  .pipeline-result-stat { text-align: center; }
+  .pipeline-result-stat-value { font-size: 16px; font-weight: 700; color: var(--text); }
+  .pipeline-result-stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .pipeline-result-preview { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-top: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; max-height: 120px; overflow-y: auto; }
+  .pipeline-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .pipeline-total { font-size: 13px; color: var(--text-muted); }
+  .pipeline-total strong { color: var(--text); }
 </style>
 </head>
 <body>
@@ -217,7 +257,8 @@
     <div class="top-bar">
       <div class="top-bar-left"><span class="page-title" id="page-title">Overview</span><span class="gpt4o-badge" id="gpt4o-badge">GPT-4o LIVE</span><span class="demo-badge" id="demo-badge">DEMO MODE</span></div>
       <div class="top-bar-right">
-        <button class="btn btn-sm" id="demo-btn" onclick="toggleDemo()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Start Demo</button>
+        <button class="btn btn-sm btn-success" id="live-demo-btn" onclick="runLiveDemo()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Live Demo</button>
+        <button class="btn btn-sm" id="demo-btn" onclick="toggleDemo()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Auto Demo</button>
         <button class="btn btn-sm btn-primary" onclick="openTaskModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Task</button>
       </div>
     </div>
@@ -300,6 +341,45 @@
 </div>
 <!-- MODALS -->
 <div class="modal-overlay" id="task-modal"><div class="modal"><div class="modal-header"><span class="modal-title">Submit New Task</span><button class="modal-close" onclick="closeTaskModal()">&times;</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Task Description</label><input class="form-input" id="modal-task-input" placeholder="e.g. Analyze competitor pricing for AI agent platforms..." maxlength="2000"/></div><div class="form-group"><label class="form-label">Budget (USDC)</label><input class="form-input" id="modal-budget-input" type="number" value="2.0" min="0.01" max="1000" step="0.01"/></div><div style="font-size:11px;color:var(--text-muted);margin-top:8px">Task will be routed to the best agent by the CEO. GPT-4o generates the response. x402 payment recorded.</div></div><div class="modal-footer"><button class="btn" onclick="closeTaskModal()">Cancel</button><button class="btn btn-primary" id="modal-submit-btn" onclick="submitModalTask()">Submit Task</button></div></div></div>
+<!-- LIVE DEMO PIPELINE OVERLAY -->
+<div class="pipeline-overlay" id="pipeline-overlay">
+  <div class="pipeline-panel">
+    <div class="pipeline-header">
+      <h2><div class="live-dot"></div>Live Pipeline</h2>
+      <button class="modal-close" onclick="closePipeline()">&times;</button>
+    </div>
+    <div class="pipeline-body">
+      <div class="pipeline-task">
+        <div class="pipeline-task-label">Task</div>
+        <div class="pipeline-task-text" id="pipeline-task-text">Preparing...</div>
+      </div>
+      <div class="pipeline-stages" id="pipeline-stages">
+        <div class="pipeline-stage waiting" id="ps-1"><div class="pipeline-stage-line"></div><div class="pipeline-stage-dot">1</div><div class="pipeline-stage-content"><div class="pipeline-stage-name">Task Received</div><div class="pipeline-stage-detail" id="ps-1-detail">Waiting...</div></div><div class="pipeline-stage-time" id="ps-1-time"></div></div>
+        <div class="pipeline-stage waiting" id="ps-2"><div class="pipeline-stage-line"></div><div class="pipeline-stage-dot">2</div><div class="pipeline-stage-content"><div class="pipeline-stage-name">Agent Discovery</div><div class="pipeline-stage-detail" id="ps-2-detail">Waiting...</div></div><div class="pipeline-stage-time" id="ps-2-time"></div></div>
+        <div class="pipeline-stage waiting" id="ps-3"><div class="pipeline-stage-line"></div><div class="pipeline-stage-dot">3</div><div class="pipeline-stage-content"><div class="pipeline-stage-name">Budget Allocation</div><div class="pipeline-stage-detail" id="ps-3-detail">Waiting...</div></div><div class="pipeline-stage-time" id="ps-3-time"></div></div>
+        <div class="pipeline-stage waiting" id="ps-4"><div class="pipeline-stage-line"></div><div class="pipeline-stage-dot">4</div><div class="pipeline-stage-content"><div class="pipeline-stage-name">GPT-4o Execution</div><div class="pipeline-stage-detail" id="ps-4-detail">Waiting...</div></div><div class="pipeline-stage-time" id="ps-4-time"></div></div>
+        <div class="pipeline-stage waiting" id="ps-5"><div class="pipeline-stage-line"></div><div class="pipeline-stage-dot">5</div><div class="pipeline-stage-content"><div class="pipeline-stage-name">Payment Settlement</div><div class="pipeline-stage-detail" id="ps-5-detail">Waiting...</div></div><div class="pipeline-stage-time" id="ps-5-time"></div></div>
+        <div class="pipeline-stage waiting" id="ps-6"><div class="pipeline-stage-line"></div><div class="pipeline-stage-dot">6</div><div class="pipeline-stage-content"><div class="pipeline-stage-name">Result Delivered</div><div class="pipeline-stage-detail" id="ps-6-detail">Waiting...</div></div><div class="pipeline-stage-time" id="ps-6-time"></div></div>
+      </div>
+      <div class="pipeline-result" id="pipeline-result">
+        <div class="pipeline-result-header">
+          <div class="pipeline-result-title">Pipeline Complete</div>
+          <div class="pipeline-result-stats">
+            <div class="pipeline-result-stat"><div class="pipeline-result-stat-value" id="pr-agent">--</div><div class="pipeline-result-stat-label">Agent</div></div>
+            <div class="pipeline-result-stat"><div class="pipeline-result-stat-value" id="pr-cost">--</div><div class="pipeline-result-stat-label">Cost</div></div>
+            <div class="pipeline-result-stat"><div class="pipeline-result-stat-value" id="pr-time">--</div><div class="pipeline-result-stat-label">Time</div></div>
+            <div class="pipeline-result-stat"><div class="pipeline-result-stat-value" id="pr-model">--</div><div class="pipeline-result-stat-label">Model</div></div>
+          </div>
+        </div>
+        <div class="pipeline-result-preview" id="pr-preview"></div>
+      </div>
+    </div>
+    <div class="pipeline-footer">
+      <div class="pipeline-total" id="pipeline-total">Starting pipeline...</div>
+      <button class="btn btn-sm btn-primary" id="pipeline-again-btn" style="display:none" onclick="runLiveDemo()">Run Again</button>
+    </div>
+  </div>
+</div>
 <div class="toast-container" id="toast-container"></div>
 <script>
 var API=window.location.origin,currentPage='overview',selectedAgent=null,demoRunning=false,chartInstances={},cachedAgents=[],cachedStats=null;
@@ -505,6 +585,102 @@ async function toggleDemo(){
   catch(e){toast('Demo toggle error','error')}finally{btn.disabled=false}}
 
 async function checkDemoStatus(){try{var d=await fetchJSON('/demo/status');if(d&&d.running){demoRunning=true;document.getElementById('demo-btn').innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop Demo';document.getElementById('demo-badge').classList.add('active')}}catch(e){}}
+
+// ── LIVE DEMO PIPELINE ──
+var liveDemoRunning=false,liveDemoIndex=0;
+
+function closePipeline(){document.getElementById('pipeline-overlay').classList.remove('active');}
+
+function resetPipelineUI(){
+  for(var i=1;i<=6;i++){
+    var el=document.getElementById('ps-'+i);
+    el.className='pipeline-stage waiting';
+    document.getElementById('ps-'+i+'-detail').textContent='Waiting...';
+    document.getElementById('ps-'+i+'-time').textContent='';
+  }
+  document.getElementById('pipeline-result').classList.remove('visible');
+  document.getElementById('pipeline-again-btn').style.display='none';
+  document.getElementById('pipeline-total').textContent='Starting pipeline...';
+}
+
+async function runLiveDemo(){
+  if(liveDemoRunning)return;
+  liveDemoRunning=true;
+  var btn=document.getElementById('live-demo-btn');
+  btn.disabled=true;
+  btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Running...';
+
+  resetPipelineUI();
+  document.getElementById('pipeline-overlay').classList.add('active');
+  document.getElementById('pipeline-task-text').textContent='Submitting to CEO agent...';
+
+  // Animate stages one by one before the real call completes
+  var stageNames=['Task Received','Agent Discovery','Budget Allocation','GPT-4o Execution','Payment Settlement','Result Delivered'];
+  var currentStage=0;
+
+  function activateStage(n){
+    if(n>6)return;
+    var el=document.getElementById('ps-'+n);
+    el.className='pipeline-stage active';
+  }
+
+  // Start animating stages optimistically
+  activateStage(1);
+
+  try{
+    var r=await fetch(API+'/demo/live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_index:liveDemoIndex})});
+    if(!r.ok)throw new Error('API error '+r.status);
+    var data=await r.json();
+
+    // Update task text
+    document.getElementById('pipeline-task-text').textContent=data.description;
+
+    // Animate through all stages with delays
+    var stages=data.stages||[];
+    for(var i=0;i<stages.length;i++){
+      await new Promise(function(res){setTimeout(res,350)});
+      var s=stages[i];
+      var n=s.stage;
+      // Complete previous stages
+      for(var j=1;j<n;j++){
+        var prev=document.getElementById('ps-'+j);
+        if(prev.className.indexOf('done')<0)prev.className='pipeline-stage done';
+      }
+      // Activate current
+      var el=document.getElementById('ps-'+n);
+      el.className='pipeline-stage active';
+      document.getElementById('ps-'+n+'-detail').textContent=s.detail;
+      // Briefly show active then mark done
+      await new Promise(function(res){setTimeout(res,300)});
+      el.className='pipeline-stage done';
+      document.getElementById('ps-'+n+'-time').textContent=s.duration_ms+'ms';
+    }
+
+    // Show result panel
+    document.getElementById('pr-agent').textContent=data.agent;
+    document.getElementById('pr-cost').textContent='$'+data.cost_usdc.toFixed(4);
+    document.getElementById('pr-time').textContent=data.total_ms+'ms';
+    document.getElementById('pr-model').textContent=data.model.toUpperCase();
+    document.getElementById('pr-preview').textContent=data.response_preview;
+    document.getElementById('pipeline-result').classList.add('visible');
+    document.getElementById('pipeline-total').innerHTML='Pipeline completed in <strong>'+data.total_ms+'ms</strong> — Task ID: '+data.task_id;
+    document.getElementById('pipeline-again-btn').style.display='inline-flex';
+
+    toast('Live demo completed — '+data.agent+' finished in '+data.total_ms+'ms','success');
+    liveDemoIndex=(liveDemoIndex+1)%3;
+
+    // Refresh dashboard data
+    setTimeout(refreshOverview,1000);
+  }catch(e){
+    toast('Live demo error: '+e.message,'error');
+    document.getElementById('pipeline-total').textContent='Pipeline failed: '+e.message;
+    document.getElementById('pipeline-again-btn').style.display='inline-flex';
+  }finally{
+    liveDemoRunning=false;
+    btn.disabled=false;
+    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Live Demo';
+  }
+}
 
 // Init
 refreshOverview();checkDemoStatus();

@@ -717,6 +717,158 @@ async def demo_status():
     return _demo_runner.status()
 
 
+# ── Live Demo Pipeline endpoint ──────────────────────────────────────────────
+
+LIVE_DEMO_TASKS = [
+    {
+        "description": "Compare agent memory architectures: MemGPT vs A-Mem vs RAG for long-term agent context",
+        "budget": 3.00,
+        "mock_response": (
+            "**Agent Memory Architecture Comparison:**\n\n"
+            "- **MemGPT**: Virtual context management with tiered memory (main/archival). Best for: long conversations, persistent agents. Drawback: complex prompt engineering.\n"
+            "- **A-Mem**: Associative memory with self-organizing knowledge graphs. Best for: creative tasks, contextual recall. Drawback: high compute for graph updates.\n"
+            "- **RAG**: Retrieval-augmented generation with vector stores. Best for: factual tasks, large knowledge bases. Drawback: retrieval latency, chunking sensitivity.\n\n"
+            "**Recommendation**: Hybrid approach — RAG for factual retrieval + MemGPT-style tiered context for agent state. Estimated implementation: 2-3 sprints."
+        ),
+    },
+    {
+        "description": "Analyze pricing strategies for AI agent marketplace — per-task vs subscription vs auction",
+        "budget": 2.50,
+        "mock_response": (
+            "**Marketplace Pricing Analysis:**\n\n"
+            "- **Per-task ($)**: Simple, transparent. Avg $0.01-$0.10/call. Best for external agents. Risk: unpredictable costs for complex workflows.\n"
+            "- **Subscription**: $49-$499/mo tiers. Predictable revenue, higher retention. Risk: underutilization, churn at renewal.\n"
+            "- **Auction**: Dynamic pricing based on demand. Maximizes revenue during peaks. Risk: complexity, price volatility.\n\n"
+            "**Recommendation**: Hybrid per-task + subscription tiers. Base tier includes 1000 tasks/mo, overage at per-task rates. x402 enables seamless per-task billing."
+        ),
+    },
+    {
+        "description": "Design a real-time monitoring dashboard for multi-agent workflows with cost tracking",
+        "budget": 4.00,
+        "mock_response": (
+            "**Dashboard Architecture Plan:**\n\n"
+            "- **Layout**: 5-section SPA — Overview (stats grid + activity feed), Agents (roster + detail), Tasks (history table), Payments (charts + log), Metrics (radar + spend).\n"
+            "- **Real-time**: WebSocket or 5s polling for activity feed. Server-sent events for task state transitions.\n"
+            "- **Cost Tracking**: Doughnut chart for spend-by-agent, line chart for daily burn rate, budget meters per task.\n"
+            "- **Tech Stack**: Vanilla JS + Chart.js (no framework overhead), Tailwind CSS, dark theme.\n\n"
+            "**Key Metrics**: Total spend, completion rate, avg response time, GPT-4o usage count, agent utilization."
+        ),
+    },
+]
+
+
+@app.post("/demo/live")
+async def demo_live(body: dict[str, Any] | None = None):
+    """Run a single impressive demo task through the full pipeline.
+
+    Returns structured pipeline stages so the frontend can animate each step.
+    Accepts optional {"task_index": 0} to pick a specific demo task.
+    """
+    task_index = 0
+    if body and "task_index" in body:
+        task_index = int(body["task_index"]) % len(LIVE_DEMO_TASKS)
+
+    spec = LIVE_DEMO_TASKS[task_index]
+    description = spec["description"]
+    budget = spec["budget"]
+    stages: list[dict[str, Any]] = []
+    t0 = time.time()
+
+    # Stage 1: Task received
+    task_id = f"live_{uuid.uuid4().hex[:8]}"
+    now = time.time()
+    storage = get_storage()
+    storage.save_task(
+        task_id=task_id, description=description, workflow="ceo",
+        budget_usd=budget, status="pending", created_at=now,
+    )
+    stages.append({
+        "stage": 1, "name": "Task Received",
+        "detail": f"CEO received: \"{description[:80]}...\"",
+        "duration_ms": round((time.time() - t0) * 1000, 1),
+    })
+
+    # Stage 2: CEO Analysis
+    t1 = time.time()
+    analysis = await analyze_task(description)
+    primary_agent = _detect_agent(description)
+    stages.append({
+        "stage": 2, "name": "Agent Discovery",
+        "detail": f"Best match: {primary_agent} (type={analysis.get('task_type','general')}, complexity={analysis.get('complexity','moderate')})",
+        "duration_ms": round((time.time() - t1) * 1000, 1),
+    })
+
+    # Stage 3: Budget Allocation
+    t2 = time.time()
+    estimated_cost = analysis.get("estimated_cost", 0.0)
+    if estimated_cost <= 0:
+        estimated_cost = round(budget * random.uniform(0.15, 0.4), 4)
+        analysis["estimated_cost"] = estimated_cost
+    ledger.allocate_budget(task_id, budget)
+    stages.append({
+        "stage": 3, "name": "Budget Allocation",
+        "detail": f"Reserved ${budget:.2f} USDC — estimated cost ${estimated_cost:.4f}",
+        "duration_ms": round((time.time() - t2) * 1000, 1),
+    })
+
+    # Stage 4: GPT-4o Execution
+    t3 = time.time()
+    storage.update_task_status(task_id, "running")
+    gpt_response = await asyncio.get_event_loop().run_in_executor(
+        None, _get_gpt4o_response, description, primary_agent
+    )
+    model = "gpt-4o" if gpt_response else "mock"
+    response_len = len(gpt_response or spec.get("mock_response", ""))
+    stages.append({
+        "stage": 4, "name": "GPT-4o Execution",
+        "detail": f"Model: {model} | Agent: {primary_agent} | Response: {response_len} chars",
+        "duration_ms": round((time.time() - t3) * 1000, 1),
+    })
+
+    # Stage 5: Payment & Settlement
+    t4 = time.time()
+    payment_amount = min(estimated_cost, budget) if estimated_cost > 0 else round(budget * 0.3, 4)
+    ledger.record_payment(from_agent="ceo", to_agent=primary_agent, amount=payment_amount, task_id=task_id)
+    is_external = primary_agent.startswith(("designer", "analyst"))
+    x402_info = None
+    if is_external:
+        x402_info = {"agent": primary_agent, "amount_usdc": payment_amount, "protocol": "x402", "network": "eip155:8453"}
+    stages.append({
+        "stage": 5, "name": "Payment Settlement",
+        "detail": f"Paid ${payment_amount:.4f} USDC to {primary_agent}" + (" via x402" if is_external else ""),
+        "duration_ms": round((time.time() - t4) * 1000, 1),
+    })
+
+    # Stage 6: Result delivery
+    mock_fallback = spec.get("mock_response", f"Task '{description}' completed by {primary_agent}.")
+    analysis["agent_response"] = gpt_response or mock_fallback
+    analysis["agent_response_preview"] = (gpt_response or mock_fallback)[:150]
+    analysis["assigned_agent"] = primary_agent
+    analysis["model"] = model
+    analysis["response_time_ms"] = round((time.time() - t0) * 1000, 0)
+    if x402_info:
+        analysis["x402_payment"] = x402_info
+    storage.update_task_status(task_id, "completed", result=analysis)
+
+    stages.append({
+        "stage": 6, "name": "Result Delivered",
+        "detail": f"Task completed in {round((time.time()-t0)*1000)}ms — result stored",
+        "duration_ms": round((time.time() - t0) * 1000, 1),
+    })
+
+    return {
+        "task_id": task_id,
+        "description": description,
+        "agent": primary_agent,
+        "model": model,
+        "budget_usdc": budget,
+        "cost_usdc": payment_amount,
+        "response_preview": (gpt_response or spec.get("mock_response", "Task completed."))[:300],
+        "total_ms": round((time.time() - t0) * 1000, 1),
+        "stages": stages,
+    }
+
+
 # ── Startup hook ────────────────────────────────────────────────────────────
 
 
