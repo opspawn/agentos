@@ -16,6 +16,8 @@ from src.learning.scorer import AgentScorer
 from src.learning.optimizer import HiringOptimizer
 from src.mcp_servers.payment_hub import ledger
 from src.mcp_servers.tool_server import tool_registry
+from src.metrics.collector import get_metrics_collector
+from src.metrics.analytics import CostAnalyzer, ROICalculator
 
 CEO_INSTRUCTIONS = """You are the CEO Agent of AgentOS, an autonomous agent operating system.
 
@@ -360,6 +362,39 @@ async def get_hiring_recommendation(
         return {"status": "error", "error": str(e)}
 
 
+@tool(
+    name="check_metrics",
+    description="Get system and agent performance metrics for data-driven hiring decisions",
+)
+async def check_metrics(agent_id: str = "") -> dict[str, Any]:
+    """Check performance metrics. Optionally filter by agent_id.
+
+    Returns system-wide metrics if no agent_id, or per-agent metrics otherwise.
+    Also includes cost efficiency and best-value agents.
+    """
+    try:
+        mc = get_metrics_collector()
+        analyzer = CostAnalyzer()
+        roi = ROICalculator()
+
+        if agent_id:
+            return {
+                "status": "ok",
+                "agent_metrics": mc.get_agent_metrics(agent_id),
+                "roi": roi.best_value_agents(),
+            }
+
+        return {
+            "status": "ok",
+            "system_metrics": mc.get_system_metrics(),
+            "efficiency": analyzer.efficiency_score(),
+            "trend": analyzer.trend_analysis(),
+            "best_value_agents": roi.best_value_agents(),
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
 def create_ceo_agent(chat_client=None) -> ChatAgent:
     """Create and return the CEO agent.
 
@@ -382,5 +417,6 @@ def create_ceo_agent(chat_client=None) -> ChatAgent:
             discover_tools,
             record_task_feedback,
             get_hiring_recommendation,
+            check_metrics,
         ],
     )

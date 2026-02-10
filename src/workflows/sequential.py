@@ -5,11 +5,14 @@ Implements a pipeline where each agent processes in order, passing results forwa
 
 from __future__ import annotations
 
+import time
+
 from agent_framework import ChatAgent, SequentialBuilder, Workflow
 
 from src.agents.ceo_agent import create_ceo_agent
 from src.agents.builder_agent import create_builder_agent
 from src.agents.research_agent import create_research_agent
+from src.metrics.collector import get_metrics_collector
 
 
 def create_sequential_workflow(
@@ -58,13 +61,28 @@ async def run_sequential(task: str, chat_client=None) -> dict:
         Dict with workflow result
     """
     workflow = create_sequential_workflow(chat_client=chat_client)
+    t0 = time.time()
     result = await workflow.run(task)
+    elapsed_ms = (time.time() - t0) * 1000
     outputs = result.get_outputs()
     output_text = _extract_output_text(outputs)
+
+    # Record metrics
+    status = str(result.get_final_state())
+    mc = get_metrics_collector()
+    mc.update_metrics({
+        "task_id": task[:32],
+        "agent_id": "sequential",
+        "task_type": "sequential",
+        "status": "success" if "complete" in status.lower() else "failure",
+        "cost_usdc": 0.0,
+        "latency_ms": elapsed_ms,
+    })
+
     return {
         "workflow": "sequential",
         "task": task,
-        "status": str(result.get_final_state()),
+        "status": status,
         "output": output_text,
     }
 

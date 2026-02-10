@@ -38,6 +38,8 @@ from src.demo.runner import DemoRunner
 from src.demo.seeder import seed_demo_data
 from src.mcp_servers.payment_hub import ledger, PaymentRecord
 from src.mcp_servers.registry_server import registry
+from src.metrics.collector import get_metrics_collector
+from src.metrics.analytics import CostAnalyzer, ROICalculator
 from src.storage import get_storage
 
 # ── App ──────────────────────────────────────────────────────────────────────
@@ -135,6 +137,7 @@ async def _execute_task(task_id: str, description: str, budget: float) -> None:
     """Analyse the task via CEO tools and persist the result."""
     storage = get_storage()
     storage.update_task_status(task_id, "running")
+    t0 = time.time()
     try:
         analysis = await analyze_task(description)
         # Record a simulated payment for the estimated cost
@@ -148,8 +151,36 @@ async def _execute_task(task_id: str, description: str, budget: float) -> None:
                 task_id=task_id,
             )
         storage.update_task_status(task_id, "completed", result=analysis)
+        # Record metrics
+        elapsed_ms = (time.time() - t0) * 1000
+        mc = get_metrics_collector()
+        mc.update_metrics({
+            "task_id": task_id,
+            "agent_id": "ceo",
+            "task_type": analysis.get("task_type", "general"),
+            "status": "success",
+            "cost_usdc": estimated_cost,
+            "latency_ms": elapsed_ms,
+        })
+        if estimated_cost > 0:
+            mc.record_payment({
+                "to_agent": "builder",
+                "task_id": task_id,
+                "amount_usdc": min(estimated_cost, budget),
+                "status": "completed",
+            })
     except Exception as exc:
         storage.update_task_status(task_id, "failed", result={"error": str(exc)})
+        elapsed_ms = (time.time() - t0) * 1000
+        mc = get_metrics_collector()
+        mc.update_metrics({
+            "task_id": task_id,
+            "agent_id": "ceo",
+            "task_type": "general",
+            "status": "failure",
+            "cost_usdc": 0.0,
+            "latency_ms": elapsed_ms,
+        })
     finally:
         _running_tasks.pop(task_id, None)
 
@@ -279,6 +310,42 @@ async def health():
         agents_count=len(registry.list_all()),
         total_spent_usdc=ledger.total_spent(),
     )
+
+
+# ── Metrics endpoints ──────────────────────────────────────────────────────
+
+
+@app.get("/metrics")
+async def system_metrics():
+    """System-wide metrics summary."""
+    mc = get_metrics_collector()
+    return mc.get_system_metrics()
+
+
+@app.get("/metrics/agents")
+async def agent_metrics():
+    """Per-agent metrics summaries."""
+    mc = get_metrics_collector()
+    return mc.get_all_agent_summaries()
+
+
+@app.get("/metrics/costs")
+async def cost_metrics():
+    """Cost analytics: by agent, by task type, efficiency, trends."""
+    storage = get_storage()
+    analyzer = CostAnalyzer(storage)
+    roi = ROICalculator(storage)
+    return {
+        "cost_by_agent": analyzer.cost_by_agent(),
+        "cost_by_task_type": analyzer.cost_by_task_type(),
+        "efficiency": analyzer.efficiency_score(),
+        "trend": analyzer.trend_analysis(),
+        "savings": roi.savings_estimate(),
+        "best_value_agents": roi.best_value_agents(),
+    }
+
+
+# ── Demo endpoints ─────────────────────────────────────────────────────────
 
 
 @app.get("/demo", response_model=DemoResponse)

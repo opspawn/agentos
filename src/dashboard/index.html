@@ -302,6 +302,42 @@
   .demo-btn:hover { background: var(--accent-dim); }
   .demo-btn.active { background: var(--yellow); color: var(--bg); }
   .header-controls { display: flex; align-items: center; gap: 10px; }
+  /* Tab nav */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  /* Metrics panel extras */
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 24px; max-width: 1600px; margin: 0 auto; }
+  @media (max-width: 900px) { .metrics-grid { grid-template-columns: 1fr; } }
+  .leaderboard-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .leaderboard-table th { text-align: left; padding: 6px 8px; color: var(--text-dim); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  .leaderboard-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .leaderboard-table tr:last-child td { border-bottom: none; }
+  .trend-up { color: var(--red); }
+  .trend-down { color: var(--green); }
+  .trend-stable { color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -322,6 +358,12 @@
   <button id="submit-btn" onclick="submitTask()">Submit Task</button>
 </div>
 
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+  <button class="tab-btn" onclick="switchTab('metrics')">Metrics</button>
+</div>
+
+<div id="tab-overview" class="tab-content active">
 <div class="grid">
   <!-- System Stats -->
   <div class="panel" style="grid-column: span 2;">
@@ -381,6 +423,60 @@
     </div>
   </div>
 </div>
+</div><!-- /tab-overview -->
+
+<div id="tab-metrics" class="tab-content">
+<div class="metrics-grid">
+  <!-- Metrics Summary -->
+  <div class="panel" style="grid-column: span 2;">
+    <div class="panel-header">Metrics Summary</div>
+    <div class="panel-body">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="m-total-spend">--</div>
+          <div class="stat-label">Total Spend</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="m-success-rate">--</div>
+          <div class="stat-label">Success Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="m-efficiency">--</div>
+          <div class="stat-label">Tasks / $</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="m-trend">--</div>
+          <div class="stat-label">Cost Trend</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Leaderboard -->
+  <div class="panel" style="grid-column: span 2;">
+    <div class="panel-header">Agent Leaderboard</div>
+    <div class="panel-body" id="agent-leaderboard">
+      <div class="empty-state">No metrics data yet.</div>
+    </div>
+  </div>
+
+  <!-- Cost by Task Type -->
+  <div class="panel">
+    <div class="panel-header">Cost by Task Type</div>
+    <div class="panel-body" id="cost-by-type">
+      <div class="empty-state">No data.</div>
+    </div>
+  </div>
+
+  <!-- ROI / Savings -->
+  <div class="panel">
+    <div class="panel-header">ROI &amp; Savings</div>
+    <div class="panel-body" id="roi-panel">
+      <div class="empty-state">No data.</div>
+    </div>
+  </div>
+</div>
+</div><!-- /tab-metrics -->
 
 <footer>
   AgentOS &mdash; Self-Sustaining Agent Operating System &mdash;
@@ -586,6 +682,84 @@ async function checkDemoStatus() {
       document.getElementById('demo-badge').classList.add('active');
     }
   } catch {}
+}
+
+// Tab switching
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  // Highlight button
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.trim().toLowerCase() === name) b.classList.add('active');
+  });
+  if (name === 'metrics') refreshMetrics();
+}
+
+// Metrics rendering
+async function refreshMetrics() {
+  const [sys, costs] = await Promise.all([
+    fetchJSON('/metrics'),
+    fetchJSON('/metrics/costs')
+  ]);
+  renderMetricsSummary(sys, costs);
+  renderLeaderboard(costs);
+  renderCostByType(costs);
+  renderROI(costs);
+}
+
+function renderMetricsSummary(sys, costs) {
+  if (!sys) return;
+  document.getElementById('m-total-spend').textContent = '$' + (sys.total_cost || 0).toFixed(2);
+  document.getElementById('m-success-rate').textContent = ((sys.success_rate || 0) * 100).toFixed(0) + '%';
+  const eff = costs && costs.efficiency ? costs.efficiency.tasks_per_dollar : 0;
+  document.getElementById('m-efficiency').textContent = eff.toFixed(1);
+  if (costs && costs.trend) {
+    const t = costs.trend;
+    const arrow = t.direction === 'up' ? '\u2191' : t.direction === 'down' ? '\u2193' : '\u2192';
+    const cls = 'trend-' + t.direction;
+    document.getElementById('m-trend').innerHTML = '<span class="' + cls + '">' + arrow + ' ' + Math.abs(t.change_pct).toFixed(0) + '%</span>';
+  }
+}
+
+function renderLeaderboard(costs) {
+  const el = document.getElementById('agent-leaderboard');
+  if (!costs || !costs.best_value_agents || costs.best_value_agents.length === 0) {
+    el.innerHTML = '<div class="empty-state">No agent data yet.</div>';
+    return;
+  }
+  const agents = costs.best_value_agents;
+  el.innerHTML = '<table class="leaderboard-table"><thead><tr><th>#</th><th>Agent</th><th>Tasks</th><th>Cost</th><th>Success</th><th>Efficiency</th></tr></thead><tbody>' +
+    agents.map((a, i) => '<tr><td>' + (i+1) + '</td><td style="color:var(--accent)">' + a.agent_id + '</td><td>' + a.total_tasks + '</td><td class="usdc">$' + a.total_cost.toFixed(2) + '</td><td>' + (a.success_rate * 100).toFixed(0) + '%</td><td>' + a.efficiency.toFixed(1) + '</td></tr>').join('') +
+    '</tbody></table>';
+}
+
+function renderCostByType(costs) {
+  const el = document.getElementById('cost-by-type');
+  if (!costs || !costs.cost_by_task_type || costs.cost_by_task_type.length === 0) {
+    el.innerHTML = '<div class="empty-state">No data.</div>';
+    return;
+  }
+  el.innerHTML = costs.cost_by_task_type.map(t =>
+    '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">' +
+    '<span>' + t.task_type + '</span>' +
+    '<span class="usdc">$' + t.total_cost.toFixed(2) + ' (' + t.task_count + ')</span></div>'
+  ).join('');
+}
+
+function renderROI(costs) {
+  const el = document.getElementById('roi-panel');
+  if (!costs || !costs.savings) {
+    el.innerHTML = '<div class="empty-state">No data.</div>';
+    return;
+  }
+  const s = costs.savings;
+  el.innerHTML =
+    '<div class="stat-card" style="margin-bottom:8px"><div class="stat-value" style="color:var(--green)">$' + s.total_savings.toFixed(2) + '</div><div class="stat-label">Estimated Savings</div></div>' +
+    '<div style="font-size:11px;color:var(--text-dim)">' +
+    '<div>Agent cost: $' + s.total_agent_cost.toFixed(2) + '</div>' +
+    '<div>Manual estimate: $' + s.total_manual_estimate.toFixed(2) + '</div>' +
+    '<div>Savings: ' + s.savings_pct.toFixed(0) + '%</div></div>';
 }
 
 // Initial load + auto-refresh every 5s

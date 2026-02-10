@@ -16,6 +16,7 @@ import httpx
 
 from src.mcp_servers.registry_server import registry, AgentCard
 from src.mcp_servers.payment_hub import ledger
+from src.metrics.collector import get_metrics_collector
 
 
 @dataclass
@@ -198,7 +199,25 @@ async def run_hiring_workflow(
         task_id=task_id,
     )
 
-    # 7. Aggregate
+    # 7. Record metrics
+    elapsed = round(time.monotonic() - t0, 3)
+    mc = get_metrics_collector()
+    mc.update_metrics({
+        "task_id": task_id,
+        "agent_id": best.agent_name,
+        "task_type": "hiring",
+        "status": "success",
+        "cost_usdc": best.price_usdc,
+        "latency_ms": elapsed * 1000,
+    })
+    mc.record_payment({
+        "to_agent": best.agent_name,
+        "task_id": task_id,
+        "amount_usdc": payment_record.amount_usdc,
+        "status": payment_record.status,
+    })
+
+    # 8. Aggregate
     return HiringResult(
         task_id=task_id,
         task_description=task_description,
@@ -213,7 +232,7 @@ async def run_hiring_workflow(
             "status": payment_record.status,
         },
         budget_summary=_budget_summary(task_id),
-        elapsed_s=round(time.monotonic() - t0, 3),
+        elapsed_s=elapsed,
     )
 
 

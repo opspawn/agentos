@@ -76,6 +76,19 @@ CREATE TABLE IF NOT EXISTS tools (
     tags TEXT NOT NULL DEFAULT '[]',           -- JSON array
     registered_at REAL NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type TEXT NOT NULL,           -- 'task_completed', 'payment', etc.
+    agent_id TEXT NOT NULL DEFAULT '',
+    task_id TEXT NOT NULL DEFAULT '',
+    task_type TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT '',    -- 'success', 'failure', 'timeout'
+    cost_usdc REAL NOT NULL DEFAULT 0.0,
+    latency_ms REAL NOT NULL DEFAULT 0.0,
+    metadata TEXT NOT NULL DEFAULT '{}', -- JSON blob
+    timestamp REAL NOT NULL
+);
 """
 
 
@@ -582,6 +595,98 @@ class SQLiteStorage:
         }
 
     # ------------------------------------------------------------------
+    # Metrics
+    # ------------------------------------------------------------------
+
+    def save_metric(
+        self,
+        event_type: str,
+        agent_id: str = "",
+        task_id: str = "",
+        task_type: str = "",
+        status: str = "",
+        cost_usdc: float = 0.0,
+        latency_ms: float = 0.0,
+        metadata: dict[str, Any] | None = None,
+        timestamp: float | None = None,
+    ) -> None:
+        """Insert a metrics event."""
+        conn = self._get_conn()
+        try:
+            conn.execute(
+                """INSERT INTO metrics
+                   (event_type, agent_id, task_id, task_type, status,
+                    cost_usdc, latency_ms, metadata, timestamp)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    event_type,
+                    agent_id,
+                    task_id,
+                    task_type,
+                    status,
+                    cost_usdc,
+                    latency_ms,
+                    json.dumps(metadata or {}),
+                    timestamp or time.time(),
+                ),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def get_metrics(
+        self,
+        event_type: str | None = None,
+        agent_id: str | None = None,
+        since: float | None = None,
+    ) -> list[dict[str, Any]]:
+        """Query metrics with optional filters."""
+        conn = self._get_conn()
+        try:
+            clauses: list[str] = []
+            params: list[Any] = []
+            if event_type:
+                clauses.append("event_type = ?")
+                params.append(event_type)
+            if agent_id:
+                clauses.append("agent_id = ?")
+                params.append(agent_id)
+            if since is not None:
+                clauses.append("timestamp >= ?")
+                params.append(since)
+            where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+            rows = conn.execute(
+                f"SELECT * FROM metrics{where} ORDER BY timestamp DESC", params
+            ).fetchall()
+            return [self._row_to_metric(r) for r in rows]
+        finally:
+            conn.close()
+
+    def clear_metrics(self) -> None:
+        """Delete all metrics (for testing)."""
+        conn = self._get_conn()
+        try:
+            conn.execute("DELETE FROM metrics")
+            conn.commit()
+        finally:
+            conn.close()
+
+    @staticmethod
+    def _row_to_metric(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "event_type": row["event_type"],
+            "agent_id": row["agent_id"],
+            "task_id": row["task_id"],
+            "task_type": row["task_type"],
+            "status": row["status"],
+            "cost_usdc": row["cost_usdc"],
+            "latency_ms": row["latency_ms"],
+            "metadata": json.loads(row["metadata"]),
+            "timestamp": row["timestamp"],
+        }
+
+    # ------------------------------------------------------------------
     # Async wrappers (via aiosqlite)
     # ------------------------------------------------------------------
 
@@ -659,6 +764,7 @@ class SQLiteStorage:
         self.clear_budgets()
         self.clear_agents()
         self.clear_tools()
+        self.clear_metrics()
 
     def close(self) -> None:
         """No-op — connections are opened/closed per operation."""
