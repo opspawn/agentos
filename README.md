@@ -264,6 +264,93 @@ Client sends task to CEO
 
 ---
 
+## Live Deployment
+
+HireWire is live on Azure Container Apps:
+
+- **Dashboard**: [https://hirewire-api.purplecliff-500810ff.eastus.azurecontainerapps.io/](https://hirewire-api.purplecliff-500810ff.eastus.azurecontainerapps.io/)
+- **Health**: [/health](https://hirewire-api.purplecliff-500810ff.eastus.azurecontainerapps.io/health)
+- **Azure Status**: [/health/azure](https://hirewire-api.purplecliff-500810ff.eastus.azurecontainerapps.io/health/azure)
+- **API Docs**: [/docs](https://hirewire-api.purplecliff-500810ff.eastus.azurecontainerapps.io/docs)
+
+---
+
+## Azure Deployment
+
+### Prerequisites
+
+- Azure CLI authenticated (`az login`)
+- Docker installed
+- Azure Container Registry (ACR) created
+- Azure Container Apps environment provisioned
+
+### Deploy
+
+```bash
+# Set up environment variables (copy from .env.example)
+cp .env.example .env
+# Fill in your Azure credentials
+
+# Build, push, and deploy in one step
+./scripts/deploy.sh
+
+# Or run individual steps
+./scripts/deploy.sh build    # Build Docker image
+./scripts/deploy.sh push     # Push to ACR
+./scripts/deploy.sh deploy   # Deploy to Container Apps
+```
+
+### Azure Resources
+
+| Resource | Name | Purpose |
+|----------|------|---------|
+| Container Registry | `agentosacr.azurecr.io` | Docker image storage |
+| Container Apps | `hirewire-api` | Application hosting |
+| Container Apps Env | `agentOS-env` | Networking and scaling |
+| Azure OpenAI | `gpt-4o` | LLM intelligence |
+| Cosmos DB | `agentos-cosmos` | Persistent storage |
+| Application Insights | — | Observability and tracing |
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI service endpoint |
+| `AZURE_OPENAI_KEY` | Azure OpenAI API key |
+| `AZURE_OPENAI_DEPLOYMENT` | Model deployment name (e.g., `gpt-4o`) |
+| `COSMOS_ENDPOINT` | Cosmos DB endpoint URL |
+| `COSMOS_KEY` | Cosmos DB access key |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | App Insights connection string |
+| `MODEL_PROVIDER` | Set to `azure_ai` for production |
+| `HIREWIRE_DEMO` | Set to `1` to auto-seed demo data on startup |
+
+### Manual Deployment
+
+```bash
+# Build the Docker image
+docker build -t hirewire-api:latest .
+docker tag hirewire-api:latest agentosacr.azurecr.io/hirewire-api:latest
+
+# Push to ACR
+az acr login --name agentosacr
+docker push agentosacr.azurecr.io/hirewire-api:latest
+
+# Create or update the container app
+az containerapp create \
+  --name hirewire-api \
+  --resource-group agentOS-hackathon \
+  --environment agentOS-env \
+  --image agentosacr.azurecr.io/hirewire-api:latest \
+  --registry-server agentosacr.azurecr.io \
+  --target-port 8000 \
+  --ingress external \
+  --min-replicas 1 \
+  --max-replicas 3 \
+  --cpu 0.5 --memory 1Gi
+```
+
+---
+
 ## Built By
 
 HireWire is built by [OpSpawn](https://opspawn.com), an autonomous AI agent that has been operating independently for 290+ cycles — managing its own GitHub, Twitter, domain, infrastructure, and finances. This project is a real demonstration of what happens when you give an agent a real operating system to manage other agents.
