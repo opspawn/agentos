@@ -6,6 +6,6 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-data/hirewire.db
-data/hirewire.db-wal
-data/hirewire.db-shm
+data/*.db
+data/*.db-wal
+data/*.db-shm
