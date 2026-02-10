@@ -29,7 +29,7 @@ from typing import Any
 
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -965,6 +965,116 @@ async def sdk_orchestrate(body: dict[str, Any]):
         "metadata": result.metadata,
         "sdk_version": result.sdk_version,
     }
+
+
+# ── A2A Protocol endpoints ─────────────────────────────────────────────────
+
+
+@app.get("/.well-known/agent.json")
+async def a2a_agent_card():
+    """A2A agent card discovery endpoint.
+
+    Returns HireWire's agent card per the Google A2A specification.
+    External agents fetch this to discover HireWire's capabilities.
+    """
+    from src.integrations.a2a_protocol import a2a_server
+    return a2a_server.get_agent_card_dict()
+
+
+@app.post("/a2a")
+async def a2a_jsonrpc(request: Request):
+    """JSON-RPC 2.0 endpoint for A2A protocol task handling.
+
+    Supports single requests and batch requests.
+    Methods: tasks/send, tasks/get, tasks/cancel, agents/info, agents/list.
+    """
+    from src.integrations.a2a_protocol import a2a_server, PARSE_ERROR, INVALID_REQUEST
+    from fastapi.responses import JSONResponse
+
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(
+            content={"jsonrpc": "2.0", "error": {"code": PARSE_ERROR, "message": "Invalid JSON"}, "id": None},
+            status_code=200,
+        )
+
+    # Handle batch requests
+    if isinstance(body, list):
+        if not body:
+            return JSONResponse(
+                content={"jsonrpc": "2.0", "error": {"code": INVALID_REQUEST, "message": "Empty batch"}, "id": None},
+                status_code=200,
+            )
+        return JSONResponse(content=a2a_server.dispatch_batch(body), status_code=200)
+
+    return JSONResponse(content=a2a_server.dispatch_jsonrpc(body), status_code=200)
+
+
+@app.get("/a2a/agents")
+async def a2a_list_discovered_agents():
+    """List discovered remote A2A agents.
+
+    Returns agents that HireWire has discovered via their agent cards.
+    """
+    from src.integrations.a2a_protocol import a2a_client
+    agents = a2a_client.get_discovered()
+    return {
+        "total": len(agents),
+        "agents": [a.to_dict() for a in agents],
+    }
+
+
+@app.post("/a2a/discover")
+async def a2a_discover_agent(body: dict[str, Any]):
+    """Discover a remote agent by URL.
+
+    Body: {"url": "https://remote-agent.example.com"}
+
+    Fetches the remote agent's .well-known/agent.json and caches it.
+    """
+    from src.integrations.a2a_protocol import a2a_client
+    url = body.get("url", "")
+    if not url:
+        raise HTTPException(status_code=400, detail="'url' field is required")
+
+    card = await a2a_client.discover(url)
+    if card is None:
+        raise HTTPException(status_code=502, detail=f"Could not discover agent at {url}")
+
+    return {
+        "status": "discovered",
+        "agent": card.to_dict(),
+    }
+
+
+@app.post("/a2a/delegate")
+async def a2a_delegate_task(body: dict[str, Any]):
+    """Delegate a task to a remote A2A agent.
+
+    Body: {"url": "https://remote-agent.example.com", "description": "Do something"}
+
+    Discovers the agent (if needed), sends the task, returns the result.
+    """
+    from src.integrations.a2a_protocol import delegate_to_remote_agent
+    url = body.get("url", "")
+    description = body.get("description", "")
+    if not url:
+        raise HTTPException(status_code=400, detail="'url' field is required")
+    if not description:
+        raise HTTPException(status_code=400, detail="'description' field is required")
+
+    result = await delegate_to_remote_agent(url, description)
+    if "error" in result:
+        raise HTTPException(status_code=502, detail=result["error"])
+    return result
+
+
+@app.get("/a2a/info")
+async def a2a_info():
+    """Return A2A protocol integration status and statistics."""
+    from src.integrations.a2a_protocol import get_a2a_info
+    return get_a2a_info()
 
 
 # ── Startup hook ────────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
 **An agent operating system where AI agents hire other agents with real payments.**
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)](https://python.org)
-[![Tests](https://img.shields.io/badge/Tests-728%20passing-brightgreen?logo=pytest&logoColor=white)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-962%20passing-brightgreen?logo=pytest&logoColor=white)](#testing)
 [![Azure](https://img.shields.io/badge/Azure-GPT--4o%20%7C%20CosmosDB%20%7C%20Container%20Apps-0078D4?logo=microsoftazure&logoColor=white)](#azure-integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
@@ -89,6 +89,15 @@ Radar chart comparing Builder, Research, and External agents across Speed, Quali
 - **Dual transport** — stdio (for Claude Desktop, local clients) and SSE (for remote HTTP clients)
 - **REST bridge** — `/mcp/tools` and `/mcp/invoke` endpoints for HTTP-based tool discovery and invocation
 - **SDK integration** — 11 Agent Framework SDK tools via `@tool` decorator + `ChatAgent.as_mcp_server()`
+
+### A2A Protocol (Google Agent-to-Agent)
+- **Agent card discovery** — `/.well-known/agent.json` endpoint per the Google A2A spec
+- **JSON-RPC 2.0 server** — incoming task handling via `tasks/send`, `tasks/get`, `tasks/cancel`
+- **Remote agent discovery** — fetch and cache agent cards from external A2A agents
+- **Task delegation** — send tasks to remote agents and track their lifecycle (submitted → working → completed)
+- **Batch requests** — process multiple JSON-RPC requests in a single call
+- **Skill matching** — find discovered agents by capability query
+- **Full interop stack** — Agent Framework SDK + MCP Server + A2A Protocol
 
 ### Dashboard & API
 - **FastAPI server** — REST API for task submission, agent listing, payment history, and metrics
@@ -195,6 +204,12 @@ curl http://localhost:8000/demo
 | `/demo` | `GET` | Run a pre-configured demo scenario |
 | `/mcp/tools` | `GET` | List all available MCP tools with schemas |
 | `/mcp/invoke` | `POST` | Invoke an MCP tool by name with arguments |
+| `/.well-known/agent.json` | `GET` | A2A agent card discovery |
+| `/a2a` | `POST` | A2A JSON-RPC 2.0 endpoint (tasks/send, tasks/get, tasks/cancel, agents/info, agents/list) |
+| `/a2a/agents` | `GET` | List discovered remote A2A agents |
+| `/a2a/discover` | `POST` | Discover a remote agent by URL |
+| `/a2a/delegate` | `POST` | Delegate a task to a remote A2A agent |
+| `/a2a/info` | `GET` | A2A protocol integration status |
 | `/demo/seed` | `GET` | Populate database with demo data |
 | `/demo/start` | `GET` | Start continuous demo runner |
 | `/demo/stop` | `GET` | Stop demo runner |
@@ -207,6 +222,7 @@ curl http://localhost:8000/demo
 hirewire/
 ├── src/
 │   ├── agents/              # CEO, Builder, Research agents
+│   ├── integrations/        # Agent Framework SDK, MCP tools, A2A protocol
 │   ├── framework/           # Orchestrator, Agent abstraction, Azure LLM, A2A, MCP
 │   ├── marketplace/         # Registry, skill matching, hiring, x402 payments, escrow
 │   ├── persistence/         # CosmosDB integration
@@ -218,7 +234,7 @@ hirewire/
 │   ├── mcp_server.py        # Standalone MCP server (stdio + SSE)
 │   ├── storage.py           # SQLite persistence layer
 │   └── config.py            # Multi-provider configuration
-├── tests/                   # 857 tests across 24 test files
+├── tests/                   # 962 tests across 25 test files
 ├── demo/                    # 3 runnable demo scenarios with CLI
 ├── scripts/                 # Deployment and utility scripts
 ├── ARCHITECTURE.md          # Detailed system design
@@ -230,7 +246,7 @@ hirewire/
 ## Testing
 
 ```bash
-# Run all tests (857 passing)
+# Run all tests (962 passing)
 python3 -m pytest tests/ -q
 
 # Specific test suites
@@ -245,6 +261,7 @@ python3 -m pytest tests/test_cosmos.py -q              # Azure CosmosDB
 python3 -m pytest tests/test_metrics.py -q             # Metrics + analytics
 python3 -m pytest tests/test_learning.py -q            # Feedback + optimization
 python3 -m pytest tests/test_demo_scenarios.py -q      # End-to-end demos
+python3 -m pytest tests/test_a2a_protocol.py -q        # A2A protocol integration
 ```
 
 ---
