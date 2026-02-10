@@ -56,6 +56,10 @@ app = FastAPI(
     version="2.0.0",
 )
 
+# Mount marketplace + payment routes
+from src.api.marketplace_routes import router as marketplace_router
+app.include_router(marketplace_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

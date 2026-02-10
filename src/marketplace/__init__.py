@@ -29,6 +29,10 @@ class AgentListing:
     price_per_unit: float = 0.0  # USDC per task or per 1K tokens
     rating: float = 0.0  # 0.0 - 5.0
     total_jobs: int = 0
+    completed_jobs: int = 0
+    failed_jobs: int = 0
+    total_earnings: float = 0.0
+    availability: str = "available"  # "available", "busy", "offline"
     endpoint: str = ""
     protocol: str = "a2a"
     registered_at: float = field(default_factory=time.time)
@@ -39,12 +43,21 @@ class AgentListing:
         unit = "task" if self.pricing_model == "per-task" else "1K tokens"
         return f"${self.price_per_unit:.4f}/{unit}"
 
+    @property
+    def completion_rate(self) -> float:
+        """Task completion rate (0.0-1.0). Returns 0 if no jobs."""
+        if self.total_jobs == 0:
+            return 0.0
+        return self.completed_jobs / self.total_jobs
+
     def matches_skill(self, skill: str) -> bool:
         skill_lower = skill.lower()
         return any(skill_lower in s.lower() for s in self.skills)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        d = asdict(self)
+        d["completion_rate"] = self.completion_rate
+        return d
 
 
 class MarketplaceRegistry:
@@ -111,6 +124,70 @@ class MarketplaceRegistry:
             return False
         listing.total_jobs += 1
         return True
+
+    def record_job_completion(self, agent_id: str, success: bool, earnings: float = 0.0) -> bool:
+        """Record a job outcome for an agent (updates reputation metrics)."""
+        listing = self._listings.get(agent_id)
+        if listing is None:
+            return False
+        listing.total_jobs += 1
+        if success:
+            listing.completed_jobs += 1
+            listing.total_earnings += earnings
+        else:
+            listing.failed_jobs += 1
+        return True
+
+    def update_agent_rating(self, agent_id: str, new_rating: float) -> bool:
+        """Update an agent's rating using rolling average."""
+        listing = self._listings.get(agent_id)
+        if listing is None:
+            return False
+        if listing.total_jobs <= 1:
+            listing.rating = max(0.0, min(5.0, new_rating))
+        else:
+            # Rolling average weighted toward new rating
+            listing.rating = max(0.0, min(5.0, (listing.rating * 0.7 + new_rating * 0.3)))
+        return True
+
+    def set_availability(self, agent_id: str, status: str) -> bool:
+        """Set an agent's availability status."""
+        if status not in ("available", "busy", "offline"):
+            return False
+        listing = self._listings.get(agent_id)
+        if listing is None:
+            return False
+        listing.availability = status
+        return True
+
+    def list_available(self) -> list[AgentListing]:
+        """Return only available agents."""
+        return [a for a in self._listings.values() if a.availability == "available"]
+
+    def sort_by_price(self, ascending: bool = True) -> list[AgentListing]:
+        """Return all listings sorted by price."""
+        return sorted(self._listings.values(), key=lambda a: a.price_per_unit, reverse=not ascending)
+
+    def sort_by_rating(self) -> list[AgentListing]:
+        """Return all listings sorted by rating (highest first)."""
+        return sorted(self._listings.values(), key=lambda a: a.rating, reverse=True)
+
+    def get_reputation(self, agent_id: str) -> dict[str, Any] | None:
+        """Get full reputation profile for an agent."""
+        listing = self._listings.get(agent_id)
+        if listing is None:
+            return None
+        return {
+            "agent_id": listing.agent_id,
+            "name": listing.name,
+            "rating": listing.rating,
+            "total_jobs": listing.total_jobs,
+            "completed_jobs": listing.completed_jobs,
+            "failed_jobs": listing.failed_jobs,
+            "completion_rate": listing.completion_rate,
+            "total_earnings": listing.total_earnings,
+            "availability": listing.availability,
+        }
 
     def clear(self) -> None:
         """Remove all listings."""

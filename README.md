@@ -3,7 +3,7 @@
 **An agent operating system where AI agents hire other agents with real payments.**
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)](https://python.org)
-[![Tests](https://img.shields.io/badge/Tests-962%20passing-brightgreen?logo=pytest&logoColor=white)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-1056%20passing-brightgreen?logo=pytest&logoColor=white)](#testing)
 [![Azure](https://img.shields.io/badge/Azure-GPT--4o%20%7C%20CosmosDB%20%7C%20Container%20Apps-0078D4?logo=microsoftazure&logoColor=white)](#azure-integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
@@ -69,12 +69,18 @@ Radar chart comparing Builder, Research, and External agents across Speed, Quali
 - **Skill matching** — automatic matching of task requirements to agent capabilities
 - **Hiring workflow** — 7-step lifecycle: discover → select → negotiate → escrow → assign → verify → release
 - **Budget management** — per-task budget allocation with spending tracking and ROI analysis
+- **Agent reputation** — track completion rate, average rating, total earnings, and availability per agent
+- **Sorting & filtering** — sort by price, rating, or jobs; filter by skill, max price, or availability
+- **Agent registration API** — `POST /marketplace/agents` to register new agents at runtime
 
 ### x402 Micropayments
 - **Real USDC settlements** — agents pay each other using the x402 payment protocol
 - **Multi-chain support** — Base, SKALE, and Arbitrum networks
 - **Escrow system** — funds held during task execution, released on completion or refunded on failure
 - **Payment verification** — on-chain proof of agent-to-agent transactions
+- **PaymentManager** — unified payment flow: create requests, verify proofs, track balances
+- **Payment ledger** — full audit trail of payment requests, verifications, escrow holds, releases, and refunds
+- **Agent balances** — real-time balance tracking per agent with credit/debit operations
 
 ### Azure Integration
 - **GPT-4o** — LLM intelligence via Azure OpenAI
@@ -189,6 +195,7 @@ curl http://localhost:8000/demo
 
 ## API Reference
 
+### Core
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/tasks` | `POST` | Submit a new task to the CEO agent |
@@ -198,10 +205,37 @@ curl http://localhost:8000/demo
 | `/transactions` | `GET` | List all payment transactions |
 | `/health` | `GET` | System health with uptime and stats |
 | `/health/azure` | `GET` | Azure services connectivity check |
+
+### Agent Marketplace
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/marketplace/agents` | `GET` | List agents with filters (`?skill=`, `?max_price=`, `?sort_by=price\|rating\|jobs`, `?available_only=true`) |
+| `/marketplace/agents` | `POST` | Register a new agent listing |
+| `/marketplace/agents/{id}` | `GET` | Agent details + reputation (completion rate, earnings, availability) |
+| `/marketplace/hire` | `POST` | Hire an agent for a task (triggers x402 escrow) |
+| `/marketplace/hire/{id}/status` | `GET` | Check hiring request status and escrow state |
+| `/marketplace/jobs` | `GET` | List all hiring jobs with payment status |
+| `/marketplace/budget` | `GET` | Current marketplace budget status |
+| `/marketplace/x402` | `GET` | x402 payment gate information |
+
+### Payments (x402)
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/payments/request` | `POST` | Create x402 payment request (returns 402 + `X-Payment: required` header) |
+| `/payments/verify` | `POST` | Verify a payment receipt |
+| `/payments/balance/{agent_id}` | `GET` | Get agent's current USDC balance |
+| `/payments/ledger` | `GET` | Full payment audit trail (`?event_type=`, `?agent_id=`, `?task_id=`) |
+
+### Metrics & Analytics
+| Endpoint | Method | Description |
+|----------|--------|-------------|
 | `/metrics` | `GET` | System-wide metrics |
 | `/metrics/agents` | `GET` | Per-agent performance metrics |
 | `/metrics/costs` | `GET` | Cost analysis, efficiency, ROI |
-| `/demo` | `GET` | Run a pre-configured demo scenario |
+
+### MCP & A2A Interop
+| Endpoint | Method | Description |
+|----------|--------|-------------|
 | `/mcp/tools` | `GET` | List all available MCP tools with schemas |
 | `/mcp/invoke` | `POST` | Invoke an MCP tool by name with arguments |
 | `/.well-known/agent.json` | `GET` | A2A agent card discovery |
@@ -210,6 +244,11 @@ curl http://localhost:8000/demo
 | `/a2a/discover` | `POST` | Discover a remote agent by URL |
 | `/a2a/delegate` | `POST` | Delegate a task to a remote A2A agent |
 | `/a2a/info` | `GET` | A2A protocol integration status |
+
+### Demo
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/demo` | `GET` | Run a pre-configured demo scenario |
 | `/demo/seed` | `GET` | Populate database with demo data |
 | `/demo/start` | `GET` | Start continuous demo runner |
 | `/demo/stop` | `GET` | Stop demo runner |
@@ -234,7 +273,7 @@ hirewire/
 │   ├── mcp_server.py        # Standalone MCP server (stdio + SSE)
 │   ├── storage.py           # SQLite persistence layer
 │   └── config.py            # Multi-provider configuration
-├── tests/                   # 962 tests across 25 test files
+├── tests/                   # 1056+ tests across 27 test files
 ├── demo/                    # 3 runnable demo scenarios with CLI
 ├── scripts/                 # Deployment and utility scripts
 ├── ARCHITECTURE.md          # Detailed system design
@@ -246,22 +285,24 @@ hirewire/
 ## Testing
 
 ```bash
-# Run all tests (962 passing)
+# Run all tests (1056+ passing)
 python3 -m pytest tests/ -q
 
 # Specific test suites
-python3 -m pytest tests/test_agents.py -q            # Agent behavior
-python3 -m pytest tests/test_workflows.py -q          # Orchestration patterns
-python3 -m pytest tests/test_agent_hiring.py -q       # Hiring + x402 payments
-python3 -m pytest tests/test_framework.py -q           # Agent Framework integration
-python3 -m pytest tests/test_marketplace.py -q         # Registry + skill matching
-python3 -m pytest tests/test_storage.py -q             # Persistence layer
-python3 -m pytest tests/test_dashboard_api.py -q       # REST API endpoints
-python3 -m pytest tests/test_cosmos.py -q              # Azure CosmosDB
-python3 -m pytest tests/test_metrics.py -q             # Metrics + analytics
-python3 -m pytest tests/test_learning.py -q            # Feedback + optimization
-python3 -m pytest tests/test_demo_scenarios.py -q      # End-to-end demos
-python3 -m pytest tests/test_a2a_protocol.py -q        # A2A protocol integration
+python3 -m pytest tests/test_agents.py -q              # Agent behavior
+python3 -m pytest tests/test_workflows.py -q            # Orchestration patterns
+python3 -m pytest tests/test_agent_hiring.py -q         # Hiring + x402 payments
+python3 -m pytest tests/test_framework.py -q             # Agent Framework integration
+python3 -m pytest tests/test_marketplace.py -q           # Registry + skill matching
+python3 -m pytest tests/test_marketplace_v2.py -q        # Marketplace v2 + payments
+python3 -m pytest tests/test_marketplace_edge_cases.py -q # Edge cases
+python3 -m pytest tests/test_storage.py -q               # Persistence layer
+python3 -m pytest tests/test_dashboard_api.py -q         # REST API endpoints
+python3 -m pytest tests/test_cosmos.py -q                # Azure CosmosDB
+python3 -m pytest tests/test_metrics.py -q               # Metrics + analytics
+python3 -m pytest tests/test_learning.py -q              # Feedback + optimization
+python3 -m pytest tests/test_demo_scenarios.py -q        # End-to-end demos
+python3 -m pytest tests/test_a2a_protocol.py -q          # A2A protocol integration
 ```
 
 ---
