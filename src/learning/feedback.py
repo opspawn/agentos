@@ -59,8 +59,8 @@ class FeedbackCollector:
 
     def __init__(self, db_path: str | Path | None = None) -> None:
         default = Path(
-            os.environ.get("AGENTOS_DB_PATH", "")
-            or str(Path(__file__).resolve().parent.parent.parent / "data" / "agentos.db")
+            os.environ.get("HIREWIRE_DB_PATH", "")
+            or str(Path(__file__).resolve().parent.parent.parent / "data" / "hirewire.db")
         )
         self._db_path = str(db_path or default)
         os.makedirs(os.path.dirname(self._db_path), exist_ok=True)

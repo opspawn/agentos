@@ -1,4 +1,4 @@
-"""AgentOS agent definitions."""
+"""HireWire agent definitions."""
 
 from src.agents.ceo_agent import create_ceo_agent
 from src.agents.builder_agent import create_builder_agent

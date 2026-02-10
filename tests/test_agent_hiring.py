@@ -221,7 +221,7 @@ class TestHiringWorkflow:
         try:
             result = await run_hiring_workflow(
                 task_id="hire-test-001",
-                task_description="Design a landing page for AgentOS",
+                task_description="Design a landing page for HireWire",
                 required_skills=["design", "ui"],
                 budget_usd=1.0,
                 capability_query="design",
@@ -325,7 +325,7 @@ class TestAgentHiringDemoScenario:
             # Import and run just the hiring workflow part
             result = await run_hiring_workflow(
                 task_id="demo-hiring-test",
-                task_description="Create a professional design for an AgentOS landing page",
+                task_description="Create a professional design for an HireWire landing page",
                 required_skills=["design", "ui", "landing-page"],
                 budget_usd=5.0,
                 capability_query="design",

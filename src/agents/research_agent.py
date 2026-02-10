@@ -12,7 +12,7 @@ from agent_framework import ChatAgent, tool
 
 from src.config import get_chat_client
 
-RESEARCH_INSTRUCTIONS = """You are the Research Agent of AgentOS.
+RESEARCH_INSTRUCTIONS = """You are the Research Agent of HireWire.
 
 Your responsibilities:
 1. **Web Search**: Find relevant information, documentation, and resources.

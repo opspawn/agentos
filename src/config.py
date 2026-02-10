@@ -1,4 +1,4 @@
-"""Configuration management for AgentOS.
+"""Configuration management for HireWire.
 
 Supports Azure AI, Ollama (local), OpenAI, and mock backends.
 Uses pydantic-settings for env var loading.

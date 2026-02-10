@@ -135,7 +135,7 @@ def _generate_design_deliverable(description: str) -> str:
             "## Design Deliverable: Brand Identity\n\n"
             "### Logo\n"
             "- Geometric hexagon mark with embedded circuit motif\n"
-            "- Wordmark: 'AgentOS' in Inter ExtraBold\n\n"
+            "- Wordmark: 'HireWire' in Inter ExtraBold\n\n"
             "### Brand Colors\n"
             "- Primary: #6C5CE7, Secondary: #00D2D3, Accent: #FF6B6B\n"
         )

@@ -1,4 +1,4 @@
-"""FastAPI Dashboard API for AgentOS.
+"""FastAPI Dashboard API for HireWire.
 
 Provides interactive REST endpoints for judges / demos:
 - POST /tasks        — submit a new task to the CEO agent
@@ -47,8 +47,8 @@ from src.storage import get_storage
 _START_TIME = time.time()
 
 app = FastAPI(
-    title="AgentOS Dashboard",
-    description="Interactive dashboard API for AgentOS — Microsoft AI Dev Days",
+    title="HireWire Dashboard",
+    description="Interactive dashboard API for HireWire — Microsoft AI Dev Days",
     version="1.0.0",
 )
 
@@ -194,7 +194,7 @@ async def root():
     index = _DASHBOARD_DIR / "index.html"
     if index.is_file():
         return HTMLResponse(content=index.read_text(), status_code=200)
-    return HTMLResponse(content="<h1>AgentOS</h1><p>Dashboard not found.</p>", status_code=200)
+    return HTMLResponse(content="<h1>HireWire</h1><p>Dashboard not found.</p>", status_code=200)
 
 
 @app.get("/tasks", response_model=list[TaskResponse])
@@ -478,6 +478,6 @@ async def demo_status():
 
 @app.on_event("startup")
 async def _on_startup():
-    """Auto-seed demo data if AGENTOS_DEMO=1."""
-    if os.environ.get("AGENTOS_DEMO") == "1":
+    """Auto-seed demo data if HIREWIRE_DEMO=1."""
+    if os.environ.get("HIREWIRE_DEMO") == "1":
         seed_demo_data()

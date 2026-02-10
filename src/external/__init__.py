@@ -1,1 +1,1 @@
-"""External agent implementations for AgentOS marketplace."""
+"""External agent implementations for HireWire marketplace."""

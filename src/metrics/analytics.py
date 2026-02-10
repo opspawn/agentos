@@ -1,4 +1,4 @@
-"""Cost analytics and ROI calculations for AgentOS.
+"""Cost analytics and ROI calculations for HireWire.
 
 CostAnalyzer — cost breakdowns, efficiency scores, trend analysis.
 ROICalculator — per-task ROI, agent ranking, savings estimates.

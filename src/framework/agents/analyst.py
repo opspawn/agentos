@@ -12,7 +12,7 @@ from src.framework.agent import AgentFrameworkAgent, ToolDescriptor
 from src.framework.mcp_tools import AI_ANALYSIS_TOOL, MARKDOWN_CONVERSION_TOOL
 from src.config import get_chat_client
 
-ANALYST_INSTRUCTIONS = """You are an Analyst Agent in the AgentOS multi-agent system.
+ANALYST_INSTRUCTIONS = """You are an Analyst Agent in the HireWire multi-agent system.
 
 Your role is to analyze data, content, and information to produce actionable insights.
 

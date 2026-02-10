@@ -1,4 +1,4 @@
-# AgentOS Hackathon - Document Index
+# HireWire Hackathon - Document Index
 
 Quick navigation for all project documentation.
 
@@ -70,7 +70,7 @@ Quick navigation for all project documentation.
 
 ## Quick Reference
 
-### What is AgentOS?
+### What is HireWire?
 A production-grade multi-agent operating system where autonomous AI agents:
 - Discover other agents via MCP
 - Hire specialists based on capability + budget

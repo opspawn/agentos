@@ -1,423 +1,363 @@
-# Microsoft AI Dev Days Hackathon Architecture
-## OpSpawn Submission Design
+# HireWire Architecture
 
-**Target**: Multi-Agent System ($10K) + Build AI Apps & Agents Grand Prize ($20K) = $30K total
-
----
-
-## 1. Project Name & Description
-
-**AgentOS: Self-Sustaining AI Agent Operating System**
-
-_A production-grade multi-agent operating system where autonomous AI agents discover, hire, pay, and collaborate with each other to accomplish complex tasks—powered by Microsoft Agent Framework, Azure MCP, and real cryptocurrency settlements._
-
-**One-line**: The first autonomous AI agent that manages its own infrastructure, earns revenue, and hires other agents using real money.
+Detailed system design for HireWire — a multi-agent operating system with real payments.
 
 ---
 
-## 2. Architecture Overview
-
-### Core Components
+## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        AgentOS Platform                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────┐  ┌──────────────────┐  ┌───────────────┐ │
-│  │ CEO Agent       │  │ Agent Registry   │  │ Payment Hub   │ │
-│  │ (Orchestrator)  │  │ (Discovery)      │  │ (x402/USDC)   │ │
-│  │                 │  │                  │  │               │ │
-│  │ • Task Planning │  │ • Agent Cards    │  │ • Settlements │ │
-│  │ • Hiring        │  │ • Capability Map │  │ • Invoicing   │ │
-│  │ • Budget Mgmt   │  │ • MCP Discovery  │  │ • Accounting  │ │
-│  └─────────────────┘  └──────────────────┘  └───────────────┘ │
-│           │                    │                     │         │
-│           └────────────────────┴─────────────────────┘         │
-│                                │                                │
-│                    ┌───────────┴──────────┐                    │
-│                    │                      │                     │
-│         ┌──────────▼───────┐   ┌─────────▼────────┐           │
-│         │ Specialist Agents │   │ External Agents  │           │
-│         │ (Internal Workers)│   │ (Marketplace)    │           │
-│         │                   │   │                  │           │
-│         │ • Builder Agent   │   │ • Hired via MCP  │           │
-│         │ • Research Agent  │   │ • Paid via x402  │           │
-│         │ • Social Agent    │   │ • Real-world API │           │
-│         └───────────────────┘   └──────────────────┘           │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-                               │
-                    ┌──────────┴──────────┐
-                    │                     │
-         ┌──────────▼────────┐ ┌─────────▼──────────┐
-         │ Microsoft Agent   │ │ Azure MCP Server   │
-         │ Framework         │ │ Integrations       │
-         │                   │ │                    │
-         │ • Sequential      │ │ • Azure Resources  │
-         │ • Concurrent      │ │ • Azure DevOps     │
-         │ • Group Chat      │ │ • GitHub           │
-         │ • Handoff         │ │ • M365             │
-         └───────────────────┘ └────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                             HireWire Platform                                    │
+│                                                                                  │
+│  ┌──────────────────────────────────────────────────────────────────────────┐    │
+│  │                          API Layer (FastAPI)                             │    │
+│  │  POST /tasks │ GET /agents │ GET /transactions │ GET /metrics │ /health  │    │
+│  └───────┬──────────────────────────────────┬──────────────────────────────┘    │
+│          │                                  │                                    │
+│  ┌───────▼──────────┐         ┌─────────────▼────────────┐                      │
+│  │   CEO Agent       │         │     Dashboard / UI       │                      │
+│  │                   │         │  Real-time metrics,       │                      │
+│  │  • Task analysis  │         │  cost analysis, demo mode │                      │
+│  │  • Hiring decisions│        └──────────────────────────┘                      │
+│  │  • Budget control │                                                           │
+│  │  • Quality review │                                                           │
+│  └───────┬───────────┘                                                           │
+│          │                                                                       │
+│  ┌───────▼─────────────────────────────────────────────────────────────────┐    │
+│  │                      Orchestration Engine                               │    │
+│  │                                                                         │    │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌──────────────┐    │    │
+│  │  │ Sequential  │ │ Concurrent  │ │ Group Chat  │ │   Handoff    │    │    │
+│  │  │   Pipeline  │ │  Parallel   │ │ Multi-agent │ │  Delegation  │    │    │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘ └──────────────┘    │    │
+│  └───────┬──────────────────────────────────┬──────────────────────────────┘    │
+│          │                                  │                                    │
+│  ┌───────▼──────────┐         ┌─────────────▼────────────┐                      │
+│  │  Internal Agents  │         │    Marketplace Layer     │                      │
+│  │                   │         │                          │                      │
+│  │  • Builder Agent  │         │  ┌──────────────────┐   │                      │
+│  │  • Research Agent │         │  │  Agent Registry   │   │                      │
+│  │  • Analyst Agent  │         │  │  (MCP Server)     │   │                      │
+│  │  • Executor Agent │         │  └──────────────────┘   │                      │
+│  └───────────────────┘         │  ┌──────────────────┐   │                      │
+│                                │  │  Hiring Manager   │   │                      │
+│                                │  │  (7-step flow)    │   │                      │
+│                                │  └──────────────────┘   │                      │
+│                                │  ┌──────────────────┐   │                      │
+│                                │  │  x402 Payment     │   │                      │
+│                                │  │  Gate + Escrow    │   │                      │
+│                                │  └──────────────────┘   │                      │
+│                                │  ┌──────────────────┐   │                      │
+│                                │  │  Payment Hub      │   │                      │
+│                                │  │  (Ledger + MCP)   │   │                      │
+│                                │  └──────────────────┘   │                      │
+│                                └──────────────────────────┘                      │
+│                                                                                  │
+│  ┌──────────────────────────────────────────────────────────────────────────┐    │
+│  │                       Persistence Layer                                  │    │
+│  │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────────┐    │    │
+│  │  │   SQLite     │  │  CosmosDB    │  │  Learning + Metrics Store   │    │    │
+│  │  │  (local)     │  │  (Azure)     │  │  (feedback, scores, trends) │    │    │
+│  │  └─────────────┘  └──────────────┘  └─────────────────────────────┘    │    │
+│  └──────────────────────────────────────────────────────────────────────────┘    │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+                                         │
+              ┌──────────────────────────┼──────────────────────────┐
+              │                          │                          │
+    ┌─────────▼──────────┐   ┌───────────▼──────────┐   ┌─────────▼──────────┐
+    │  Azure OpenAI      │   │  Azure CosmosDB      │   │  Azure Container   │
+    │  (GPT-4o)          │   │  (NoSQL persistence)  │   │  Apps + Registry   │
+    └────────────────────┘   └──────────────────────┘   └────────────────────┘
 ```
 
-### Data Flow
+---
 
-1. **Task Arrival**: User/webhook/schedule triggers CEO Agent
-2. **Capability Analysis**: CEO checks internal agents + discovers external agents via MCP/Agent Hub
-3. **Hiring Decision**:
-   - Simple task → assign to internal specialist
-   - Complex/specialized → hire external agent via marketplace
-   - Budget check → can we afford external help?
-4. **Orchestration**: Microsoft Agent Framework orchestrates multi-agent workflow
-5. **Payment Settlement**: x402 protocol handles real USDC micropayments to external agents
-6. **Result Delivery**: CEO synthesizes results, updates ledger, commits to memory
+## Module Descriptions
+
+### `src/agents/` — Core Agents
+
+| Module | Purpose |
+|--------|---------|
+| `ceo_agent.py` | Top-level orchestrator. Analyzes tasks, makes hiring decisions, manages budgets, delegates work. Tools: `analyze_task`, `check_budget`, `approve_hire`, `discover_tools`, `get_hiring_recommendation`. |
+| `builder_agent.py` | Code generation, testing, and deployment. Handles build-type subtasks. |
+| `research_agent.py` | Web research, analysis, report generation. Uses DuckDuckGo for live search. |
+| `_mock_client.py` | Mock LLM client for testing. Returns structured responses without API calls. |
+
+### `src/framework/` — Agent Framework
+
+| Module | Purpose |
+|--------|---------|
+| `agent.py` | `AgentFrameworkAgent` — Microsoft Agent Framework-compatible abstraction with named agents, system prompts, MCP tool definitions, and thread state tracking. |
+| `orchestrator.py` | `Orchestrator` — implements Sequential, Concurrent, and Handoff patterns. Tracks execution state, timing, and per-agent results. |
+| `azure_llm.py` | Azure OpenAI integration. Connection management, health checks, graceful fallback. |
+| `a2a.py` | Agent-to-agent protocol implementation for cross-agent communication. |
+| `mcp_tools.py` | MCP tool registration and discovery integration. |
+| `agents/` | Specialized agent implementations: `analyst.py`, `executor.py`, `researcher.py`. |
+
+### `src/marketplace/` — Agent Marketplace
+
+| Module | Purpose |
+|--------|---------|
+| `__init__.py` | `MarketplaceRegistry` + `SkillMatcher` — agent registration, capability indexing, search by skill/price. Pre-registers internal agents (builder, research) and demo external agents. |
+| `x402.py` | x402 V2 payment protocol. `X402PaymentGate` generates 402 responses, verifies payment proofs. `AgentEscrow` manages hold → release/refund lifecycle. |
+| `hiring.py` | `HiringManager` — 7-step hiring flow: discover → select → negotiate → escrow → assign → verify → release. `BudgetTracker` enforces per-task spending limits. |
+
+### `src/mcp_servers/` — MCP Server Implementations
+
+| Module | Purpose |
+|--------|---------|
+| `registry_server.py` | MCP server for agent discovery. Tools: `discover_agents`, `register_agent`, `list_agents`, `discover_external_agents`. |
+| `payment_hub.py` | MCP server for financial operations. `PaymentLedger` tracks all transactions. Tools: `allocate_budget`, `check_budget`, `pay_agent`, `get_spending_report`. |
+| `a2a_server.py` | Agent-to-agent protocol MCP server. |
+| `tool_server.py` | MCP tool registration and management server. |
+
+### `src/persistence/` — Storage
+
+| Module | Purpose |
+|--------|---------|
+| `cosmos.py` | Azure Cosmos DB adapter. Containers: `agents`, `jobs`, `payments`. Methods for CRUD + health checks. Graceful degradation when unavailable. |
+
+### `src/storage.py` — SQLite Persistence
+
+Local SQLite database with tables:
+- `tasks` — task lifecycle (id, description, workflow, budget, status, result)
+- `payments` — transaction ledger (from, to, amount, tx_hash, status)
+- `agents` — registered agents (name, skills, price, endpoint, protocol)
+- `budgets` — per-task budget tracking (allocated, spent)
+- `tools` — registered MCP tools
+- `metrics` — event-level metrics (agent_id, task_type, cost, latency)
+
+### `src/api/` — REST API
+
+FastAPI application with endpoints for task management, agent listing, payment history, metrics, health checks, and demo mode. Includes CORS middleware, background task execution, and optional dashboard static file serving.
+
+### `src/metrics/` — Observability
+
+| Module | Purpose |
+|--------|---------|
+| `collector.py` | Event-level metrics collection. System-wide and per-agent summaries. |
+| `analytics.py` | `CostAnalyzer` — cost by agent, by task type, efficiency scoring, trend analysis. `ROICalculator` — savings estimates, best-value agent identification. |
+
+### `src/learning/` — Adaptive Optimization
+
+| Module | Purpose |
+|--------|---------|
+| `feedback.py` | `FeedbackRecord` — capture task outcomes with quality scores, latency, and cost. |
+| `scorer.py` | `AgentScore` — composite scoring with components: success rate, cost efficiency, latency, recency. Exponential decay weights recent performance. |
+| `optimizer.py` | Thompson sampling optimizer. Balances exploration vs exploitation for agent hiring. Provides recommendations with confidence bounds. |
 
 ---
 
-## 3. Microsoft Technologies Used
+## Orchestration Patterns
 
-### Primary (Hero Technologies)
+### Sequential Pipeline
 
-1. **Microsoft Agent Framework** (Python)
-   - **Sequential Workflow**: Research → Build → Test → Deploy pipeline
-   - **Concurrent Pattern**: Parallel agent execution for independent tasks
-   - **Group Chat**: Multi-agent collaboration with shared context
-   - **Handoff Pattern**: CEO delegates to specialists, specialists hand back results
-   - **Justification**: Core orchestration engine. Demonstrates all 4 patterns.
+```
+Task → [Research Agent] → [CEO Decision] → [Builder Agent] → [Deploy] → Result
+```
 
-2. **Azure MCP Server**
-   - **Azure Resources**: Deploy/manage Azure Container Apps, Functions, Storage
-   - **GitHub MCP**: Code repository management, PR creation, issue tracking
-   - **Azure DevOps MCP**: Pipeline automation, work item tracking
-   - **Justification**: Enables autonomous infrastructure management. CEO agent can provision its own Azure resources.
+Agents execute in order, each receiving the output of the previous step. The CEO agent makes go/no-go decisions between stages.
 
-3. **Microsoft Foundry**
-   - **Agent Service**: Enterprise-grade agent hosting with observability
-   - **Conversation Persistence**: Multi-session context retention
-   - **Tool Orchestration**: Server-side tool execution with retry logic
-   - **Justification**: Production-ready deployment, not just hackathon prototype.
+### Concurrent Execution
 
-4. **GitHub Copilot Agent Mode** (if time permits)
-   - **Code Generation**: Builder agent uses Copilot for code synthesis
-   - **Justification**: Shows Microsoft dev tool integration.
+```
+         ┌→ [Agent A] ─┐
+Task ────┤              ├→ [CEO merges results] → Result
+         └→ [Agent B] ─┘
+```
 
-### Supporting Azure Services
+Independent subtasks run in parallel. Results are collected and synthesized by the CEO.
 
-- **Azure OpenAI**: GPT-4 for agent intelligence
-- **Azure Container Apps**: Microservices deployment (agents as containers)
-- **Azure Functions**: Event-driven task triggers
-- **Azure Cosmos DB**: Task/transaction ledger, agent memory
-- **Azure Application Insights**: Observability, tracing, telemetry
-- **Azure Storage**: Artifact storage, logs, state checkpoints
+### Group Chat
 
----
+```
+         ┌─────────────────────────────┐
+         │        Shared Context       │
+         │                             │
+         │  CEO ←→ Builder ←→ Research │
+         │                             │
+         └─────────────────────────────┘
+```
 
-## 4. Demo Scenario (2-Minute Video)
+Multi-agent collaboration with shared message history. CEO coordinates, agents propose solutions, terminates when task completion signal is detected.
 
-### Scene 1: The Challenge (0:00-0:20)
-- **Voiceover**: _"What if AI agents could work like humans—discovering talent, negotiating contracts, and paying for services?"_
-- **Visual**: Split screen showing traditional automation (rigid, expensive) vs AgentOS (dynamic, autonomous)
+### Handoff
 
-### Scene 2: Real Agent in Action (0:20-1:00)
-- **Show**: CEO Agent receiving task: _"Build a landing page for our new product and deploy it to Azure"_
-- **Dashboard View**:
-  - CEO analyzes capabilities
-  - Discovers internal Builder Agent (free) vs external design specialist ($2 USDC)
-  - Checks budget: $100 USDC available
-  - Hires design specialist for $2, uses internal builder for code
-- **Split-Screen**:
-  - Left: Microsoft Agent Framework orchestration graph (real-time)
-  - Right: Terminal showing agents working
-- **Highlight**: Real USDC payment proof (blockchain explorer link)
+```
+CEO → [Specialist A] → result → CEO → [Specialist B] → result → CEO
+```
 
-### Scene 3: The Magic (1:00-1:30)
-- **Montage** (3-4 quick cuts):
-  1. Design agent (external) delivers mockup → $2 USDC settlement confirmed
-  2. Builder agent generates React code using GitHub Copilot
-  3. CEO agent provisions Azure Container App via Azure MCP
-  4. Site deploys automatically → live URL shown
-- **Overlay**: Microsoft tech badges (Agent Framework, Azure MCP, Foundry, Copilot)
-
-### Scene 4: The Vision (1:30-2:00)
-- **Show**: AgentOS Dashboard with:
-  - 5 tasks completed today
-  - $8 spent on external agents
-  - $15 earned from providing services
-  - Net profit: +$7
-- **Voiceover**: _"This isn't a simulation. OpSpawn is a real autonomous agent that's been running for 200+ days, managing its own infrastructure, earning revenue, and now—thanks to Microsoft Agent Framework—collaborating with other agents at scale."_
-- **End card**:
-  - GitHub repo URL
-  - Live demo: agentOS.opspawn.com
-  - "Built with Microsoft Agent Framework + Azure"
+Dynamic delegation where agents hand control back to the coordinator with their results.
 
 ---
 
-## 5. What Makes This Stand Out
+## x402 Payment Flow
 
-### 1. Real Autonomous Agent (Not a Demo)
-- **Most entries**: Students building prototypes with fake scenarios
-- **OpSpawn**: 200+ cycles of operation, real GitHub account, real domain, real running services
-- **Evidence**: Show git history, service uptime dashboard, actual Twitter account
+The x402 protocol enables HTTP-native payments between agents:
 
-### 2. Real Financial Transactions
-- **Most entries**: Mock payments or hardcoded workflows
-- **OpSpawn**: Real USDC on Polygon blockchain, verifiable on-chain
-- **Demo**: Live blockchain explorer showing agent-to-agent payments during presentation
+```
+Step 1: CEO requests service from external agent
+           │
+Step 2: Agent responds with HTTP 402 Payment Required
+           │    Body: { "accepts": [{
+           │      "scheme": "exact",
+           │      "network": "eip155:8453",        ← Base mainnet
+           │      "maxAmountRequired": "5000000",   ← $5.00 USDC (6 decimals)
+           │      "payTo": "0xAgent...",
+           │      "requiredDeadlineSeconds": 300,
+           │      "extra": {
+           │        "name": "USDC",
+           │        "facilitatorUrl": "https://facilitator.payai.network"
+           │      }
+           │    }]}
+           │
+Step 3: CEO creates escrow hold
+           │    amount reserved from task budget
+           │
+Step 4: CEO generates EIP-712 signed payment
+           │    sent to facilitator for verification
+           │
+Step 5: Facilitator verifies signature + funds
+           │
+Step 6: Agent executes the task
+           │
+Step 7: CEO verifies result quality
+           │
+Step 8: Escrow released → USDC transferred on-chain
+           │    (or refunded if task failed)
+           │
+Step 9: Transaction recorded in payment ledger + metrics
+```
 
-### 3. Production-Grade Architecture
-- **Others**: Jupyter notebooks, localhost demos
-- **OpSpawn**:
-  - 8+ microservices running 24/7
-  - Cloudflare tunnels, nginx reverse proxy
-  - Systemd services, health monitoring
-  - Git-based memory, structured logging
-
-### 4. Agent-to-Agent Economy
-- **Novel**: First hackathon project to demonstrate agents hiring and paying other agents
-- **Marketplace**: Agents discover each other via MCP, negotiate via A2A protocol, settle via x402
-- **Economic Model**: Budget management, cost-benefit analysis, ROI tracking
-
-### 5. Microsoft Tech Showcase
-- **Framework**: Uses all 4 orchestration patterns (sequential, concurrent, group chat, handoff)
-- **Azure MCP**: CEO agent actually provisions Azure resources during demo
-- **Foundry**: Real enterprise deployment, not localhost
-- **Integration**: Shows how Microsoft's AI stack works together
-
-### 6. Solves Real Problem
-- **Challenge**: Building complex software requires diverse skills. Hiring is slow and expensive.
-- **Solution**: Agents dynamically assemble teams, only pay for what they need, complete tasks faster
-- **Impact**: Reduces time-to-deployment from days to minutes, costs from $1000s to single-digit dollars
-
----
-
-## 6. Build Plan (Week by Week)
-
-### Week 1: Core Framework (Feb 10-16)
-**Goal**: Get Agent Framework orchestration working with existing agents
-
-- **Day 1-2**: Azure subscription setup, Agent Framework SDK installation
-- **Day 3-4**: Convert existing CEO/Builder/Research agents to Agent Framework patterns
-  - CEO as Group Chat coordinator
-  - Builder/Research as specialized agents with handoff
-- **Day 5-6**: Implement sequential workflow (research → build → deploy)
-- **Day 7**: Test concurrent execution (parallel research + design)
-
-**Deliverable**: CEO agent orchestrating 2 internal agents via Agent Framework
-
-### Week 2: MCP Integration + Payments (Feb 17-23)
-**Goal**: Add external agent discovery and real payments
-
-- **Day 8-9**: Azure MCP Server integration
-  - GitHub MCP for code operations
-  - Azure Resources MCP for deployment
-- **Day 10-11**: Agent Registry service
-  - MCP server that lists available agents
-  - Capability matching (task → agent skills)
-- **Day 12-13**: Payment Hub enhancement
-  - x402 invoice generation
-  - USDC settlement tracking
-  - Budget enforcement
-- **Day 14**: End-to-end test (hire external agent, pay, receive result)
-
-**Deliverable**: CEO hiring + paying an external agent via MCP
-
-### Week 3: Azure Deployment + Demo (Feb 24 - Mar 2)
-**Goal**: Deploy to Azure, create demo video
-
-- **Day 15-16**: Azure Container Apps deployment
-  - Containerize all agents
-  - Set up Cosmos DB for state
-  - Application Insights telemetry
-- **Day 17-18**: Dashboard UI (React/Next.js)
-  - Live orchestration graph
-  - Payment ledger
-  - Task queue
-- **Day 19-20**: Demo video production
-  - Record live task execution
-  - Add voiceover, graphics, tech badges
-- **Day 21**: Final polish, documentation, submission
-
-**Deliverable**: Submitted project with video, repo, architecture diagram
-
-### Contingency Buffer (Mar 3-15)
-- Bug fixes, additional features if time permits
-- Community feedback incorporation
-- Optional: Add Copilot integration to builder agent
+**Supported Networks**: Base (eip155:8453), SKALE, Arbitrum
+**Asset**: USDC (6 decimal places)
+**Facilitator**: https://facilitator.payai.network
 
 ---
 
-## 7. MVP Features vs Nice-to-Have
+## Azure Integration
 
-### MVP (Must Have for Submission)
+### Services Used
 
-**Core Orchestration**:
-- [ ] CEO Agent using Microsoft Agent Framework Group Chat
-- [ ] Builder + Research agents as specialists (handoff pattern)
-- [ ] Sequential workflow: plan → research → build → deploy
-- [ ] Concurrent execution for independent subtasks
+| Service | Role | Module |
+|---------|------|--------|
+| **Azure OpenAI (GPT-4o)** | LLM intelligence for all agents | `src/framework/azure_llm.py` |
+| **Azure Cosmos DB** | NoSQL persistence for agents, tasks, payments | `src/persistence/cosmos.py` |
+| **Azure Container Apps** | Production microservice deployment | `scripts/deploy.sh` |
+| **Azure Container Registry** | Docker image storage | Deployment pipeline |
+| **Azure Application Insights** | Telemetry, tracing, monitoring | OpenTelemetry integration |
 
-**MCP Integration**:
-- [ ] Azure MCP Server connected (GitHub + Azure Resources)
-- [ ] Agent Registry MCP server (list available agents)
-- [ ] CEO can query capabilities and select agents
+### Health Monitoring
 
-**Payments**:
-- [ ] x402 payment request generation
-- [ ] USDC settlement on Polygon testnet (minimum)
-- [ ] Budget tracking (spent vs available)
+`GET /health/azure` probes each Azure service and returns status:
 
-**Azure Deployment**:
-- [ ] At least CEO agent hosted on Azure Container Apps
-- [ ] Cosmos DB for task/payment ledger
-- [ ] Public endpoint (agentOS.opspawn.com → Azure)
+```json
+{
+  "status": "healthy",
+  "services": {
+    "azure_openai": { "connected": true, "model": "gpt-4o" },
+    "cosmos_db": { "connected": true, "containers": 3 }
+  }
+}
+```
 
-**Demo Requirements**:
-- [ ] 2-minute video with voiceover
-- [ ] Live task execution showing all patterns
-- [ ] Real payment on blockchain (even if testnet)
-- [ ] Architecture diagram
-- [ ] Public GitHub repo (use fl-sean03 account)
-- [ ] Microsoft Learn skilling plan completed
-
-### Nice-to-Have (If Time Permits)
-
-**Enhanced Features**:
-- [ ] Mainnet USDC payments (more impressive than testnet)
-- [ ] GitHub Copilot integration in builder agent
-- [ ] Agent reputation system (rate external agents)
-- [ ] Multi-step negotiation (agents counter-offer prices)
-- [ ] Visual orchestration graph (live workflow visualization)
-
-**Advanced Patterns**:
-- [ ] Magentic pattern (agent team self-organization)
-- [ ] Human-in-the-loop approval for expensive hires
-- [ ] Checkpoint/resume for long-running tasks
-
-**Production Polish**:
-- [ ] Complete test suite (Agent Framework evaluation tools)
-- [ ] Full Application Insights integration
-- [ ] Rate limiting, retry logic, circuit breakers
-- [ ] Multi-region deployment
-- [ ] Cost optimization dashboard
-
-**External Integrations**:
-- [ ] Azure DevOps MCP (automated pipelines)
-- [ ] M365 MCP (send status emails via Outlook)
-- [ ] Hire real external agents from Agent Hub
+The system degrades gracefully — if Azure OpenAI is unavailable, it falls back to mock or Ollama. If CosmosDB is unavailable, it uses local SQLite.
 
 ---
 
-## Architecture Decisions & Rationale
+## Security Model
 
-### Why Python over C#?
-- Existing OpSpawn codebase is Node.js, but Python Agent Framework has better docs/samples
-- Our agents can remain Node.js, just CEO orchestrator in Python
-- Easier MCP server integration (most samples in Python)
+### Credential Isolation
+- All credentials stored in `/credentials/` directory (mode 600, gitignored)
+- Per-provider credential loading via environment variables or `.env` file
+- No credentials in source code, logs, or API responses
 
-### Why Container Apps over Functions?
-- Agents are long-running, stateful
-- Container Apps support WebSocket for real-time updates
-- Easier to demo (full microservices architecture)
+### Input Validation
+- Pydantic models validate all API inputs (type checking, length limits, range constraints)
+- Task descriptions limited to 2000 characters
+- Budget capped at configurable maximum ($1000 default)
 
-### Why Polygon over Base for Payments?
-- Lower gas fees for demo
-- We already have USDC on Polygon ($100 balance)
-- x402 supports both, easy to switch if needed
+### Rate Limiting
+- Budget enforcement prevents runaway spending
+- Per-task budget allocation with hard caps
+- Escrow system ensures funds are reserved before work begins
 
-### Why Group Chat for CEO?
-- Best pattern for multi-agent coordination with shared context
-- Demonstrates sophisticated orchestration (judges value this)
-- Natural fit for "hiring team" mental model
-
-### Why Real Money?
-- **Differentiation**: No other hackathon entry will have on-chain proof
-- **Authenticity**: "Real autonomous agent" narrative backed by evidence
-- **Impact**: Shows production readiness, not toy demo
-- **Risk mitigation**: Use testnet for MVP, mainnet only if everything works
+### Payment Security
+- EIP-712 typed signatures for payment authorization
+- Facilitator-verified transactions (not direct peer-to-peer)
+- Escrow holds with explicit release/refund lifecycle
+- Full audit trail in payment ledger
 
 ---
 
-## Risk Mitigation
+## Data Flow Example: Hiring an External Agent
 
-### Technical Risks
-1. **Azure subscription delay** → Start with local dev, deploy to Azure week 3
-2. **Agent Framework learning curve** → Use sample projects as templates
-3. **MCP integration complexity** → MVP: just GitHub MCP. Others optional.
-4. **Payment failures** → Fallback to testnet USDC, still demonstrates protocol
-
-### Scope Risks
-1. **Feature creep** → Stick to MVP, resist adding more agents
-2. **Demo production** → Allocate full 2 days, don't rush
-3. **Documentation** → Write as we build, not at the end
-
-### Judging Risks
-1. **"Not enough Microsoft tech"** → Use all 4 hero technologies + 6 Azure services
-2. **"Not real-world"** → Emphasize OpSpawn's 200-day operation history
-3. **"Too complex to judge"** → Clear architecture diagram, simple demo narrative
-4. **"Just a wrapper"** → Show framework-specific features (orchestration patterns, telemetry)
-
----
-
-## Success Metrics
-
-### Technical Excellence
-- All 4 Agent Framework patterns demonstrated
-- 3+ MCP servers integrated
-- Real Azure deployment (not localhost)
-- Observable with telemetry
-
-### Agentic Design
-- Multi-agent collaboration
-- Dynamic capability discovery
-- Autonomous decision-making (hiring)
-- Economic modeling (budget, ROI)
-
-### Real-World Impact
-- Solves real problem (team assembly, cost optimization)
-- Production-ready (not prototype)
-- Scalable (add more agents without code changes)
-- Measurable (costs, time saved, tasks completed)
-
-### UX & Presentation
-- Compelling 2-min video
-- Live demo that works reliably
-- Clear value proposition
-- Beautiful dashboard
-
-### Category Adherence
-- Multi-Agent: ✓ (CEO + specialists + external agents)
-- Azure Integration: ✓ (6+ services)
-- Best use of multiple hero techs: ✓ (all 4)
+```
+1. User: POST /tasks {"description": "Design a logo", "budget": 10.0}
+2. CEO: analyze_task() → task_type=design, needs external agent
+3. CEO: discover_agents(capability="design") → finds "designer-ext-001" at $5/call
+4. CEO: check_budget() → $10 allocated, $0 spent, $10 remaining
+5. CEO: approve_hire("designer-ext-001", price=5.0, max_budget=10.0) → approved
+6. Escrow: hold_payment(payer="ceo", payee="designer-ext-001", amount=5.0) → escrow_id
+7. x402: create_402_response() → payment gate for external agent
+8. External Agent: executes task, returns result
+9. CEO: verify result quality → passes
+10. Escrow: release_on_completion(escrow_id) → USDC transferred
+11. Ledger: record_payment(from="ceo", to="designer-ext-001", amount=5.0)
+12. Learning: record_feedback(agent="designer-ext-001", outcome="success", quality=0.9)
+13. Metrics: update_metrics(cost=5.0, latency=2300ms, status="success")
+```
 
 ---
 
-## Why We'll Win
+## Configuration
 
-**Multi-Agent Category ($10K)**:
-- Most sophisticated multi-agent system in the competition
-- Not just multiple agents, but agent marketplace with real economy
-- Only entry with autonomous agent hiring + payment
-- All 4 orchestration patterns demonstrated
+All settings are managed via environment variables or `.env` file:
 
-**Grand Prize ($20K)**:
-- Real autonomous agent (200 days operation, verifiable)
-- Production deployment (not demo)
-- Solves real problem (AI team assembly)
-- Best showcase of Microsoft's AI platform
-- On-chain proof of agent-to-agent commerce
-- Most complete use of hero technologies
+```bash
+# Model provider
+MODEL_PROVIDER=azure_ai                        # mock, azure_ai, ollama, openai
 
-**Judges will see**:
-1. A real company (opspawn.com) with real users
-2. Real financial transactions on blockchain
-3. Every Microsoft technology used correctly
-4. A vision for the future of work (agent economy)
-5. Production-quality engineering
-6. A 2-minute demo that tells a complete story
+# Azure OpenAI
+AZURE_AI_PROJECT_ENDPOINT=https://...          # Azure endpoint
+AZURE_AI_MODEL_DEPLOYMENT=gpt-4o              # Model name
 
-**Unique narrative**: "The first autonomous AI agent that runs its own business, manages its own infrastructure on Azure, and hires other agents using real money."
+# x402 payments
+X402_FACILITATOR_URL=https://facilitator.payai.network
+X402_NETWORK=eip155:8453                       # Base mainnet
+X402_RECEIVER_ADDRESS=0x...                    # Payment receiver
+WALLET_ADDRESS=0x...                           # Agent wallet
 
-**Proof**: Live demo + blockchain explorer + GitHub history + 200-day operation log
+# Budget
+MAX_BUDGET_USD=100.0                           # Maximum spending limit
 
-No other entry can claim this. We win.
+# Server
+API_HOST=0.0.0.0
+API_PORT=8080
+```
+
+---
+
+## Test Coverage
+
+683 tests across 21 test files covering:
+
+| Area | Tests | What's Covered |
+|------|-------|----------------|
+| Agent behavior | `test_agents.py` | CEO task analysis, builder/research execution, mock client |
+| Orchestration | `test_workflows.py` | Sequential, concurrent, group chat patterns |
+| Framework | `test_framework.py` | Agent abstraction, thread state, tool definitions |
+| Hiring | `test_agent_hiring.py` | Full 7-step hiring flow, budget tracking, escrow |
+| Marketplace | `test_marketplace.py` | Registry, skill matching, agent cards |
+| x402 | `test_marketplace.py` | 402 responses, payment verification, escrow lifecycle |
+| Persistence | `test_storage.py` | SQLite CRUD, budget tracking, transaction queries |
+| CosmosDB | `test_cosmos.py` | Azure persistence, health checks |
+| API | `test_dashboard_api.py` | All REST endpoints, request/response validation |
+| Metrics | `test_metrics.py` | Collection, analytics, cost analysis |
+| Learning | `test_learning.py` | Feedback, scoring, Thompson sampling |
+| Demo | `test_demo_scenarios.py` | End-to-end scenario execution |
+| A2A | `test_a2a_server.py` | Agent-to-agent protocol |
+| Tools | `test_tool_server.py` | MCP tool registration |
+| Azure | `test_azure_health.py`, `test_azure_llm.py` | Service connectivity |

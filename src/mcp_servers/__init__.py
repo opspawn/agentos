@@ -1,4 +1,4 @@
-"""AgentOS MCP server implementations."""
+"""HireWire MCP server implementations."""
 
 from .tool_server import (
     create_tool_mcp_server,

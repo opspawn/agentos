@@ -1,4 +1,4 @@
-"""AgentOS Metrics & Cost Analytics.
+"""HireWire Metrics & Cost Analytics.
 
 Provides MetricsCollector for recording events and CostAnalyzer / ROICalculator
 for business intelligence over agent performance data.

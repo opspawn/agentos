@@ -15,7 +15,7 @@ from agent_framework import ChatAgent, tool
 
 from src.config import get_chat_client
 
-BUILDER_INSTRUCTIONS = """You are the Builder Agent of AgentOS.
+BUILDER_INSTRUCTIONS = """You are the Builder Agent of HireWire.
 
 Your responsibilities:
 1. **Write Code**: Implement features, fix bugs, and refactor code based on task specs.

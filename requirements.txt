@@ -1,4 +1,4 @@
-# Microsoft AI Dev Days Hackathon - AgentOS
+# Microsoft AI Dev Days Hackathon - HireWire
 # Python dependencies
 
 # Core Agent Framework (preview version required)

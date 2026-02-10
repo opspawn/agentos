@@ -1,4 +1,4 @@
-"""Azure OpenAI LLM Provider for AgentOS.
+"""Azure OpenAI LLM Provider for HireWire.
 
 Provides an LLM interface backed by Azure OpenAI Service, using the
 deployment configured via environment variables. Designed to be the default

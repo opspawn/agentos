@@ -13,7 +13,7 @@ from src.framework.agent import AgentFrameworkAgent, ToolDescriptor
 from src.framework.mcp_tools import WEB_SEARCH_TOOL, AI_ANALYSIS_TOOL
 from src.config import get_chat_client
 
-RESEARCHER_INSTRUCTIONS = """You are a Researcher Agent in the AgentOS multi-agent system.
+RESEARCHER_INSTRUCTIONS = """You are a Researcher Agent in the HireWire multi-agent system.
 
 Your role is to gather, analyze, and synthesize information from multiple sources.
 

@@ -1,4 +1,4 @@
-"""FastAPI server for AgentOS.
+"""FastAPI server for HireWire.
 
 Provides REST endpoints for:
 - Task submission and status tracking
@@ -33,7 +33,7 @@ from src.workflows.group_chat import run_group_chat
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="AgentOS",
+    title="HireWire",
     description="Autonomous Agent Operating System - Microsoft AI Dev Days Hackathon",
     version="0.1.0",
 )
@@ -134,7 +134,7 @@ async def _execute_task(record: TaskRecord) -> None:
 async def root():
     """Root endpoint with API info."""
     return {
-        "name": "AgentOS",
+        "name": "HireWire",
         "version": "0.1.0",
         "description": "Autonomous Agent Operating System",
         "endpoints": {
@@ -295,10 +295,10 @@ async def task_budget(task_id: str):
 
 @app.get("/.well-known/agent-card.json")
 async def agent_card():
-    """A2A discovery endpoint for AgentOS."""
+    """A2A discovery endpoint for HireWire."""
     settings = get_settings()
     return {
-        "name": "AgentOS",
+        "name": "HireWire",
         "description": "Autonomous Agent Operating System with x402 micropayments",
         "version": "0.1.0",
         "capabilities": ["task-execution", "agent-hiring", "budget-management"],

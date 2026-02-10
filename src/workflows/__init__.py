@@ -1,1 +1,1 @@
-"""AgentOS workflow orchestrations."""
+"""HireWire workflow orchestrations."""

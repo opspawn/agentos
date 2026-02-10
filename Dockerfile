@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------
-# AgentOS — Multi-stage Docker build for Azure Container Apps
+# HireWire — Multi-stage Docker build for Azure Container Apps
 # -------------------------------------------------------------------
 
 # Stage 1: Install dependencies
@@ -40,7 +40,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 # Default environment variables (overridden by Container Apps config)
 ENV PYTHONUNBUFFERED=1
-ENV AGENTOS_DEMO=1
+ENV HIREWIRE_DEMO=1
 
 # Start the dashboard API server
 CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

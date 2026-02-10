@@ -1,4 +1,4 @@
-"""SQLite persistence layer for AgentOS.
+"""SQLite persistence layer for HireWire.
 
 Replaces in-memory dicts with durable storage using SQLite (WAL mode)
 for tasks, payments, and agent registry. Uses aiosqlite for async access
@@ -17,10 +17,10 @@ from typing import Any
 
 import aiosqlite
 
-# Default database path (overridable via AGENTOS_DB_PATH env var)
+# Default database path (overridable via HIREWIRE_DB_PATH env var)
 _DEFAULT_DB_PATH = Path(
-    os.environ.get("AGENTOS_DB_PATH", "")
-    or str(Path(__file__).resolve().parent.parent / "data" / "agentos.db")
+    os.environ.get("HIREWIRE_DB_PATH", "")
+    or str(Path(__file__).resolve().parent.parent / "data" / "hirewire.db")
 )
 
 # SQL schema

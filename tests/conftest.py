@@ -17,8 +17,8 @@ os.environ["MODEL_PROVIDER"] = "mock"
 
 # Use a temporary database for tests
 _test_db_dir = tempfile.mkdtemp()
-_test_db_path = os.path.join(_test_db_dir, "test_agentos.db")
-os.environ["AGENTOS_DB_PATH"] = _test_db_path
+_test_db_path = os.path.join(_test_db_dir, "test_hirewire.db")
+os.environ["HIREWIRE_DB_PATH"] = _test_db_path
 
 
 @pytest.fixture(autouse=True)

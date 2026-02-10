@@ -1,6 +1,6 @@
-"""Microsoft Agent Framework integration layer for AgentOS.
+"""Microsoft Agent Framework integration layer for HireWire.
 
-Provides Agent Framework-compatible abstractions that wrap AgentOS's
+Provides Agent Framework-compatible abstractions that wrap HireWire's
 existing agent system, enabling multi-agent orchestration patterns
 aligned with Microsoft's Agent Framework SDK.
 

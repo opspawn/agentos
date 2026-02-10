@@ -12,7 +12,7 @@ from src.framework.agent import AgentFrameworkAgent, ToolDescriptor
 from src.framework.mcp_tools import FILE_OPERATION_TOOL, API_CALL_TOOL
 from src.config import get_chat_client
 
-EXECUTOR_INSTRUCTIONS = """You are an Executor Agent in the AgentOS multi-agent system.
+EXECUTOR_INSTRUCTIONS = """You are an Executor Agent in the HireWire multi-agent system.
 
 Your role is to take concrete actions based on plans and instructions from other agents.
 

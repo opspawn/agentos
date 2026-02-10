@@ -1,7 +1,7 @@
 """Demo Scenario: Parallel competitor + customer research.
 
 Submits two independent research tasks that run concurrently using the
-concurrent workflow, showing how AgentOS parallelises work.
+concurrent workflow, showing how HireWire parallelises work.
 
 Works with both mock and ollama providers (controlled by MODEL_PROVIDER env var).
 """
@@ -28,7 +28,7 @@ from src.workflows.concurrent import create_concurrent_workflow, _extract_output
 
 
 TASK_DESCRIPTION = (
-    "Research competitor analysis for AgentOS while simultaneously "
+    "Research competitor analysis for HireWire while simultaneously "
     "researching potential enterprise customers"
 )
 
@@ -79,7 +79,7 @@ async def run_parallel_research_scenario() -> dict:
     Returns:
         Dict with keys: task, workflow, status, output, budget, elapsed_s
     """
-    _header("AgentOS Demo: Parallel Research")
+    _header("HireWire Demo: Parallel Research")
 
     provider = get_settings().model_provider.value
     _info(f"Model provider: {provider}")
@@ -124,7 +124,7 @@ async def run_parallel_research_scenario() -> dict:
     _step(4, "Executing parallel workflow")
     t0 = time.monotonic()
 
-    _agent("Research-Competitors", "Searching for AgentOS competitors …")
+    _agent("Research-Competitors", "Searching for HireWire competitors …")
     _agent("Research-Customers", "Identifying enterprise customers …")
 
     result = await workflow.run(TASK_DESCRIPTION)

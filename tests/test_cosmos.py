@@ -189,7 +189,7 @@ class TestPaymentCRUD:
 class TestConnectivity:
     def test_check_connection_success(self, mock_store):
         store, _ = mock_store
-        store._client.list_databases.return_value = [{"id": "agentos"}]
+        store._client.list_databases.return_value = [{"id": "hirewire"}]
         result = store.check_connection()
         assert result["connected"] is True
         assert result["databases"] == 1

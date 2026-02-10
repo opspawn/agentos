@@ -1,6 +1,6 @@
 """AgentFrameworkAgent — Microsoft Agent Framework-compatible agent abstraction.
 
-Wraps AgentOS's existing ChatAgent system with an interface that aligns
+Wraps HireWire's existing ChatAgent system with an interface that aligns
 with Microsoft's Agent Framework patterns:
 - Named agents with instructions (system prompt)
 - MCP-compatible tool definitions
@@ -75,7 +75,7 @@ class ToolDescriptor:
 class AgentFrameworkAgent:
     """Microsoft Agent Framework-compatible agent.
 
-    Wraps the existing AgentOS ChatAgent with additional capabilities:
+    Wraps the existing HireWire ChatAgent with additional capabilities:
     - Tool management via MCP-compatible descriptors
     - Thread/conversation state tracking
     - Connected Agents pattern for delegation

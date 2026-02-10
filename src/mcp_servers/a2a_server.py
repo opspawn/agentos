@@ -1,7 +1,7 @@
-"""A2A (Agent-to-Agent) Protocol Server for AgentOS.
+"""A2A (Agent-to-Agent) Protocol Server for HireWire.
 
 Implements a JSON-RPC 2.0 endpoint following Google A2A spec patterns,
-enabling external agents to discover and invoke AgentOS internal agents.
+enabling external agents to discover and invoke HireWire internal agents.
 
 Endpoints:
 - POST /a2a          — JSON-RPC 2.0 dispatch (tasks/send, tasks/get, agents/list)
@@ -120,7 +120,7 @@ def generate_agent_card(base_url: str = "") -> dict[str, Any]:
         })
 
     return {
-        "name": "AgentOS",
+        "name": "HireWire",
         "description": "Autonomous Agent Operating System with multi-agent orchestration and x402 micropayments",
         "version": "0.1.0",
         "url": base_url or "http://localhost:8080",
@@ -207,7 +207,7 @@ def _jsonrpc_result(result: Any, req_id: Any = None) -> dict:
 
 
 def handle_tasks_send(params: dict[str, Any]) -> dict[str, Any]:
-    """Handle tasks/send — submit a task to an AgentOS agent."""
+    """Handle tasks/send — submit a task to an HireWire agent."""
     agent_name = params.get("agent")
     description = params.get("description")
     from_agent = params.get("from_agent", "anonymous")
@@ -355,8 +355,8 @@ def dispatch_jsonrpc(request_body: dict[str, Any]) -> dict[str, Any]:
 def create_a2a_app(base_url: str = "") -> FastAPI:
     """Create the A2A protocol server as a FastAPI application."""
     app = FastAPI(
-        title="AgentOS A2A Server",
-        description="A2A (Agent-to-Agent) protocol endpoint for AgentOS",
+        title="HireWire A2A Server",
+        description="A2A (Agent-to-Agent) protocol endpoint for HireWire",
         version="0.1.0",
     )
 

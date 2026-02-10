@@ -1,7 +1,7 @@
-"""Azure Cosmos DB persistence layer for AgentOS.
+"""Azure Cosmos DB persistence layer for HireWire.
 
 Provides a cloud-native persistence backend using Azure Cosmos DB (NoSQL API).
-Creates a database ``agentos`` with containers for agents, jobs, and payments.
+Creates a database ``hirewire`` with containers for agents, jobs, and payments.
 
 Environment variables:
     COSMOS_ENDPOINT — Cosmos DB account endpoint
@@ -24,7 +24,7 @@ class CosmosDBStore:
     workloads where cross-partition queries are acceptable).
     """
 
-    DATABASE_NAME = "agentos"
+    DATABASE_NAME = "hirewire"
     CONTAINERS = {
         "agents": "/id",
         "jobs": "/id",

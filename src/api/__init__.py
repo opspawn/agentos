@@ -1,1 +1,1 @@
-"""AgentOS API — dashboard and task server."""
+"""HireWire API — dashboard and task server."""

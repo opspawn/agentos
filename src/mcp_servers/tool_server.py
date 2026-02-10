@@ -102,16 +102,16 @@ async def _azure_devops_create_item(args: dict[str, Any]) -> dict[str, Any]:
         "type": args.get("work_item_type", "Task"),
         "state": "New",
         "assigned_to": args.get("assigned_to", "unassigned"),
-        "project": args.get("project", "AgentOS"),
+        "project": args.get("project", "HireWire"),
         "created_at": time.time(),
-        "url": f"https://dev.azure.com/mock/AgentOS/_workitems/edit/{int(time.time()) % 100000}",
+        "url": f"https://dev.azure.com/mock/HireWire/_workitems/edit/{int(time.time()) % 100000}",
     }
 
 
 async def _azure_keyvault_get(args: dict[str, Any]) -> dict[str, Any]:
     """Azure Key Vault - retrieve a secret (mock, returns metadata only)."""
     secret_name = args.get("secret_name", "")
-    vault_name = args.get("vault_name", "agentos-vault")
+    vault_name = args.get("vault_name", "hirewire-vault")
     return {
         "secret_name": secret_name,
         "vault_name": vault_name,

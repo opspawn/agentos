@@ -1,4 +1,4 @@
-# AgentOS Hackathon - Executive Summary
+# HireWire Hackathon - Executive Summary
 
 **For**: Sean (OpSpawn creator)
 **Date**: February 9, 2026
@@ -9,7 +9,7 @@
 
 ## TL;DR
 
-**Project**: AgentOS - A self-sustaining AI agent operating system where agents discover, hire, and pay each other using real USDC.
+**Project**: HireWire - A self-sustaining AI agent operating system where agents discover, hire, and pay each other using real USDC.
 
 **Unique Angle**: OpSpawn is a real autonomous agent (200+ days operation) that will demo hiring other agents with real cryptocurrency on Azure infrastructure—something no student team can replicate.
 
@@ -25,7 +25,7 @@
 
 ### Differentiation Matrix
 
-| Factor | Typical Hackathon Entry | Our Entry (AgentOS) |
+| Factor | Typical Hackathon Entry | Our Entry (HireWire) |
 |--------|------------------------|---------------------|
 | **Team** | Students/hobbyists | Real autonomous agent (200 days uptime) |
 | **Payments** | Mock/fake | Real USDC on blockchain (verifiable) |
@@ -168,33 +168,33 @@ Return Result + Update Ledger
 # $200 free credit for 30 days - enough for hackathon
 
 # Create resource group
-az group create --name agentOS-hackathon --location eastus
+az group create --name hirewire-hackathon --location eastus
 
 # Create Container Apps environment
 az containerapp env create \
-  --name agentOS-env \
-  --resource-group agentOS-hackathon \
+  --name hirewire-env \
+  --resource-group hirewire-hackathon \
   --location eastus
 
 # Create Cosmos DB (serverless - cheapest)
 az cosmosdb create \
-  --name agentOS-cosmos \
-  --resource-group agentOS-hackathon \
+  --name hirewire-cosmos \
+  --resource-group hirewire-hackathon \
   --locations regionName=eastus \
   --enable-serverless
 
 # Create Azure OpenAI
 az cognitiveservices account create \
-  --name agentOS-openai \
-  --resource-group agentOS-hackathon \
+  --name hirewire-openai \
+  --resource-group hirewire-hackathon \
   --kind OpenAI \
   --sku S0 \
   --location eastus
 
 # Deploy GPT-4 model
 az cognitiveservices account deployment create \
-  --name agentOS-openai \
-  --resource-group agentOS-hackathon \
+  --name hirewire-openai \
+  --resource-group hirewire-hackathon \
   --deployment-name gpt-4 \
   --model-name gpt-4 \
   --model-version "0613" \
@@ -204,14 +204,14 @@ az cognitiveservices account deployment create \
 
 # Create Application Insights
 az monitor app-insights component create \
-  --app agentOS-insights \
+  --app hirewire-insights \
   --location eastus \
-  --resource-group agentOS-hackathon
+  --resource-group hirewire-hackathon
 
 # Create Container Registry (for Docker images)
 az acr create \
-  --name agentOSacr \
-  --resource-group agentOS-hackathon \
+  --name hirewireacr \
+  --resource-group hirewire-hackathon \
   --sku Basic
 ```
 

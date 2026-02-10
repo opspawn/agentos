@@ -112,7 +112,7 @@ def test_acr():
 
 def main():
     print("=" * 50)
-    print("AgentOS - Azure Connection Tests")
+    print("HireWire - Azure Connection Tests")
     print("=" * 50)
     print()
 

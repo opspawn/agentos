@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""AgentOS Polished CLI Demo Runner.
+"""HireWire Polished CLI Demo Runner.
 
-Demonstrates the full AgentOS pipeline with rich terminal output:
+Demonstrates the full HireWire pipeline with rich terminal output:
 CEO receives task -> discovers agents -> evaluates candidates ->
 hires best agent -> executes via A2A -> pays with USDC via x402.
 
@@ -95,7 +95,7 @@ class DemoConfig:
     fast: bool = False
     budget: float = 5.0
     task_description: str = (
-        "Build a professional landing page for AgentOS with modern design, "
+        "Build a professional landing page for HireWire with modern design, "
         "responsive layout, and interactive agent marketplace showcase"
     )
     required_skills: list[str] = field(
@@ -360,7 +360,7 @@ def _delay(seconds: float, fast: bool) -> None:
 
 
 def display_banner() -> None:
-    """Display the AgentOS ASCII banner."""
+    """Display the HireWire ASCII banner."""
     banner_text = Text(BANNER, style="bold cyan")
     console.print(Panel(
         Align.center(banner_text),
@@ -715,7 +715,7 @@ def run_demo_with_display(config: DemoConfig) -> DemoResult:
         "[dim]CEO agent discovered, evaluated, hired, and paid an external agent\n"
         "using A2A protocol for communication and x402 for USDC micropayments.\n"
         "All without human intervention.[/]",
-        title="[bold cyan]AgentOS[/]",
+        title="[bold cyan]HireWire[/]",
         border_style="cyan",
         padding=(1, 2),
     ))
@@ -729,7 +729,7 @@ def run_demo_with_display(config: DemoConfig) -> DemoResult:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="AgentOS Demo - Full agent hiring pipeline with rich output",
+        description="HireWire Demo - Full agent hiring pipeline with rich output",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(

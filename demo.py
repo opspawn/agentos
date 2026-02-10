@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""AgentOS Demo Runner — standalone entry point.
+"""HireWire Demo Runner — standalone entry point.
 
 Usage:
     python demo.py              # Default mode with realistic timing

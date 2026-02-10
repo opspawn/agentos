@@ -53,7 +53,7 @@ class TestAgentCard:
 
     def test_card_has_required_fields(self):
         card = generate_agent_card()
-        assert card["name"] == "AgentOS"
+        assert card["name"] == "HireWire"
         assert "description" in card
         assert "version" in card
         assert "skills" in card
@@ -94,8 +94,8 @@ class TestAgentCard:
         assert "x402" in card["authentication"]["schemes"]
 
     def test_card_uses_custom_base_url(self):
-        card = generate_agent_card(base_url="https://agentos.opspawn.com")
-        assert card["url"] == "https://agentos.opspawn.com"
+        card = generate_agent_card(base_url="https://hirewire.opspawn.com")
+        assert card["url"] == "https://hirewire.opspawn.com"
 
     def test_card_default_base_url(self):
         card = generate_agent_card()
@@ -466,7 +466,7 @@ class TestA2AEndpoints:
             resp = await client.get("/.well-known/agent.json")
         assert resp.status_code == 200
         card = resp.json()
-        assert card["name"] == "AgentOS"
+        assert card["name"] == "HireWire"
         assert card["url"] == "https://test.example.com"
 
     @pytest.mark.asyncio

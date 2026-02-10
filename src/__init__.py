@@ -1,1 +1,1 @@
-"""AgentOS - Autonomous Agent Operating System for Microsoft AI Dev Days Hackathon."""
+"""HireWire - Autonomous Agent Operating System for Microsoft AI Dev Days Hackathon."""

@@ -1,1 +1,1 @@
-"""Persistence backends for AgentOS."""
+"""Persistence backends for HireWire."""

@@ -1,1 +1,1 @@
-"""AgentOS demo scenarios."""
+"""HireWire demo scenarios."""

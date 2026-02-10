@@ -38,7 +38,7 @@ from src.workflows.sequential import create_sequential_workflow, _extract_output
 
 
 TASK_DESCRIPTION = (
-    "Build a landing page with a professional design for AgentOS — "
+    "Build a landing page with a professional design for HireWire — "
     "an AI agent operating system that lets agents hire and pay each other"
 )
 
@@ -120,7 +120,7 @@ async def run_agent_hiring_scenario() -> dict:
         Dict with keys: task, status, internal_result, hiring_result,
         budget, elapsed_s
     """
-    _header("AgentOS Demo: External Agent Hiring")
+    _header("HireWire Demo: External Agent Hiring")
 
     provider = get_settings().model_provider.value
     _info(f"Model provider: {provider}")
@@ -143,7 +143,7 @@ async def run_agent_hiring_scenario() -> dict:
     _agent("Builder", "Writing landing page HTML/CSS skeleton ...")
     workflow = create_sequential_workflow(chat_client=client)
     internal_result = await workflow.run(
-        "Write the HTML and CSS code for a responsive landing page for AgentOS"
+        "Write the HTML and CSS code for a responsive landing page for HireWire"
     )
     internal_output = _extract_output_text(internal_result.get_outputs())
     _ok("Builder produced code skeleton")
@@ -168,7 +168,7 @@ async def run_agent_hiring_scenario() -> dict:
         _step(5, "CEO hires designer agent + sends task via A2A")
         hiring_result = await run_hiring_workflow(
             task_id=f"{TASK_ID}-design",
-            task_description="Create a professional design specification for an AgentOS landing page",
+            task_description="Create a professional design specification for an HireWire landing page",
             required_skills=["design", "ui", "landing-page"],
             budget_usd=BUDGET_USD,
             capability_query="design",
@@ -214,7 +214,7 @@ async def run_agent_hiring_scenario() -> dict:
 
     output_parts = [
         "=" * 60,
-        "AgentOS Demo: External Agent Hiring",
+        "HireWire Demo: External Agent Hiring",
         "=" * 60,
         "",
         "--- Internal Builder Output ---",

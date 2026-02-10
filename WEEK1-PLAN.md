@@ -1,4 +1,4 @@
-# AgentOS Week 1: Updated Execution Plan
+# HireWire Week 1: Updated Execution Plan
 ## Feb 10-16, 2026
 
 **Context**: Scaffold is DONE (18 tests passing). Week 1 plan in ROADMAP.md assumed starting from scratch — we're ahead. This plan reflects reality.

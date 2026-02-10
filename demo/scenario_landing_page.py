@@ -1,4 +1,4 @@
-"""Demo Scenario: Build a landing page for AgentOS.
+"""Demo Scenario: Build a landing page for HireWire.
 
 Submits a task to the CEO agent that requires both research and building,
 running through the sequential workflow: Research -> CEO -> Builder.
@@ -26,7 +26,7 @@ from src.workflows.sequential import create_sequential_workflow, _extract_output
 
 TASK_DESCRIPTION = (
     "Research best practices for modern SaaS landing pages, then build a "
-    "responsive HTML landing page for AgentOS - an AI agent operating system"
+    "responsive HTML landing page for HireWire - an AI agent operating system"
 )
 
 TASK_ID = "demo-landing-page"
@@ -76,7 +76,7 @@ async def run_landing_page_scenario() -> dict:
     Returns:
         Dict with keys: task, workflow, status, output, budget, elapsed_s
     """
-    _header("AgentOS Demo: Build a Landing Page")
+    _header("HireWire Demo: Build a Landing Page")
 
     provider = get_settings().model_provider.value
     _info(f"Model provider: {provider}")

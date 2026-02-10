@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI entry point for AgentOS demo scenarios.
+"""CLI entry point for HireWire demo scenarios.
 
 Usage:
     python demo/run_demo.py landing-page   # Build a landing page
@@ -117,7 +117,7 @@ SCENARIOS = {
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="AgentOS Demo Runner",
+        description="HireWire Demo Runner",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Set MODEL_PROVIDER env var to switch between mock/ollama/azure_ai/openai",
     )

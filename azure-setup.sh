@@ -1,21 +1,21 @@
 #!/bin/bash
-# Azure Setup Script for AgentOS Hackathon
+# Azure Setup Script for HireWire Hackathon
 # Run this script to provision all required Azure resources
 # Requires: Azure CLI installed, logged in with `az login`
 
 set -e  # Exit on error
 
 # Configuration
-RESOURCE_GROUP="agentOS-hackathon"
+RESOURCE_GROUP="hirewire-hackathon"
 LOCATION="eastus"
-OPENAI_NAME="agentOS-openai"
-COSMOS_NAME="agentOS-cosmos"
-INSIGHTS_NAME="agentOS-insights"
-ACR_NAME="agentOSacr"
-CONTAINERAPP_ENV="agentOS-env"
+OPENAI_NAME="hirewire-openai"
+COSMOS_NAME="hirewire-cosmos"
+INSIGHTS_NAME="hirewire-insights"
+ACR_NAME="hirewireacr"
+CONTAINERAPP_ENV="hirewire-env"
 
 echo "========================================="
-echo "AgentOS Hackathon - Azure Setup"
+echo "HireWire Hackathon - Azure Setup"
 echo "========================================="
 echo ""
 echo "This script will create:"

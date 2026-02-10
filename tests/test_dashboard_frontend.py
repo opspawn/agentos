@@ -29,9 +29,9 @@ class TestDashboardServing:
         assert "text/html" in resp.headers["content-type"]
 
     @pytest.mark.asyncio
-    async def test_root_contains_agentos(self, client):
+    async def test_root_contains_hirewire(self, client):
         resp = await client.get("/")
-        assert "AgentOS" in resp.text
+        assert "HireWire" in resp.text
 
     @pytest.mark.asyncio
     async def test_root_contains_dashboard_panels(self, client):
@@ -51,7 +51,7 @@ class TestDashboardServing:
     async def test_dashboard_static_mount(self, client):
         resp = await client.get("/dashboard/index.html")
         assert resp.status_code == 200
-        assert "AgentOS" in resp.text
+        assert "HireWire" in resp.text
 
     @pytest.mark.asyncio
     async def test_root_has_auto_refresh(self, client):

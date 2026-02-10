@@ -1,4 +1,4 @@
-"""Metrics collector for AgentOS.
+"""Metrics collector for HireWire.
 
 Aggregates task completion rates, costs, latency, and budget utilisation.
 All data is persisted via the SQLite metrics table in storage.py.

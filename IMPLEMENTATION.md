@@ -1,4 +1,4 @@
-# AgentOS Implementation Guide
+# HireWire Implementation Guide
 ## Technical Setup & Code Patterns
 
 ---
@@ -7,7 +7,7 @@
 
 ### Prerequisites
 1. **Azure Subscription** (Sean must set up)
-   - Resource group: `agentOS-hackathon`
+   - Resource group: `hirewire-hackathon`
    - Region: East US (lower latency for demos)
    - Services: Container Apps, Cosmos DB, OpenAI, Storage, Application Insights
 
@@ -83,7 +83,7 @@ client = AzureOpenAIChatClient(
 
 # CEO Agent Instructions
 CEO_INSTRUCTIONS = """
-You are the CEO Agent of AgentOS. Your job:
+You are the CEO Agent of HireWire. Your job:
 1. Receive tasks from users or webhooks
 2. Break down complex tasks into subtasks
 3. Analyze which agents (internal or external) can handle each subtask
@@ -521,7 +521,7 @@ class TaskStore:
         credential = DefaultAzureCredential()
 
         self.client = CosmosClient(endpoint, credential=credential)
-        self.database = self.client.create_database_if_not_exists("agentOS")
+        self.database = self.client.create_database_if_not_exists("hirewire")
 
         # Containers
         self.tasks = self.database.create_container_if_not_exists(
@@ -625,14 +625,14 @@ CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: agentOS-ceo
+  name: hirewire-ceo
 spec:
   replicas: 1
   template:
     spec:
       containers:
       - name: ceo-agent
-        image: agentOSacr.azurecr.io/ceo-agent:latest
+        image: hirewireacr.azurecr.io/ceo-agent:latest
         env:
         - name: AZURE_OPENAI_ENDPOINT
           value: "https://<resource>.openai.azure.com"
@@ -667,7 +667,7 @@ async def demo_landing_page():
     ceo = await create_ceo_agent()
 
     task = """
-    Create a landing page for our new product "AgentOS" - an operating system for AI agents.
+    Create a landing page for our new product "HireWire" - an operating system for AI agents.
 
     Requirements:
     - Modern design with hero section
@@ -766,7 +766,7 @@ Before demo recording:
 - [ ] All transactions logged to Cosmos DB
 - [ ] Telemetry visible in Application Insights
 - [ ] Deployed to Azure Container Apps
-- [ ] Public endpoint working (https://agentOS.opspawn.com)
+- [ ] Public endpoint working (https://hirewire.opspawn.com)
 
 ---
 
@@ -778,7 +778,7 @@ Before demo recording:
 #!/bin/bash
 # Record 2-minute demo video
 
-echo "Starting AgentOS Demo Recording"
+echo "Starting HireWire Demo Recording"
 echo "================================"
 
 # Terminal 1: Start CEO agent
@@ -787,7 +787,7 @@ CEO_PID=$!
 
 # Terminal 2: Monitor telemetry
 az monitor app-insights query \
-  --app agentOS \
+  --app hirewire \
   --analytics-query "traces | where timestamp > ago(5m)" \
   --output table &
 MONITOR_PID=$!

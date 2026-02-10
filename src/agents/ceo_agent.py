@@ -19,7 +19,7 @@ from src.mcp_servers.tool_server import tool_registry
 from src.metrics.collector import get_metrics_collector
 from src.metrics.analytics import CostAnalyzer, ROICalculator
 
-CEO_INSTRUCTIONS = """You are the CEO Agent of AgentOS, an autonomous agent operating system.
+CEO_INSTRUCTIONS = """You are the CEO Agent of HireWire, an autonomous agent operating system.
 
 Your responsibilities:
 1. **Task Analysis**: When a user submits a task, break it down into subtasks

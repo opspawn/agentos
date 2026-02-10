@@ -1,22 +1,22 @@
 ============================================================
-AgentOS Demo: External Agent Hiring
+HireWire Demo: External Agent Hiring
 ============================================================
 
 --- Internal Builder Output ---
-Write the HTML and CSS code for a responsive landing page for AgentOS
+Write the HTML and CSS code for a responsive landing page for HireWire
 [MockLLM call #1]
 Agent: unknown
-Task: Write the HTML and CSS code for a responsive landing page for AgentOS
+Task: Write the HTML and CSS code for a responsive landing page for HireWire
 Status: TASK_COMPLETE
 Result: Mock response from unknown agent.
 [MockLLM call #2]
 Agent: unknown
-Task: Write the HTML and CSS code for a responsive landing page for AgentOS
+Task: Write the HTML and CSS code for a responsive landing page for HireWire
 Status: TASK_COMPLETE
 Result: Mock response from unknown agent.
 [MockLLM call #3]
 Agent: unknown
-Task: Write the HTML and CSS code for a responsive landing page for AgentOS
+Task: Write the HTML and CSS code for a responsive landing page for HireWire
 Status: TASK_COMPLETE
 Result: Mock response from unknown agent.
 

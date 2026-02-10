@@ -1,4 +1,4 @@
-"""Seed realistic demo data into the AgentOS database.
+"""Seed realistic demo data into the HireWire database.
 
 Populates tasks, payments, and agents so judges see a rich dashboard
 on first load rather than an empty screen.

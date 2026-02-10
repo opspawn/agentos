@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # -------------------------------------------------------------------
-# AgentOS — Azure Container Apps deployment script
+# HireWire — Azure Container Apps deployment script
 #
 # Usage:
 #   ./scripts/deploy.sh          # build, push, deploy
@@ -28,10 +28,10 @@ fi
 : "${CONTAINERAPP_ENV:?CONTAINERAPP_ENV not set}"
 : "${AZURE_RESOURCE_GROUP:?AZURE_RESOURCE_GROUP not set}"
 
-IMAGE_NAME="agentos-api"
+IMAGE_NAME="hirewire-api"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 FULL_IMAGE="${ACR_LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}"
-APP_NAME="agentos-api"
+APP_NAME="hirewire-api"
 
 # -------------------------------------------------------------------
 
@@ -71,8 +71,9 @@ deploy() {
                 "AZURE_OPENAI_DEPLOYMENT=${AZURE_OPENAI_DEPLOYMENT}" \
                 "COSMOS_ENDPOINT=${COSMOS_ENDPOINT}" \
                 "COSMOS_KEY=${COSMOS_KEY}" \
+                "APPLICATIONINSIGHTS_CONNECTION_STRING=${APPLICATIONINSIGHTS_CONNECTION_STRING:-}" \
                 "MODEL_PROVIDER=azure_ai" \
-                "AGENTOS_DEMO=1" \
+                "HIREWIRE_DEMO=1" \
                 "PYTHONUNBUFFERED=1"
     else
         echo "==> Creating new container app"
@@ -96,8 +97,9 @@ deploy() {
                 "AZURE_OPENAI_DEPLOYMENT=${AZURE_OPENAI_DEPLOYMENT}" \
                 "COSMOS_ENDPOINT=${COSMOS_ENDPOINT}" \
                 "COSMOS_KEY=${COSMOS_KEY}" \
+                "APPLICATIONINSIGHTS_CONNECTION_STRING=${APPLICATIONINSIGHTS_CONNECTION_STRING:-}" \
                 "MODEL_PROVIDER=azure_ai" \
-                "AGENTOS_DEMO=1" \
+                "HIREWIRE_DEMO=1" \
                 "PYTHONUNBUFFERED=1"
     fi
 
@@ -110,7 +112,7 @@ deploy() {
 
     echo ""
     echo "========================================="
-    echo "  AgentOS deployed successfully!"
+    echo "  HireWire deployed successfully!"
     echo "  URL: https://${FQDN}"
     echo "  Health: https://${FQDN}/health"
     echo "  Azure: https://${FQDN}/health/azure"

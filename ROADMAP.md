@@ -1,4 +1,4 @@
-# AgentOS Hackathon Roadmap
+# HireWire Hackathon Roadmap
 
 **Timeline**: Feb 10 - Mar 2, 2026 (3 weeks)
 **Target**: Multi-Agent System ($10K) + Grand Prize ($20K) = $30K
@@ -9,7 +9,7 @@
 
 ### Day 1-2: Environment Setup
 - [ ] **Azure Subscription Setup** (Sean)
-  - [ ] Create resource group `agentOS-hackathon`
+  - [ ] Create resource group `hirewire-hackathon`
   - [ ] Provision Azure OpenAI with GPT-4 deployment
   - [ ] Create Cosmos DB (serverless)
   - [ ] Set up Application Insights
@@ -184,16 +184,16 @@
 - [ ] **Docker Setup**
   - [ ] Create `deployment/Dockerfile`
   - [ ] Multi-stage build (dependencies + app)
-  - [ ] Test local build: `docker build -t agentOS:local .`
-  - [ ] Test local run: `docker run -p 8000:8000 agentOS:local`
+  - [ ] Test local build: `docker build -t hirewire:local .`
+  - [ ] Test local run: `docker run -p 8000:8000 hirewire:local`
 - [ ] **Azure Container Registry**
-  - [ ] Push image: `az acr build --registry agentOSacr --image ceo-agent:v1 .`
+  - [ ] Push image: `az acr build --registry hirewireacr --image ceo-agent:v1 .`
   - [ ] Verify image in registry
 - [ ] **Container Apps Deployment**
   - [ ] Create `deployment/container-app.yaml`
   - [ ] Deploy CEO agent: `az containerapp create ...`
   - [ ] Set environment variables (OpenAI, Cosmos, Insights)
-  - [ ] Test public endpoint: `https://agentOS-ceo.azurecontainerapps.io`
+  - [ ] Test public endpoint: `https://hirewire-ceo.azurecontainerapps.io`
 
 **Deliverable**: CEO agent running on Azure
 
@@ -350,11 +350,11 @@
   - [ ] Save to `docs/microsoft-learn-certificate.png`
 - [ ] **Submission Form**
   - [ ] Draft answers to all required fields:
-    - Project name: AgentOS
+    - Project name: HireWire
     - Category: Multi-Agent Systems
     - Also applying: Build AI Apps & Agents (Grand Prize)
     - Description: [use README summary]
-    - GitHub URL: https://github.com/fl-sean03/agentOS-hackathon
+    - GitHub URL: https://github.com/fl-sean03/hirewire-hackathon
     - Demo video: [YouTube URL]
     - Architecture diagram: [link to PNG]
     - Technologies used: [list all]

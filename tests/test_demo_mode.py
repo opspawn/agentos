@@ -4,7 +4,7 @@ Covers:
 - seed_demo_data populates tasks, transactions, agents
 - DemoRunner start/stop lifecycle
 - /demo/start, /demo/stop, /demo/seed, /demo/status endpoints
-- Auto-seed on startup with AGENTOS_DEMO=1
+- Auto-seed on startup with HIREWIRE_DEMO=1
 - Target: 15+ new tests
 """
 
@@ -283,8 +283,8 @@ class TestDemoEndpoints:
 class TestAutoSeed:
     @pytest.mark.asyncio
     async def test_startup_with_demo_env(self, client, monkeypatch):
-        """With AGENTOS_DEMO=1, startup should seed data."""
-        monkeypatch.setenv("AGENTOS_DEMO", "1")
+        """With HIREWIRE_DEMO=1, startup should seed data."""
+        monkeypatch.setenv("HIREWIRE_DEMO", "1")
         # Trigger the startup event manually
         from src.api.main import _on_startup
         await _on_startup()
@@ -294,8 +294,8 @@ class TestAutoSeed:
 
     @pytest.mark.asyncio
     async def test_startup_without_demo_env(self, client, monkeypatch):
-        """Without AGENTOS_DEMO=1, startup should not seed."""
-        monkeypatch.delenv("AGENTOS_DEMO", raising=False)
+        """Without HIREWIRE_DEMO=1, startup should not seed."""
+        monkeypatch.delenv("HIREWIRE_DEMO", raising=False)
         storage = get_storage()
         before = len(storage.list_tasks())
         from src.api.main import _on_startup

@@ -1,12 +1,12 @@
 """MCP Tool integration for Microsoft Agent Framework.
 
 Defines MCP-compatible tool descriptors and a registry that maps
-existing AgentOS capabilities as framework tools. Each tool has:
+existing HireWire capabilities as framework tools. Each tool has:
 - Name and description
 - JSON Schema parameters
 - Async execute function
 
-This module bridges AgentOS's ToolDefinition/ToolRegistry system with
+This module bridges HireWire's ToolDefinition/ToolRegistry system with
 the Microsoft Agent Framework's MCP tool pattern.
 """
 
@@ -33,7 +33,7 @@ class MCPToolDescriptor:
     name: str
     description: str
     parameters: dict[str, Any]  # JSON Schema
-    server: str = "agentos"
+    server: str = "hirewire"
     version: str = "1.0.0"
     tags: list[str] = field(default_factory=list)
     _execute: ToolHandler | None = field(default=None, repr=False)
@@ -74,7 +74,7 @@ class MCPToolRegistry:
     """Registry for MCP-compatible tools.
 
     Manages tool registration, discovery, and invocation tracking.
-    Maps existing AgentOS capabilities as MCP tools that can be
+    Maps existing HireWire capabilities as MCP tools that can be
     attached to AgentFrameworkAgent instances.
     """
 
@@ -165,7 +165,7 @@ class MCPToolRegistry:
 
 
 # ---------------------------------------------------------------------------
-# Pre-built MCP tools mapping AgentOS capabilities
+# Pre-built MCP tools mapping HireWire capabilities
 # ---------------------------------------------------------------------------
 
 async def _screenshot_handler(args: dict[str, Any]) -> dict[str, Any]:
