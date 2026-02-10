@@ -15,46 +15,11 @@ HireWire is a multi-agent operating system that gives AI agents an economy. Agen
 
 It implements the full lifecycle of agent-to-agent commerce: **discovery → hiring → orchestration → payment → learning**.
 
-```
-                              ┌─────────────────────────────────────┐
-                              │           HireWire Platform          │
-                              ├─────────────────────────────────────┤
-  ┌──────────┐                │                                     │
-  │  CLI /   │   POST /tasks  │  ┌───────────┐    ┌─────────────┐  │
-  │  Web UI  │ ──────────────>│  │ CEO Agent │───>│   Agent     │  │
-  │          │                │  │(Orchestr.)│    │  Registry   │  │
-  └──────────┘                │  └─────┬─────┘    │  (MCP)      │  │
-                              │        │          └──────┬──────┘  │
-       ┌──────────────────────│────────┼─────────────────┤         │
-       │                      │        │                 │         │
-       │                      │  ┌─────▼─────┐   ┌──────▼──────┐  │
-       │                      │  │ Framework │   │ Marketplace │  │
-       │                      │  │           │   │             │  │
-       │                      │  │ Sequential│   │ Discovery   │  │
-       │                      │  │ Concurrent│   │ Hiring      │  │
-       │                      │  │ Group Chat│   │ Escrow      │  │
-       │                      │  │ Handoff   │   │ x402 Pay    │  │
-       │                      │  └─────┬─────┘   └──────┬──────┘  │
-       │                      │        │                 │         │
-       │                      │  ┌─────▼─────────────────▼──────┐  │
-       │                      │  │      Agent Workers           │  │
-       │                      │  │  ┌────────┐  ┌───────────┐   │  │
-       │                      │  │  │Builder │  │ Research   │   │  │
-       │                      │  │  │ Agent  │  │  Agent     │   │  │
-       │                      │  │  └────────┘  └───────────┘   │  │
-       │                      │  │  ┌────────────────────────┐  │  │
-       │                      │  │  │  External Agents       │  │  │
-       │                      │  │  │  (Hired via MCP+x402)  │  │  │
-       │                      │  │  └────────────────────────┘  │  │
-       │                      │  └──────────────────────────────┘  │
-       │                      └─────────────────────────────────────┘
-       │
-  ┌────▼────────────────────────────────────────┐
-  │              Azure Services                  │
-  │  GPT-4o  │  CosmosDB  │  Container Apps     │
-  │  App Insights  │  Container Registry        │
-  └──────────────────────────────────────────────┘
-```
+### Architecture
+
+![HireWire Architecture](docs/architecture.svg)
+
+> See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed system design, module breakdown, and x402 payment flow.
 
 ---
 

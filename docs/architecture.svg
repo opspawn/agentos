@@ -1,0 +1,356 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 780" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a73e8;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0d47a1;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="apiGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e3f2fd;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#bbdefb;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="orchGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8f5e9;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#c8e6c9;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="marketGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff3e0;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ffe0b2;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="azureGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8eaf6;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#c5cae9;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="payGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fce4ec;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#f8bbd0;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="agentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3e5f5;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#e1bee7;stop-opacity:1"/>
+    </linearGradient>
+    <!-- Shadow filter -->
+    <filter id="shadow" x="-2%" y="-2%" width="104%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.12"/>
+    </filter>
+    <filter id="shadowLight" x="-2%" y="-2%" width="104%" height="108%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="780" rx="8" fill="#f8f9fa"/>
+
+  <!-- Title Bar -->
+  <rect x="0" y="0" width="1100" height="56" rx="8" fill="url(#headerGrad)"/>
+  <rect x="0" y="20" width="1100" height="36" fill="url(#headerGrad)"/>
+  <text x="550" y="35" text-anchor="middle" fill="white" font-size="22" font-weight="700" letter-spacing="0.5">HireWire — System Architecture</text>
+  <text x="550" y="50" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10">Multi-Agent Operating System with x402 Payments</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ROW 1: Client + API Layer (y: 72-155) -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <!-- Client Box -->
+  <rect x="30" y="72" width="155" height="83" rx="10" fill="white" stroke="#90a4ae" stroke-width="1.5" filter="url(#shadowLight)"/>
+  <text x="107" y="97" text-anchor="middle" fill="#546e7a" font-size="11" font-weight="600">CLIENT</text>
+  <rect x="50" y="106" width="115" height="20" rx="4" fill="#eceff1"/>
+  <text x="107" y="120" text-anchor="middle" fill="#546e7a" font-size="10">Web Dashboard</text>
+  <rect x="50" y="130" width="115" height="20" rx="4" fill="#eceff1"/>
+  <text x="107" y="144" text-anchor="middle" fill="#546e7a" font-size="10">CLI / REST API</text>
+
+  <!-- Arrow: Client → API -->
+  <line x1="185" y1="113" x2="215" y2="113" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <defs><marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1a73e8"/></marker></defs>
+
+  <!-- API Layer Box -->
+  <rect x="220" y="72" width="850" height="83" rx="10" fill="url(#apiGrad)" stroke="#1a73e8" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="220" y="72" width="850" height="26" rx="10" fill="#1a73e8"/>
+  <rect x="220" y="88" width="850" height="10" fill="#1a73e8"/>
+  <text x="645" y="90" text-anchor="middle" fill="white" font-size="12" font-weight="700">API LAYER — FastAPI (14 Endpoints)</text>
+
+  <!-- API Endpoint chips -->
+  <rect x="240" y="106" width="90" height="20" rx="4" fill="white" stroke="#1a73e8" stroke-width="0.8"/>
+  <text x="285" y="120" text-anchor="middle" fill="#1a73e8" font-size="9" font-weight="500">POST /tasks</text>
+
+  <rect x="340" y="106" width="85" height="20" rx="4" fill="white" stroke="#1a73e8" stroke-width="0.8"/>
+  <text x="382" y="120" text-anchor="middle" fill="#1a73e8" font-size="9" font-weight="500">GET /agents</text>
+
+  <rect x="435" y="106" width="115" height="20" rx="4" fill="white" stroke="#1a73e8" stroke-width="0.8"/>
+  <text x="492" y="120" text-anchor="middle" fill="#1a73e8" font-size="9" font-weight="500">GET /transactions</text>
+
+  <rect x="560" y="106" width="90" height="20" rx="4" fill="white" stroke="#1a73e8" stroke-width="0.8"/>
+  <text x="605" y="120" text-anchor="middle" fill="#1a73e8" font-size="9" font-weight="500">GET /metrics</text>
+
+  <rect x="660" y="106" width="85" height="20" rx="4" fill="white" stroke="#1a73e8" stroke-width="0.8"/>
+  <text x="702" y="120" text-anchor="middle" fill="#1a73e8" font-size="9" font-weight="500">GET /health</text>
+
+  <rect x="755" y="106" width="80" height="20" rx="4" fill="white" stroke="#1a73e8" stroke-width="0.8"/>
+  <text x="795" y="120" text-anchor="middle" fill="#1a73e8" font-size="9" font-weight="500">GET /demo</text>
+
+  <rect x="845" y="106" width="105" height="20" rx="4" fill="white" stroke="#1a73e8" stroke-width="0.8"/>
+  <text x="897" y="120" text-anchor="middle" fill="#1a73e8" font-size="9" font-weight="500">Marketplace API</text>
+
+  <text x="645" y="148" text-anchor="middle" fill="#37474f" font-size="9" font-style="italic">CORS · Async Execution · Background Tasks · Response Validation · Demo Mode</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ROW 2: CEO Agent + Intelligence (y: 175-290) -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <!-- Arrow: API → CEO -->
+  <line x1="450" y1="155" x2="450" y2="175" stroke="#1a73e8" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <!-- CEO Agent Box -->
+  <rect x="220" y="180" width="470" height="110" rx="10" fill="url(#orchGrad)" stroke="#2e7d32" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="220" y="180" width="470" height="26" rx="10" fill="#2e7d32"/>
+  <rect x="220" y="196" width="470" height="10" fill="#2e7d32"/>
+  <text x="455" y="198" text-anchor="middle" fill="white" font-size="12" font-weight="700">CEO AGENT — Orchestrator</text>
+
+  <!-- CEO Tools -->
+  <rect x="237" y="215" width="100" height="30" rx="6" fill="white" stroke="#388e3c" stroke-width="0.8"/>
+  <text x="287" y="228" text-anchor="middle" fill="#2e7d32" font-size="9" font-weight="600">Analyze Task</text>
+  <text x="287" y="239" text-anchor="middle" fill="#66bb6a" font-size="7">Break into subtasks</text>
+
+  <rect x="345" y="215" width="100" height="30" rx="6" fill="white" stroke="#388e3c" stroke-width="0.8"/>
+  <text x="395" y="228" text-anchor="middle" fill="#2e7d32" font-size="9" font-weight="600">Check Budget</text>
+  <text x="395" y="239" text-anchor="middle" fill="#66bb6a" font-size="7">Spending control</text>
+
+  <rect x="453" y="215" width="100" height="30" rx="6" fill="white" stroke="#388e3c" stroke-width="0.8"/>
+  <text x="503" y="228" text-anchor="middle" fill="#2e7d32" font-size="9" font-weight="600">Approve Hire</text>
+  <text x="503" y="239" text-anchor="middle" fill="#66bb6a" font-size="7">Authorize hiring</text>
+
+  <rect x="561" y="215" width="115" height="30" rx="6" fill="white" stroke="#388e3c" stroke-width="0.8"/>
+  <text x="618" y="228" text-anchor="middle" fill="#2e7d32" font-size="9" font-weight="600">Hiring Recommend</text>
+  <text x="618" y="239" text-anchor="middle" fill="#66bb6a" font-size="7">Thompson sampling</text>
+
+  <!-- Orchestration Patterns -->
+  <rect x="237" y="252" width="105" height="30" rx="6" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="0.8"/>
+  <text x="289" y="266" text-anchor="middle" fill="#2e7d32" font-size="9">Sequential</text>
+  <text x="289" y="276" text-anchor="middle" fill="#66bb6a" font-size="7">A → B → C</text>
+
+  <rect x="349" y="252" width="105" height="30" rx="6" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="0.8"/>
+  <text x="401" y="266" text-anchor="middle" fill="#2e7d32" font-size="9">Concurrent</text>
+  <text x="401" y="276" text-anchor="middle" fill="#66bb6a" font-size="7">Parallel + merge</text>
+
+  <rect x="461" y="252" width="105" height="30" rx="6" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="0.8"/>
+  <text x="513" y="266" text-anchor="middle" fill="#2e7d32" font-size="9">Group Chat</text>
+  <text x="513" y="276" text-anchor="middle" fill="#66bb6a" font-size="7">Multi-agent collab</text>
+
+  <rect x="573" y="252" width="105" height="30" rx="6" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="0.8"/>
+  <text x="625" y="266" text-anchor="middle" fill="#2e7d32" font-size="9">Handoff</text>
+  <text x="625" y="276" text-anchor="middle" fill="#66bb6a" font-size="7">Dynamic delegation</text>
+
+  <!-- Azure OpenAI Box (right side of CEO row) -->
+  <rect x="720" y="180" width="350" height="110" rx="10" fill="url(#azureGrad)" stroke="#3f51b5" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="720" y="180" width="350" height="26" rx="10" fill="#3f51b5"/>
+  <rect x="720" y="196" width="350" height="10" fill="#3f51b5"/>
+  <text x="895" y="198" text-anchor="middle" fill="white" font-size="12" font-weight="700">AZURE OPENAI</text>
+
+  <!-- Azure OpenAI inner -->
+  <rect x="738" y="215" width="155" height="65" rx="6" fill="white" stroke="#5c6bc0" stroke-width="0.8"/>
+  <text x="815" y="235" text-anchor="middle" fill="#283593" font-size="13" font-weight="700">GPT-4o</text>
+  <text x="815" y="250" text-anchor="middle" fill="#7986cb" font-size="9">Task analysis · Delegation</text>
+  <text x="815" y="263" text-anchor="middle" fill="#7986cb" font-size="9">Quality review · Responses</text>
+
+  <rect x="903" y="215" width="155" height="65" rx="6" fill="white" stroke="#5c6bc0" stroke-width="0.8"/>
+  <text x="980" y="232" text-anchor="middle" fill="#283593" font-size="11" font-weight="600">Multi-Provider</text>
+  <text x="980" y="248" text-anchor="middle" fill="#7986cb" font-size="9">Azure AI (production)</text>
+  <text x="980" y="260" text-anchor="middle" fill="#7986cb" font-size="9">Ollama (local dev)</text>
+  <text x="980" y="272" text-anchor="middle" fill="#7986cb" font-size="9">Mock (testing/CI)</text>
+
+  <!-- Arrow: CEO → Azure OpenAI -->
+  <line x1="690" y1="235" x2="720" y2="235" stroke="#3f51b5" stroke-width="2" stroke-dasharray="6,3"/>
+  <defs><marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3f51b5"/></marker></defs>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ROW 3: Marketplace + Agents (y: 310-470) -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <!-- Arrow: CEO → down -->
+  <line x1="350" y1="290" x2="350" y2="315" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <defs><marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2e7d32"/></marker></defs>
+  <line x1="560" y1="290" x2="560" y2="315" stroke="#e65100" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <defs><marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#e65100"/></marker></defs>
+
+  <!-- Agent Workers Box (left) -->
+  <rect x="30" y="320" width="465" height="150" rx="10" fill="url(#agentGrad)" stroke="#7b1fa2" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="320" width="465" height="26" rx="10" fill="#7b1fa2"/>
+  <rect x="30" y="336" width="465" height="10" fill="#7b1fa2"/>
+  <text x="262" y="338" text-anchor="middle" fill="white" font-size="12" font-weight="700">AGENT WORKERS — Multi-Agent Orchestration</text>
+
+  <!-- Internal agents -->
+  <text x="56" y="364" fill="#4a148c" font-size="10" font-weight="600">Internal Agents</text>
+
+  <rect x="48" y="372" width="100" height="42" rx="6" fill="white" stroke="#9c27b0" stroke-width="0.8"/>
+  <text x="98" y="389" text-anchor="middle" fill="#6a1b9a" font-size="10" font-weight="600">Builder</text>
+  <text x="98" y="402" text-anchor="middle" fill="#ab47bc" font-size="8">Code · Deploy</text>
+
+  <rect x="156" y="372" width="100" height="42" rx="6" fill="white" stroke="#9c27b0" stroke-width="0.8"/>
+  <text x="206" y="389" text-anchor="middle" fill="#6a1b9a" font-size="10" font-weight="600">Researcher</text>
+  <text x="206" y="402" text-anchor="middle" fill="#ab47bc" font-size="8">Analysis · Search</text>
+
+  <rect x="264" y="372" width="100" height="42" rx="6" fill="white" stroke="#9c27b0" stroke-width="0.8"/>
+  <text x="314" y="389" text-anchor="middle" fill="#6a1b9a" font-size="10" font-weight="600">Analyst</text>
+  <text x="314" y="402" text-anchor="middle" fill="#ab47bc" font-size="8">Data · Metrics</text>
+
+  <rect x="372" y="372" width="110" height="42" rx="6" fill="white" stroke="#9c27b0" stroke-width="0.8"/>
+  <text x="427" y="389" text-anchor="middle" fill="#6a1b9a" font-size="10" font-weight="600">Executor</text>
+  <text x="427" y="402" text-anchor="middle" fill="#ab47bc" font-size="8">Run · Verify</text>
+
+  <!-- External agents -->
+  <text x="56" y="432" fill="#4a148c" font-size="10" font-weight="600">External Agents (Hired via MCP + x402)</text>
+
+  <rect x="48" y="440" width="108" height="22" rx="5" fill="#f3e5f5" stroke="#ce93d8" stroke-width="0.8"/>
+  <text x="102" y="455" text-anchor="middle" fill="#6a1b9a" font-size="9">designer-ext-001</text>
+
+  <rect x="164" y="440" width="105" height="22" rx="5" fill="#f3e5f5" stroke="#ce93d8" stroke-width="0.8"/>
+  <text x="216" y="455" text-anchor="middle" fill="#6a1b9a" font-size="9">analyst-ext-001</text>
+
+  <rect x="277" y="440" width="85" height="22" rx="5" fill="#f3e5f5" stroke="#ce93d8" stroke-width="0.8"/>
+  <text x="319" y="455" text-anchor="middle" fill="#6a1b9a" font-size="9">Any A2A Agent</text>
+
+  <text x="382" y="455" text-anchor="middle" fill="#9c27b0" font-size="9">…</text>
+
+  <!-- Marketplace Box (right) -->
+  <rect x="520" y="320" width="550" height="150" rx="10" fill="url(#marketGrad)" stroke="#e65100" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="520" y="320" width="550" height="26" rx="10" fill="#e65100"/>
+  <rect x="520" y="336" width="550" height="10" fill="#e65100"/>
+  <text x="795" y="338" text-anchor="middle" fill="white" font-size="12" font-weight="700">MARKETPLACE — Discovery · Hiring · Payments</text>
+
+  <!-- Marketplace components -->
+  <rect x="538" y="355" width="150" height="50" rx="6" fill="white" stroke="#f57c00" stroke-width="0.8"/>
+  <text x="613" y="374" text-anchor="middle" fill="#e65100" font-size="10" font-weight="600">Agent Registry</text>
+  <text x="613" y="387" text-anchor="middle" fill="#ff9800" font-size="8">MCP-based discovery</text>
+  <text x="613" y="397" text-anchor="middle" fill="#ff9800" font-size="8">Skill matching</text>
+
+  <rect x="698" y="355" width="155" height="50" rx="6" fill="white" stroke="#f57c00" stroke-width="0.8"/>
+  <text x="775" y="374" text-anchor="middle" fill="#e65100" font-size="10" font-weight="600">Hiring Manager</text>
+  <text x="775" y="387" text-anchor="middle" fill="#ff9800" font-size="8">7-step lifecycle</text>
+  <text x="775" y="397" text-anchor="middle" fill="#ff9800" font-size="8">Budget tracking</text>
+
+  <rect x="863" y="355" width="190" height="50" rx="6" fill="white" stroke="#f57c00" stroke-width="0.8"/>
+  <text x="958" y="374" text-anchor="middle" fill="#e65100" font-size="10" font-weight="600">x402 Payment Gate</text>
+  <text x="958" y="387" text-anchor="middle" fill="#ff9800" font-size="8">EIP-712 signed payments</text>
+  <text x="958" y="397" text-anchor="middle" fill="#ff9800" font-size="8">Escrow hold/release/refund</text>
+
+  <!-- Hiring Flow -->
+  <rect x="538" y="415" width="515" height="45" rx="6" fill="#fff8e1" stroke="#ffcc80" stroke-width="0.8"/>
+  <text x="795" y="432" text-anchor="middle" fill="#e65100" font-size="10" font-weight="600">Hiring Flow</text>
+  <!-- Flow steps -->
+  <text x="560" y="450" fill="#f57c00" font-size="9" font-weight="500">Discover</text>
+  <text x="619" y="450" fill="#bdbdbd" font-size="9">→</text>
+  <text x="637" y="450" fill="#f57c00" font-size="9" font-weight="500">Select</text>
+  <text x="684" y="450" fill="#bdbdbd" font-size="9">→</text>
+  <text x="705" y="450" fill="#f57c00" font-size="9" font-weight="500">Negotiate</text>
+  <text x="770" y="450" fill="#bdbdbd" font-size="9">→</text>
+  <text x="793" y="450" fill="#f57c00" font-size="9" font-weight="500">Escrow</text>
+  <text x="840" y="450" fill="#bdbdbd" font-size="9">→</text>
+  <text x="862" y="450" fill="#f57c00" font-size="9" font-weight="500">Assign</text>
+  <text x="906" y="450" fill="#bdbdbd" font-size="9">→</text>
+  <text x="927" y="450" fill="#f57c00" font-size="9" font-weight="500">Verify</text>
+  <text x="970" y="450" fill="#bdbdbd" font-size="9">→</text>
+  <text x="1000" y="450" fill="#f57c00" font-size="9" font-weight="500">Release</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ROW 4: x402 Payment Settlement (y: 490-570) -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <!-- Arrow: Marketplace → Payment -->
+  <line x1="795" y1="470" x2="795" y2="495" stroke="#c62828" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <defs><marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#c62828"/></marker></defs>
+
+  <rect x="220" y="500" width="850" height="80" rx="10" fill="url(#payGrad)" stroke="#c62828" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="220" y="500" width="850" height="26" rx="10" fill="#c62828"/>
+  <rect x="220" y="516" width="850" height="10" fill="#c62828"/>
+  <text x="645" y="518" text-anchor="middle" fill="white" font-size="12" font-weight="700">x402 PAYMENT SETTLEMENT — Real USDC On-Chain</text>
+
+  <!-- Payment chips -->
+  <rect x="245" y="535" width="120" height="35" rx="6" fill="white" stroke="#ef5350" stroke-width="0.8"/>
+  <text x="305" y="550" text-anchor="middle" fill="#c62828" font-size="10" font-weight="600">USDC</text>
+  <text x="305" y="562" text-anchor="middle" fill="#e57373" font-size="8">Stablecoin · 6 decimals</text>
+
+  <rect x="378" y="535" width="130" height="35" rx="6" fill="white" stroke="#ef5350" stroke-width="0.8"/>
+  <text x="443" y="550" text-anchor="middle" fill="#c62828" font-size="10" font-weight="600">Base (L2)</text>
+  <text x="443" y="562" text-anchor="middle" fill="#e57373" font-size="8">eip155:8453</text>
+
+  <rect x="521" y="535" width="130" height="35" rx="6" fill="white" stroke="#ef5350" stroke-width="0.8"/>
+  <text x="586" y="550" text-anchor="middle" fill="#c62828" font-size="10" font-weight="600">SKALE</text>
+  <text x="586" y="562" text-anchor="middle" fill="#e57373" font-size="8">Zero gas fees</text>
+
+  <rect x="664" y="535" width="130" height="35" rx="6" fill="white" stroke="#ef5350" stroke-width="0.8"/>
+  <text x="729" y="550" text-anchor="middle" fill="#c62828" font-size="10" font-weight="600">Arbitrum</text>
+  <text x="729" y="562" text-anchor="middle" fill="#e57373" font-size="8">L2 settlement</text>
+
+  <rect x="807" y="535" width="140" height="35" rx="6" fill="white" stroke="#ef5350" stroke-width="0.8"/>
+  <text x="877" y="550" text-anchor="middle" fill="#c62828" font-size="10" font-weight="600">EIP-712 Signing</text>
+  <text x="877" y="562" text-anchor="middle" fill="#e57373" font-size="8">Facilitator verified</text>
+
+  <rect x="960" y="535" width="95" height="35" rx="6" fill="white" stroke="#ef5350" stroke-width="0.8"/>
+  <text x="1007" y="550" text-anchor="middle" fill="#c62828" font-size="10" font-weight="600">Escrow</text>
+  <text x="1007" y="562" text-anchor="middle" fill="#e57373" font-size="8">Hold / Release</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ROW 5: Persistence + Learning (y: 600-720) -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <!-- Arrow: API → Persistence -->
+  <line x1="450" y1="580" x2="450" y2="607" stroke="#0d47a1" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <!-- Persistence Layer Box -->
+  <rect x="30" y="612" width="500" height="100" rx="10" fill="url(#azureGrad)" stroke="#3f51b5" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="612" width="500" height="26" rx="10" fill="#3f51b5"/>
+  <rect x="30" y="628" width="500" height="10" fill="#3f51b5"/>
+  <text x="280" y="630" text-anchor="middle" fill="white" font-size="12" font-weight="700">PERSISTENCE — Azure + Local</text>
+
+  <!-- Persistence components -->
+  <rect x="48" y="648" width="145" height="52" rx="6" fill="white" stroke="#5c6bc0" stroke-width="0.8"/>
+  <text x="120" y="667" text-anchor="middle" fill="#283593" font-size="11" font-weight="600">Azure Cosmos DB</text>
+  <text x="120" y="681" text-anchor="middle" fill="#7986cb" font-size="8">Agents · Tasks · Payments</text>
+  <text x="120" y="692" text-anchor="middle" fill="#7986cb" font-size="8">NoSQL · Global scale</text>
+
+  <rect x="203" y="648" width="145" height="52" rx="6" fill="white" stroke="#5c6bc0" stroke-width="0.8"/>
+  <text x="275" y="667" text-anchor="middle" fill="#283593" font-size="11" font-weight="600">SQLite</text>
+  <text x="275" y="681" text-anchor="middle" fill="#7986cb" font-size="8">Local persistence</text>
+  <text x="275" y="692" text-anchor="middle" fill="#7986cb" font-size="8">6 tables · Async</text>
+
+  <rect x="358" y="648" width="160" height="52" rx="6" fill="white" stroke="#5c6bc0" stroke-width="0.8"/>
+  <text x="438" y="667" text-anchor="middle" fill="#283593" font-size="11" font-weight="600">Container Apps</text>
+  <text x="438" y="681" text-anchor="middle" fill="#7986cb" font-size="8">Microservice deploy</text>
+  <text x="438" y="692" text-anchor="middle" fill="#7986cb" font-size="8">Auto-scale 1-3 replicas</text>
+
+  <!-- Learning + Observability Box (right) -->
+  <rect x="555" y="612" width="515" height="100" rx="10" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="555" y="612" width="515" height="26" rx="10" fill="#2e7d32"/>
+  <rect x="555" y="628" width="515" height="10" fill="#2e7d32"/>
+  <text x="812" y="630" text-anchor="middle" fill="white" font-size="12" font-weight="700">LEARNING + OBSERVABILITY</text>
+
+  <rect x="573" y="648" width="145" height="52" rx="6" fill="white" stroke="#43a047" stroke-width="0.8"/>
+  <text x="645" y="667" text-anchor="middle" fill="#1b5e20" font-size="11" font-weight="600">Feedback System</text>
+  <text x="645" y="681" text-anchor="middle" fill="#66bb6a" font-size="8">Quality scoring</text>
+  <text x="645" y="692" text-anchor="middle" fill="#66bb6a" font-size="8">Outcome recording</text>
+
+  <rect x="728" y="648" width="155" height="52" rx="6" fill="white" stroke="#43a047" stroke-width="0.8"/>
+  <text x="805" y="667" text-anchor="middle" fill="#1b5e20" font-size="11" font-weight="600">Thompson Sampling</text>
+  <text x="805" y="681" text-anchor="middle" fill="#66bb6a" font-size="8">Explore vs exploit</text>
+  <text x="805" y="692" text-anchor="middle" fill="#66bb6a" font-size="8">Optimal agent selection</text>
+
+  <rect x="893" y="648" width="165" height="52" rx="6" fill="white" stroke="#43a047" stroke-width="0.8"/>
+  <text x="975" y="667" text-anchor="middle" fill="#1b5e20" font-size="11" font-weight="600">App Insights</text>
+  <text x="975" y="681" text-anchor="middle" fill="#66bb6a" font-size="8">OpenTelemetry traces</text>
+  <text x="975" y="692" text-anchor="middle" fill="#66bb6a" font-size="8">Metrics · Cost analysis</text>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- FOOTER: MCP Protocol layer -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <rect x="30" y="730" width="1040" height="36" rx="8" fill="#37474f" filter="url(#shadowLight)"/>
+  <text x="550" y="752" text-anchor="middle" fill="white" font-size="11" font-weight="500">MCP PROTOCOL LAYER  —  Registry Server  ·  Payment Hub  ·  A2A Server  ·  Tool Server  ·  Agent-to-Agent Protocol</text>
+
+  <!-- Connection lines between rows (dotted for cross-cutting concerns) -->
+  <!-- Agents ↔ Marketplace -->
+  <line x1="495" y1="395" x2="520" y2="395" stroke="#9c27b0" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+  <!-- API → Persistence (left side) -->
+  <line x1="130" y1="155" x2="130" y2="612" stroke="#90a4ae" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+
+</svg>
