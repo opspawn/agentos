@@ -100,6 +100,155 @@ class TestDeployScript:
         assert "--ingress external" in content
 
 
+# ── Docker Compose tests ────────────────────────────────────────────────────
+
+
+class TestDockerCompose:
+    """Verify docker-compose.yml is correctly configured."""
+
+    def test_docker_compose_exists(self):
+        assert (PROJECT_DIR / "docker-compose.yml").is_file()
+
+    def test_docker_compose_has_hirewire_service(self):
+        content = (PROJECT_DIR / "docker-compose.yml").read_text()
+        assert "hirewire:" in content
+
+    def test_docker_compose_exposes_port_8000(self):
+        content = (PROJECT_DIR / "docker-compose.yml").read_text()
+        assert "8000:8000" in content
+
+    def test_docker_compose_has_healthcheck(self):
+        content = (PROJECT_DIR / "docker-compose.yml").read_text()
+        assert "healthcheck" in content
+        assert "/health" in content
+
+    def test_docker_compose_sets_demo_mode(self):
+        content = (PROJECT_DIR / "docker-compose.yml").read_text()
+        assert "HIREWIRE_DEMO=1" in content
+
+    def test_docker_compose_has_volume(self):
+        content = (PROJECT_DIR / "docker-compose.yml").read_text()
+        assert "hirewire-data" in content
+
+
+# ── Azure Bicep deployment tests ────────────────────────────────────────────
+
+
+class TestAzureBicepDeployment:
+    """Verify Bicep template and deploy script are correctly configured."""
+
+    def test_bicep_template_exists(self):
+        assert (PROJECT_DIR / "deploy" / "azure" / "main.bicep").is_file()
+
+    def test_bicep_has_container_app(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "main.bicep").read_text()
+        assert "Microsoft.App/containerApps" in content
+
+    def test_bicep_has_cosmos_db(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "main.bicep").read_text()
+        assert "Microsoft.DocumentDB/databaseAccounts" in content
+
+    def test_bicep_has_app_insights(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "main.bicep").read_text()
+        assert "Microsoft.Insights/components" in content
+
+    def test_bicep_has_acr(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "main.bicep").read_text()
+        assert "Microsoft.ContainerRegistry/registries" in content
+
+    def test_bicep_has_container_apps_env(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "main.bicep").read_text()
+        assert "Microsoft.App/managedEnvironments" in content
+
+    def test_bicep_has_outputs(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "main.bicep").read_text()
+        assert "output appUrl" in content
+        assert "output acrLoginServer" in content
+        assert "output cosmosEndpoint" in content
+
+    def test_bicep_sets_env_vars(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "main.bicep").read_text()
+        assert "AZURE_OPENAI_ENDPOINT" in content
+        assert "COSMOS_ENDPOINT" in content
+        assert "MODEL_PROVIDER" in content
+
+    def test_bicep_configures_scaling(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "main.bicep").read_text()
+        assert "minReplicas" in content
+        assert "maxReplicas" in content
+
+    def test_azure_deploy_script_exists(self):
+        assert (PROJECT_DIR / "deploy" / "azure" / "deploy.sh").is_file()
+
+    def test_azure_deploy_script_is_executable(self):
+        assert os.access(PROJECT_DIR / "deploy" / "azure" / "deploy.sh", os.X_OK)
+
+    def test_azure_deploy_script_has_commands(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "deploy.sh").read_text()
+        assert "deploy_infra()" in content
+        assert "build_image()" in content
+        assert "push_image()" in content
+        assert "smoke_test()" in content
+
+    def test_azure_deploy_script_uses_bicep(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "deploy.sh").read_text()
+        assert "az deployment group create" in content
+        assert "main.bicep" in content
+
+    def test_azure_deploy_smoke_tests(self):
+        content = (PROJECT_DIR / "deploy" / "azure" / "deploy.sh").read_text()
+        assert "/health" in content
+        assert "/agents" in content
+        assert "/tasks" in content
+
+    def test_azure_env_example_exists(self):
+        assert (PROJECT_DIR / "deploy" / "azure" / "env.example").is_file()
+
+
+# ── Architecture diagram tests ──────────────────────────────────────────────
+
+
+class TestArchitectureDiagram:
+    """Verify architecture diagram documentation exists."""
+
+    def test_architecture_diagram_exists(self):
+        assert (PROJECT_DIR / "docs" / "architecture-diagram.md").is_file()
+
+    def test_architecture_diagram_has_mermaid(self):
+        content = (PROJECT_DIR / "docs" / "architecture-diagram.md").read_text()
+        assert "```mermaid" in content
+
+    def test_architecture_diagram_shows_azure_services(self):
+        content = (PROJECT_DIR / "docs" / "architecture-diagram.md").read_text()
+        assert "Azure OpenAI" in content
+        assert "Cosmos DB" in content
+        assert "Container Apps" in content
+        assert "Application Insights" in content
+
+    def test_architecture_diagram_shows_agents(self):
+        content = (PROJECT_DIR / "docs" / "architecture-diagram.md").read_text()
+        assert "CEO Agent" in content
+        assert "Builder Agent" in content
+        assert "Research Agent" in content
+
+    def test_architecture_diagram_shows_x402(self):
+        content = (PROJECT_DIR / "docs" / "architecture-diagram.md").read_text()
+        assert "x402" in content
+        assert "USDC" in content
+
+    def test_architecture_diagram_shows_hitl(self):
+        content = (PROJECT_DIR / "docs" / "architecture-diagram.md").read_text()
+        assert "HITL" in content
+
+    def test_architecture_diagram_has_hiring_pipeline(self):
+        content = (PROJECT_DIR / "docs" / "architecture-diagram.md").read_text()
+        assert "Hiring Pipeline" in content
+
+    def test_architecture_diagram_has_payment_flow(self):
+        content = (PROJECT_DIR / "docs" / "architecture-diagram.md").read_text()
+        assert "x402 Payment Flow" in content
+
+
 # ── Environment configuration tests ──────────────────────────────────────────
 
 

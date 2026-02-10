@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   :root {
     --bg: #09090b;
     --bg-secondary: #18181b;
@@ -26,6 +26,10 @@
     --red-dim: rgba(239,68,68,0.15);
     --blue: #3b82f6;
     --blue-dim: rgba(59,130,246,0.15);
+    --cyan: #06b6d4;
+    --cyan-dim: rgba(6,182,212,0.15);
+    --purple: #a855f7;
+    --purple-dim: rgba(168,85,247,0.15);
     --text: #fafafa;
     --text-secondary: #a1a1aa;
     --text-muted: #71717a;
@@ -38,213 +42,234 @@
   }
   .app-layout { display: flex; height: 100vh; }
   .sidebar {
-    width: 240px; min-width: 240px; background: var(--bg-secondary);
+    width: 220px; min-width: 220px; background: var(--bg-secondary);
     border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; z-index: 10;
   }
-  .sidebar-logo { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
-  .sidebar-logo h1 { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+  .sidebar-logo { padding: 18px 16px 14px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h1 { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.03em; display: flex; align-items: center; gap: 8px; }
   .sidebar-logo h1 span { color: var(--accent-light); }
-  .sidebar-logo .version { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  .sidebar-nav { flex: 1; padding: 8px; overflow-y: auto; }
-  .nav-section { margin-bottom: 4px; }
-  .nav-section-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); padding: 12px 12px 6px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; cursor: pointer; color: var(--text-secondary); font-size: 13px; font-weight: 500; transition: all 0.15s ease; margin-bottom: 1px; user-select: none; }
+  .sidebar-logo .version { font-size: 10px; color: var(--text-muted); margin-top: 2px; letter-spacing: 0.02em; }
+  .sidebar-nav { flex: 1; padding: 6px; overflow-y: auto; }
+  .nav-section { margin-bottom: 2px; }
+  .nav-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); padding: 10px 10px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; cursor: pointer; color: var(--text-secondary); font-size: 12px; font-weight: 500; transition: all 0.15s ease; margin-bottom: 1px; user-select: none; }
   .nav-item:hover { background: var(--card); color: var(--text); }
   .nav-item.active { background: var(--accent-glow); color: var(--accent-light); }
-  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
   .nav-item.active svg { opacity: 1; }
-  .nav-badge { margin-left: auto; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; background: var(--accent-glow); color: var(--accent-light); }
-  .sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
-  .system-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  .nav-badge { margin-left: auto; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 10px; background: var(--accent-glow); color: var(--accent-light); }
+  .sidebar-footer { padding: 10px 14px; border-top: 1px solid var(--border); }
+  .system-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
   .status-dot.offline { background: var(--red); }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; border-bottom: 1px solid var(--border); background: var(--bg); min-height: 56px; }
-  .top-bar-left { display: flex; align-items: center; gap: 12px; }
-  .page-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
-  .top-bar-right { display: flex; align-items: center; gap: 10px; }
-  .gpt4o-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; background: var(--green-dim); color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; display: none; }
+  .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid var(--border); background: var(--bg); min-height: 48px; }
+  .top-bar-left { display: flex; align-items: center; gap: 10px; }
+  .page-title { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+  .top-bar-right { display: flex; align-items: center; gap: 8px; }
+  .gpt4o-badge { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: var(--green-dim); color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; display: none; }
   .gpt4o-badge.active { display: inline-block; }
-  .demo-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; background: var(--yellow-dim); color: var(--yellow); text-transform: uppercase; letter-spacing: 0.05em; display: none; }
+  .demo-badge { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: var(--yellow-dim); color: var(--yellow); text-transform: uppercase; letter-spacing: 0.05em; display: none; }
   .demo-badge.active { display: inline-block; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); transition: all 0.15s ease; }
+  .azure-badge { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: var(--blue-dim); color: var(--blue); text-transform: uppercase; letter-spacing: 0.05em; }
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); transition: all 0.15s ease; }
   .btn:hover { background: var(--card-hover); border-color: var(--border-active); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
   .btn-primary:hover { background: var(--accent-light); border-color: var(--accent-light); }
-  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-sm { padding: 4px 8px; font-size: 11px; }
   .btn-success { background: var(--green); border-color: var(--green); }
   .btn-success:hover { background: #16a34a; border-color: #16a34a; }
-  .page-area { flex: 1; overflow-y: auto; padding: 24px; scroll-behavior: smooth; }
+  .page-area { flex: 1; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
   .page { display: none; }
   .page.active { display: block; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.15s ease; }
   .card:hover { border-color: var(--border-active); }
-  .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
-  .card-body { padding: 18px; }
+  .card-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 12px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .card-body { padding: 16px; }
   .card-body-flush { padding: 0; }
-  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; transition: border-color 0.15s ease; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; transition: border-color 0.15s ease; }
   .stat-card:hover { border-color: var(--border-active); }
-  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; }
-  .stat-value { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1.1; }
+  .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1.1; }
   .stat-value.accent { color: var(--accent-light); }
   .stat-value.green { color: var(--green); }
-  .stat-change { font-size: 11px; font-weight: 500; margin-top: 4px; }
+  .stat-change { font-size: 10px; font-weight: 500; margin-top: 3px; color: var(--text-muted); }
   .stat-change.up { color: var(--green); }
   .stat-change.down { color: var(--red); }
-  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .data-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
-  .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th { text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+  .data-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
   .data-table tr:last-child td { border-bottom: none; }
   .data-table tr:hover td { background: rgba(255,255,255,0.02); }
-  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
   .badge-green { background: var(--green-dim); color: var(--green); }
   .badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
   .badge-red { background: var(--red-dim); color: var(--red); }
   .badge-blue { background: var(--blue-dim); color: var(--blue); }
+  .badge-cyan { background: var(--cyan-dim); color: var(--cyan); }
+  .badge-purple { background: var(--purple-dim); color: var(--purple); }
   .badge-muted { background: rgba(113,113,122,0.15); color: var(--text-muted); }
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); margin-right: 4px; margin-bottom: 4px; }
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 500; background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); margin-right: 3px; margin-bottom: 3px; }
   .tag-accent { background: var(--accent-glow); color: var(--accent-light); border-color: transparent; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   .col-span-2 { grid-column: span 2; }
-  .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .activity-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
   .activity-item:last-child { border-bottom: none; }
-  .activity-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+  .activity-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; }
   .activity-icon.green { background: var(--green-dim); color: var(--green); }
   .activity-icon.blue { background: var(--blue-dim); color: var(--blue); }
   .activity-icon.yellow { background: var(--yellow-dim); color: var(--yellow); }
   .activity-icon.accent { background: var(--accent-glow); color: var(--accent-light); }
-  .activity-text { flex: 1; font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+  .activity-text { flex: 1; font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
   .activity-text strong { color: var(--text); font-weight: 600; }
-  .activity-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
-  .agent-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s ease; }
+  .activity-time { font-size: 10px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+  .agent-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s ease; }
   .agent-row:last-child { border-bottom: none; }
   .agent-row:hover { background: rgba(255,255,255,0.02); }
   .agent-row.selected { background: var(--accent-glow); }
-  .agent-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; }
+  .agent-avatar { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
   .agent-info { flex: 1; min-width: 0; }
-  .agent-name { font-weight: 600; font-size: 14px; color: var(--text); }
-  .agent-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .agent-stats { display: flex; gap: 16px; flex-shrink: 0; }
+  .agent-name { font-weight: 600; font-size: 13px; color: var(--text); }
+  .agent-desc { font-size: 11px; color: var(--text-muted); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .agent-stats { display: flex; gap: 14px; flex-shrink: 0; }
   .agent-stat-item { text-align: right; }
-  .agent-stat-value { font-size: 14px; font-weight: 600; color: var(--text); }
-  .agent-stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-  .detail-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
-  .detail-section { margin-bottom: 16px; }
-  .detail-section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px; }
-  .detail-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .agent-stat-value { font-size: 13px; font-weight: 600; color: var(--text); }
+  .agent-stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .detail-panel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .detail-section { margin-bottom: 14px; }
+  .detail-section-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px; }
+  .detail-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12px; border-bottom: 1px solid var(--border); }
   .detail-row:last-child { border-bottom: none; }
   .detail-row .label { color: var(--text-muted); }
   .detail-row .value { color: var(--text); font-weight: 500; }
-  .quick-action { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s ease; font-size: 13px; color: var(--text-secondary); }
-  .quick-action:hover { border-color: var(--accent); color: var(--text); background: var(--accent-glow); }
-  .quick-action svg { width: 20px; height: 20px; color: var(--accent-light); flex-shrink: 0; }
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
   .modal-overlay.active { display: flex; }
   .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; width: 480px; max-width: 90vw; max-height: 80vh; overflow-y: auto; }
-  .modal-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .modal-title { font-size: 15px; font-weight: 600; }
+  .modal-header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-size: 14px; font-weight: 600; }
   .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 4px; }
   .modal-close:hover { color: var(--text); }
-  .modal-body { padding: 20px; }
-  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
-  .form-group { margin-bottom: 14px; }
-  .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
-  .form-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s; }
+  .modal-body { padding: 16px; }
+  .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+  .form-group { margin-bottom: 12px; }
+  .form-label { display: block; font-size: 11px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+  .form-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-family: inherit; font-size: 12px; outline: none; transition: border-color 0.15s; }
   .form-input:focus { border-color: var(--accent); }
   .form-input::placeholder { color: var(--text-muted); }
-  .chart-container { position: relative; height: 240px; width: 100%; }
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }
-  .flow-step { display: flex; align-items: center; gap: 12px; padding: 10px 14px; position: relative; }
-  .flow-step:not(:last-child)::after { content: ''; position: absolute; left: 25px; bottom: -4px; width: 2px; height: 8px; background: var(--border); }
-  .flow-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent); flex-shrink: 0; }
-  .flow-dot.filled { background: var(--accent); }
-  .flow-text { font-size: 12px; color: var(--text-secondary); }
-  .flow-text strong { color: var(--text); }
-  .response-preview { font-size: 12px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; margin-top: 6px; line-height: 1.4; max-height: 80px; overflow: hidden; }
-  .gpt4o-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; background: var(--green-dim); color: var(--green); letter-spacing: 0.05em; margin-left: 6px; }
-  ::-webkit-scrollbar { width: 6px; }
+  .chart-container { position: relative; height: 200px; width: 100%; }
+  .empty-state { text-align: center; padding: 30px 16px; color: var(--text-muted); font-size: 12px; }
+  .response-preview { font-size: 11px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 6px 10px; margin-top: 4px; line-height: 1.4; max-height: 70px; overflow: hidden; }
+  .gpt4o-tag { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 8px; font-weight: 700; background: var(--green-dim); color: var(--green); letter-spacing: 0.05em; margin-left: 4px; }
+  ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--border-active); }
-  .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
-  .toast { padding: 10px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--text-secondary); box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideIn 0.3s ease; }
+  .toast-container { position: fixed; bottom: 16px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 6px; }
+  .toast { padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text-secondary); box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideIn 0.3s ease; }
   .toast.success { border-left: 3px solid var(--green); }
   .toast.error { border-left: 3px solid var(--red); }
   .toast.info { border-left: 3px solid var(--accent); }
   @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-  .budget-meter { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .budget-bar { flex: 1; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
-  .budget-bar .fill { height: 100%; background: var(--accent); border-radius: 5px; transition: width 0.3s ease; }
-  .budget-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
-  .escrow-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg); border-radius: 8px; margin-bottom: 8px; }
-  .escrow-bar-fill { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .escrow-bar-fill .fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
-  .kb-entry { padding: 14px 18px; border-bottom: 1px solid var(--border); }
-  .kb-entry:last-child { border-bottom: none; }
-  .kb-entry-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-  .kb-entry-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-  .kb-entry-meta { display: flex; gap: 10px; margin-top: 6px; }
-  /* Live Demo Pipeline Overlay */
+  /* Orchestration view */
+  .orch-flow { display: flex; align-items: center; justify-content: center; gap: 0; padding: 20px 10px; overflow-x: auto; }
+  .orch-node { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 100px; }
+  .orch-node-box { width: 80px; height: 80px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid var(--border); transition: all 0.3s; position: relative; }
+  .orch-node-box.active { border-color: var(--green); box-shadow: 0 0 20px rgba(34,197,94,0.2); }
+  .orch-node-box.idle { border-color: var(--border); }
+  .orch-node-box .icon { font-size: 20px; margin-bottom: 2px; }
+  .orch-node-box .name { font-size: 9px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+  .orch-node-status { font-size: 9px; font-weight: 600; padding: 2px 8px; border-radius: 8px; }
+  .orch-arrow { width: 40px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 18px; margin-top: -20px; }
+  .orch-arrow.active { color: var(--green); }
+  /* Pipeline kanban */
+  .kanban { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .kanban-col { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; min-height: 200px; }
+  .kanban-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .kanban-header-title { font-size: 11px; font-weight: 600; color: var(--text); }
+  .kanban-header-count { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; background: var(--accent-glow); color: var(--accent-light); }
+  .kanban-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .kanban-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 11px; color: var(--text-secondary); transition: border-color 0.15s; cursor: pointer; }
+  .kanban-card:hover { border-color: var(--accent); }
+  .kanban-card-title { font-weight: 600; color: var(--text); margin-bottom: 3px; font-size: 11px; }
+  .kanban-card-meta { font-size: 9px; color: var(--text-muted); display: flex; gap: 8px; margin-top: 4px; }
+  /* Ledger */
+  .ledger-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .ledger-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .ledger-item-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+  .ledger-item-value { font-size: 20px; font-weight: 700; margin-top: 2px; }
+  /* RAI gauges */
+  .gauge-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .gauge { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .gauge-value { font-size: 24px; font-weight: 800; line-height: 1; }
+  .gauge-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+  .gauge-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .gauge-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+  /* Pipeline overlay */
   .pipeline-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 150; backdrop-filter: blur(6px); }
   .pipeline-overlay.active { display: flex; }
-  .pipeline-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; width: 620px; max-width: 92vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-  .pipeline-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .pipeline-header h2 { font-size: 17px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
-  .pipeline-header .live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
-  .pipeline-body { padding: 20px 24px; }
-  .pipeline-task { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
-  .pipeline-task-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px; }
-  .pipeline-task-text { font-size: 14px; color: var(--text); font-weight: 500; line-height: 1.4; }
+  .pipeline-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; width: 600px; max-width: 92vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+  .pipeline-header { padding: 16px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .pipeline-header h2 { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .pipeline-header .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
+  .pipeline-body { padding: 16px 20px; }
+  .pipeline-task { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; }
+  .pipeline-task-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 3px; }
+  .pipeline-task-text { font-size: 13px; color: var(--text); font-weight: 500; line-height: 1.4; }
   .pipeline-stages { display: flex; flex-direction: column; gap: 0; }
-  .pipeline-stage { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; position: relative; }
-  .pipeline-stage:not(:last-child) { border-bottom: none; }
-  .pipeline-stage-line { position: absolute; left: 15px; top: 36px; bottom: -12px; width: 2px; background: var(--border); }
+  .pipeline-stage { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; position: relative; }
+  .pipeline-stage-line { position: absolute; left: 13px; top: 32px; bottom: -10px; width: 2px; background: var(--border); }
   .pipeline-stage:last-child .pipeline-stage-line { display: none; }
-  .pipeline-stage-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; transition: all 0.4s ease; z-index: 1; background: var(--bg); }
+  .pipeline-stage-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; transition: all 0.4s ease; z-index: 1; background: var(--bg); }
   .pipeline-stage.waiting .pipeline-stage-dot { border-color: var(--border); color: var(--text-muted); }
   .pipeline-stage.active .pipeline-stage-dot { border-color: var(--accent); color: var(--accent-light); background: var(--accent-glow); animation: pulse 1s infinite; }
   .pipeline-stage.done .pipeline-stage-dot { border-color: var(--green); color: var(--green); background: var(--green-dim); }
   .pipeline-stage.done .pipeline-stage-line { background: var(--green); }
   .pipeline-stage-content { flex: 1; min-width: 0; }
-  .pipeline-stage-name { font-size: 13px; font-weight: 600; color: var(--text-muted); transition: color 0.3s; }
+  .pipeline-stage-name { font-size: 12px; font-weight: 600; color: var(--text-muted); transition: color 0.3s; }
   .pipeline-stage.active .pipeline-stage-name, .pipeline-stage.done .pipeline-stage-name { color: var(--text); }
-  .pipeline-stage-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; opacity: 0; transition: opacity 0.4s; }
+  .pipeline-stage-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; opacity: 0; transition: opacity 0.4s; }
   .pipeline-stage.active .pipeline-stage-detail, .pipeline-stage.done .pipeline-stage-detail { opacity: 1; }
-  .pipeline-stage-time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; opacity: 0; transition: opacity 0.3s; }
+  .pipeline-stage-time { font-size: 10px; color: var(--text-muted); flex-shrink: 0; opacity: 0; transition: opacity 0.3s; }
   .pipeline-stage.done .pipeline-stage-time { opacity: 1; color: var(--green); }
-  .pipeline-result { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-top: 16px; display: none; }
+  .pipeline-result { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-top: 14px; display: none; }
   .pipeline-result.visible { display: block; animation: slideIn 0.3s ease; }
-  .pipeline-result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .pipeline-result-title { font-size: 13px; font-weight: 600; color: var(--green); }
-  .pipeline-result-stats { display: flex; gap: 16px; }
+  .pipeline-result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .pipeline-result-title { font-size: 12px; font-weight: 600; color: var(--green); }
+  .pipeline-result-stats { display: flex; gap: 14px; }
   .pipeline-result-stat { text-align: center; }
-  .pipeline-result-stat-value { font-size: 16px; font-weight: 700; color: var(--text); }
-  .pipeline-result-stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-  .pipeline-result-preview { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-top: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; max-height: 120px; overflow-y: auto; }
-  .pipeline-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .pipeline-total { font-size: 13px; color: var(--text-muted); }
+  .pipeline-result-stat-value { font-size: 14px; font-weight: 700; color: var(--text); }
+  .pipeline-result-stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .pipeline-result-preview { font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-top: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; max-height: 100px; overflow-y: auto; }
+  .pipeline-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .pipeline-total { font-size: 12px; color: var(--text-muted); }
   .pipeline-total strong { color: var(--text); }
 </style>
 </head>
 <body>
 <div class="app-layout">
   <aside class="sidebar">
-    <div class="sidebar-logo"><h1>Hire<span>Wire</span></h1><div class="version">v2.0 &middot; Microsoft AI Dev Days</div></div>
+    <div class="sidebar-logo">
+      <h1><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>Hire<span>Wire</span></h1>
+      <div class="version">v2.0 &middot; Microsoft AI Dev Days 2026</div>
+    </div>
     <nav class="sidebar-nav">
       <div class="nav-section">
         <div class="nav-section-label">Platform</div>
-        <div class="nav-item active" data-page="overview" onclick="navigateTo('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</div>
-        <div class="nav-item" data-page="agents" onclick="navigateTo('agents')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Agents<span class="nav-badge" id="nav-agent-count">5</span></div>
+        <div class="nav-item active" data-page="overview" onclick="navigateTo('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</div>
+        <div class="nav-item" data-page="orchestration" onclick="navigateTo('orchestration')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>Orchestration<span class="nav-badge" id="nav-agent-count">5</span></div>
+        <div class="nav-item" data-page="pipeline" onclick="navigateTo('pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>Hiring Pipeline</div>
         <div class="nav-item" data-page="tasks" onclick="navigateTo('tasks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Tasks<span class="nav-badge" id="nav-task-count">0</span></div>
       </div>
       <div class="nav-section">
         <div class="nav-section-label">Finance</div>
-        <div class="nav-item" data-page="payments" onclick="navigateTo('payments')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Payments</div>
+        <div class="nav-item" data-page="payments" onclick="navigateTo('payments')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Payment Ledger</div>
       </div>
       <div class="nav-section">
         <div class="nav-section-label">Intelligence</div>
@@ -260,15 +285,20 @@
   </aside>
   <div class="main-content">
     <div class="top-bar">
-      <div class="top-bar-left"><span class="page-title" id="page-title">Overview</span><span class="gpt4o-badge" id="gpt4o-badge">GPT-4o LIVE</span><span class="demo-badge" id="demo-badge">DEMO MODE</span></div>
+      <div class="top-bar-left">
+        <span class="page-title" id="page-title">Overview</span>
+        <span class="gpt4o-badge" id="gpt4o-badge">GPT-4o LIVE</span>
+        <span class="demo-badge" id="demo-badge">DEMO MODE</span>
+        <span class="azure-badge">Azure Container Apps</span>
+      </div>
       <div class="top-bar-right">
-        <button class="btn btn-sm btn-success" id="live-demo-btn" onclick="runLiveDemo()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Live Demo</button>
-        <button class="btn btn-sm" id="demo-btn" onclick="toggleDemo()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Auto Demo</button>
-        <button class="btn btn-sm btn-primary" onclick="openTaskModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Task</button>
+        <button class="btn btn-sm btn-success" id="live-demo-btn" onclick="runLiveDemo()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Live Demo</button>
+        <button class="btn btn-sm" id="demo-btn" onclick="toggleDemo()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Auto Demo</button>
+        <button class="btn btn-sm btn-primary" onclick="openTaskModal()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Task</button>
       </div>
     </div>
     <div class="page-area">
-      <!-- OVERVIEW -->
+      <!-- ═══════ OVERVIEW ═══════ -->
       <div class="page active" id="page-overview">
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Total Agents</div><div class="stat-value accent" id="stat-agents">--</div><div class="stat-change up" id="stat-agents-sub">3 internal + 2 external</div></div>
@@ -277,27 +307,51 @@
           <div class="stat-card"><div class="stat-label">USDC Spent</div><div class="stat-value green" id="stat-spent">--</div><div class="stat-change up">via x402 protocol</div></div>
         </div>
         <div class="grid-2">
-          <div class="card"><div class="card-header"><span class="card-title">Live Activity Feed</span><span style="font-size:11px;color:var(--text-muted)" id="activity-source">Real-time from API</span></div><div class="card-body" id="activity-feed" style="max-height:420px;overflow-y:auto"><div class="empty-state">Loading...</div></div></div>
+          <div class="card"><div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Live Activity Feed</span><span style="font-size:10px;color:var(--text-muted)" id="activity-source">Real-time</span></div><div class="card-body" id="activity-feed" style="max-height:380px;overflow-y:auto"><div class="empty-state">Loading...</div></div></div>
           <div>
-            <div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Agent Performance</span></div><div class="card-body"><div class="chart-container" style="height:180px"><canvas id="overview-perf-chart"></canvas></div></div></div>
-            <div class="card"><div class="card-header"><span class="card-title">Submit Task</span></div><div class="card-body"><input class="form-input" id="inline-task-input" placeholder="Describe a task for the CEO agent..." style="margin-bottom:8px"/><div style="display:flex;gap:8px"><input class="form-input" id="inline-budget-input" type="number" value="1.0" min="0.01" max="100" step="0.01" style="width:100px" placeholder="USDC"/><button class="btn btn-primary" id="submit-btn" style="flex:1" onclick="submitInlineTask()">Submit to CEO</button></div></div></div>
+            <div class="card" style="margin-bottom:12px"><div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>Agent Performance</span></div><div class="card-body"><div class="chart-container" style="height:160px"><canvas id="overview-perf-chart"></canvas></div></div></div>
+            <div class="card"><div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Submit Task</span></div><div class="card-body"><input class="form-input" id="inline-task-input" placeholder="Describe a task for the CEO agent..." style="margin-bottom:6px"/><div style="display:flex;gap:6px"><input class="form-input" id="inline-budget-input" type="number" value="1.0" min="0.01" max="100" step="0.01" style="width:90px" placeholder="USDC"/><button class="btn btn-primary" id="submit-btn" style="flex:1" onclick="submitInlineTask()">Submit to CEO</button></div></div></div>
           </div>
         </div>
       </div>
-      <!-- AGENTS -->
-      <div class="page" id="page-agents">
+
+      <!-- ═══════ ORCHESTRATION ═══════ -->
+      <div class="page" id="page-orchestration">
         <div class="stat-grid">
-          <div class="stat-card"><div class="stat-label">Registered Agents</div><div class="stat-value accent" id="agents-total">--</div></div>
-          <div class="stat-card"><div class="stat-label">Internal</div><div class="stat-value" id="agents-internal">--</div></div>
-          <div class="stat-card"><div class="stat-label">External (x402)</div><div class="stat-value green" id="agents-external">--</div></div>
-          <div class="stat-card"><div class="stat-label">Avg Price</div><div class="stat-value" id="agents-avg-price">--</div></div>
+          <div class="stat-card"><div class="stat-label">Registered Agents</div><div class="stat-value accent" id="orch-total">--</div></div>
+          <div class="stat-card"><div class="stat-label">Active Now</div><div class="stat-value green" id="orch-active">0</div></div>
+          <div class="stat-card"><div class="stat-label">Tasks in Queue</div><div class="stat-value" style="color:var(--yellow)" id="orch-queue">0</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Response</div><div class="stat-value" id="orch-avg-resp">--</div></div>
         </div>
-        <div class="grid-2" style="grid-template-columns:1fr 380px">
-          <div class="card"><div class="card-header"><span class="card-title">Agent Roster</span></div><div class="card-body-flush" id="agent-list"><div class="empty-state">Loading agents...</div></div></div>
-          <div id="agent-detail" class="detail-panel"><div class="empty-state" style="padding:60px 20px">Select an agent to view details</div></div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>Agent Orchestration Flow</span><span style="font-size:10px;color:var(--text-muted)">CEO dispatches to specialized agents</span></div>
+          <div class="card-body">
+            <div class="orch-flow" id="orch-flow"></div>
+          </div>
+        </div>
+        <div class="grid-2" style="grid-template-columns:1fr 340px">
+          <div class="card"><div class="card-header"><span class="card-title">Agent Roster</span></div><div class="card-body-flush" id="orch-agent-list" style="max-height:350px;overflow-y:auto"><div class="empty-state">Loading agents...</div></div></div>
+          <div id="orch-agent-detail" class="detail-panel"><div class="empty-state" style="padding:40px 16px">Select an agent to view details</div></div>
         </div>
       </div>
-      <!-- TASKS -->
+
+      <!-- ═══════ HIRING PIPELINE (KANBAN) ═══════ -->
+      <div class="page" id="page-pipeline">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Job Postings</div><div class="stat-value accent" id="pipe-postings">--</div></div>
+          <div class="stat-card"><div class="stat-label">Candidates</div><div class="stat-value" id="pipe-candidates">--</div></div>
+          <div class="stat-card"><div class="stat-label">AI Evaluated</div><div class="stat-value green" id="pipe-evaluated">--</div></div>
+          <div class="stat-card"><div class="stat-label">HITL Approved</div><div class="stat-value" style="color:var(--cyan)" id="pipe-approved">--</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>Hiring Pipeline</span><span style="font-size:10px;color:var(--text-muted)">Job Postings &rarr; Candidates &rarr; AI Evaluation &rarr; HITL Approval &rarr; Hired</span></div>
+          <div class="card-body" style="overflow-x:auto">
+            <div class="kanban" id="kanban-board"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ TASKS ═══════ -->
       <div class="page" id="page-tasks">
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value accent" id="tasks-total">--</div></div>
@@ -305,30 +359,34 @@
           <div class="stat-card"><div class="stat-label">Running</div><div class="stat-value" style="color:var(--yellow)" id="tasks-running">--</div></div>
           <div class="stat-card"><div class="stat-label">GPT-4o Responses</div><div class="stat-value" style="color:var(--green)" id="tasks-gpt4o">--</div></div>
         </div>
-        <div class="card"><div class="card-header"><span class="card-title">Task History</span><span style="font-size:11px;color:var(--text-muted)">Showing agent responses from GPT-4o</span></div><div class="card-body-flush" id="task-table" style="max-height:500px;overflow-y:auto"><div class="empty-state">Loading tasks...</div></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Task History</span><span style="font-size:10px;color:var(--text-muted)">Agent responses from GPT-4o</span></div><div class="card-body-flush" id="task-table" style="max-height:500px;overflow-y:auto"><div class="empty-state">Loading tasks...</div></div></div>
       </div>
-      <!-- PAYMENTS -->
+
+      <!-- ═══════ PAYMENT LEDGER ═══════ -->
       <div class="page" id="page-payments">
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Total Payments</div><div class="stat-value accent" id="pay-total">--</div></div>
-          <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-value" id="pay-spent">--</div></div>
+          <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-value green" id="pay-spent">--</div></div>
           <div class="stat-card"><div class="stat-label">External (x402)</div><div class="stat-value" style="color:var(--yellow)" id="pay-external">--</div></div>
-          <div class="stat-card"><div class="stat-label">Agents Paid</div><div class="stat-value green" id="pay-agents-paid">--</div></div>
+          <div class="stat-card"><div class="stat-label">Agents Paid</div><div class="stat-value" style="color:var(--cyan)" id="pay-agents-paid">--</div></div>
         </div>
-        <div class="grid-2" style="margin-bottom:20px">
-          <div class="card"><div class="card-header"><span class="card-title">Spending by Agent</span></div><div class="card-body"><div class="chart-container" style="height:200px"><canvas id="pay-spend-chart"></canvas></div></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">x402 Payment Protocol</span></div><div class="card-body">
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>1. Task Submission</strong> &mdash; CEO receives task and analyzes it</div></div>
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>2. Agent Discovery</strong> &mdash; Find best agent via skill matching</div></div>
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>3. Budget Allocation</strong> &mdash; Reserve USDC from task budget</div></div>
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>4. x402 Payment</strong> &mdash; Create USDC payment proof to agent</div></div>
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>5. Agent Execution</strong> &mdash; Agent performs work (GPT-4o)</div></div>
-            <div class="flow-step"><div class="flow-dot"></div><div class="flow-text"><strong>6. Settlement</strong> &mdash; Payment released on task completion</div></div>
+        <div class="grid-2" style="margin-bottom:14px">
+          <div class="card"><div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Budget Allocation by Agent</span></div><div class="card-body"><div class="chart-container" style="height:180px"><canvas id="pay-spend-chart"></canvas></div></div></div>
+          <div class="card"><div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>x402 Payment Protocol</span></div><div class="card-body" style="font-size:12px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-green">1</span><span>Task Submission &mdash; CEO receives and analyzes</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">2</span><span>Agent Discovery &mdash; Skill matching via registry</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-purple">3</span><span>Budget Allocation &mdash; USDC reserved in escrow</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-yellow">4</span><span>x402 Payment &mdash; EIP-712 signed proof to agent</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-cyan">5</span><span>Agent Execution &mdash; GPT-4o powers the response</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-muted">6</span><span>Settlement &mdash; Payment released on completion</span></div>
+            </div>
           </div></div>
         </div>
-        <div class="card"><div class="card-header"><span class="card-title">Payment Log</span><span style="font-size:11px;color:var(--text-muted)" id="pay-count-label">0 transactions</span></div><div class="card-body-flush" id="payment-table" style="max-height:400px;overflow-y:auto"><div class="empty-state">No transactions yet.</div></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Payment Log</span><span style="font-size:10px;color:var(--text-muted)" id="pay-count-label">0 transactions</span></div><div class="card-body-flush" id="payment-table" style="max-height:350px;overflow-y:auto"><div class="empty-state">No transactions yet.</div></div></div>
       </div>
-      <!-- METRICS -->
+
+      <!-- ═══════ METRICS ═══════ -->
       <div class="page" id="page-metrics">
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Total Spend</div><div class="stat-value" id="m-total-spend">--</div></div>
@@ -338,10 +396,11 @@
         </div>
         <div class="grid-2">
           <div class="card"><div class="card-header"><span class="card-title">Agent Performance</span></div><div class="card-body"><div class="chart-container"><canvas id="perf-chart"></canvas></div></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Spending by Agent</span></div><div class="card-body"><div class="chart-container"><canvas id="spend-by-agent-chart"></canvas></div></div></div>
+          <div class="card"><div class="card-header"><span class="card-title">Spending Distribution</span></div><div class="card-body"><div class="chart-container"><canvas id="spend-by-agent-chart"></canvas></div></div></div>
         </div>
       </div>
-      <!-- APPROVALS (HITL) -->
+
+      <!-- ═══════ APPROVALS (HITL) ═══════ -->
       <div class="page" id="page-approvals">
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value" style="color:var(--yellow)" id="hitl-pending">--</div></div>
@@ -350,11 +409,12 @@
           <div class="stat-card"><div class="stat-label">Auto-Approved</div><div class="stat-value accent" id="hitl-auto">--</div></div>
         </div>
         <div class="grid-2">
-          <div class="card"><div class="card-header"><span class="card-title">Pending Approvals</span><span style="font-size:11px;color:var(--text-muted)">Human-in-the-Loop</span></div><div class="card-body" id="hitl-pending-list" style="max-height:400px;overflow-y:auto"><div class="empty-state">No pending approvals</div></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Approval History</span></div><div class="card-body-flush" id="hitl-history" style="max-height:400px;overflow-y:auto"><div class="empty-state">No approval history</div></div></div>
+          <div class="card"><div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>Pending Approvals</span><span style="font-size:10px;color:var(--text-muted)">Human-in-the-Loop</span></div><div class="card-body" id="hitl-pending-list" style="max-height:350px;overflow-y:auto"><div class="empty-state">No pending approvals</div></div></div>
+          <div class="card"><div class="card-header"><span class="card-title">Approval History</span></div><div class="card-body-flush" id="hitl-history" style="max-height:350px;overflow-y:auto"><div class="empty-state">No approval history</div></div></div>
         </div>
       </div>
-      <!-- RESPONSIBLE AI -->
+
+      <!-- ═══════ RESPONSIBLE AI ═══════ -->
       <div class="page" id="page-safety">
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Items Checked</div><div class="stat-value accent" id="rai-checked">--</div></div>
@@ -362,22 +422,27 @@
           <div class="stat-card"><div class="stat-label">Blocked</div><div class="stat-value" style="color:var(--red)" id="rai-blocked">--</div></div>
           <div class="stat-card"><div class="stat-label">Fairness Score</div><div class="stat-value green" id="rai-fairness">--</div></div>
         </div>
-        <div class="grid-2">
-          <div class="card"><div class="card-header"><span class="card-title">Content Safety Status</span></div><div class="card-body" id="rai-status-panel">
-            <div class="detail-section">
+        <div class="grid-2" style="margin-bottom:14px">
+          <div class="card"><div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Content Safety Gauges</span></div><div class="card-body">
+            <div class="gauge-row">
+              <div class="gauge"><div class="gauge-value" style="color:var(--green)" id="rai-safe-pct">--</div><div class="gauge-label">Safe Rate</div><div class="gauge-bar"><div class="gauge-bar-fill" id="rai-safe-bar" style="width:0;background:var(--green)"></div></div></div>
+              <div class="gauge"><div class="gauge-value" style="color:var(--yellow)" id="rai-warn-pct">--</div><div class="gauge-label">Warning Rate</div><div class="gauge-bar"><div class="gauge-bar-fill" id="rai-warn-bar" style="width:0;background:var(--yellow)"></div></div></div>
+              <div class="gauge"><div class="gauge-value" style="color:var(--red)" id="rai-block-pct">--</div><div class="gauge-label">Block Rate</div><div class="gauge-bar"><div class="gauge-bar-fill" id="rai-block-bar" style="width:0;background:var(--red)"></div></div></div>
+            </div>
+            <div class="detail-section" style="margin-top:10px">
+              <div class="detail-section-title">Detailed Counts</div>
               <div class="detail-row"><span class="label">Resumes Checked</span><span class="value" id="rai-resumes">0</span></div>
               <div class="detail-row"><span class="label">Job Postings Checked</span><span class="value" id="rai-postings">0</span></div>
               <div class="detail-row"><span class="label">Safe</span><span class="value" style="color:var(--green)" id="rai-safe">0</span></div>
               <div class="detail-row"><span class="label">Warnings</span><span class="value" style="color:var(--yellow)" id="rai-warnings">0</span></div>
-              <div class="detail-row"><span class="label">Flagged Rate</span><span class="value" id="rai-flag-rate">0%</span></div>
             </div>
           </div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Bias Report</span></div><div class="card-body" id="rai-bias-panel">
+          <div class="card"><div class="card-header"><span class="card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Bias Report &amp; Audit Trail</span></div><div class="card-body">
             <div class="detail-section">
               <div class="detail-row"><span class="label">Total Decisions</span><span class="value" id="rai-decisions">0</span></div>
               <div class="detail-row"><span class="label">Flagged Decisions</span><span class="value" id="rai-flagged-decisions">0</span></div>
               <div id="rai-bias-indicators"></div>
-              <div id="rai-recommendations" style="margin-top:12px"></div>
+              <div id="rai-recommendations" style="margin-top:10px"></div>
             </div>
           </div></div>
         </div>
@@ -385,8 +450,10 @@
     </div>
   </div>
 </div>
+
 <!-- MODALS -->
-<div class="modal-overlay" id="task-modal"><div class="modal"><div class="modal-header"><span class="modal-title">Submit New Task</span><button class="modal-close" onclick="closeTaskModal()">&times;</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Task Description</label><input class="form-input" id="modal-task-input" placeholder="e.g. Analyze competitor pricing for AI agent platforms..." maxlength="2000"/></div><div class="form-group"><label class="form-label">Budget (USDC)</label><input class="form-input" id="modal-budget-input" type="number" value="2.0" min="0.01" max="1000" step="0.01"/></div><div style="font-size:11px;color:var(--text-muted);margin-top:8px">Task will be routed to the best agent by the CEO. GPT-4o generates the response. x402 payment recorded.</div></div><div class="modal-footer"><button class="btn" onclick="closeTaskModal()">Cancel</button><button class="btn btn-primary" id="modal-submit-btn" onclick="submitModalTask()">Submit Task</button></div></div></div>
+<div class="modal-overlay" id="task-modal"><div class="modal"><div class="modal-header"><span class="modal-title">Submit New Task</span><button class="modal-close" onclick="closeTaskModal()">&times;</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Task Description</label><input class="form-input" id="modal-task-input" placeholder="e.g. Analyze competitor pricing for AI agent platforms..." maxlength="2000"/></div><div class="form-group"><label class="form-label">Budget (USDC)</label><input class="form-input" id="modal-budget-input" type="number" value="2.0" min="0.01" max="1000" step="0.01"/></div><div style="font-size:10px;color:var(--text-muted);margin-top:6px">Task will be routed to the best agent by the CEO. GPT-4o generates the response. x402 payment recorded.</div></div><div class="modal-footer"><button class="btn" onclick="closeTaskModal()">Cancel</button><button class="btn btn-primary" id="modal-submit-btn" onclick="submitModalTask()">Submit Task</button></div></div></div>
+
 <!-- LIVE DEMO PIPELINE OVERLAY -->
 <div class="pipeline-overlay" id="pipeline-overlay">
   <div class="pipeline-panel">
@@ -439,9 +506,10 @@ function navigateTo(page){
   currentPage=page;
   document.querySelectorAll('.nav-item').forEach(function(el){el.classList.toggle('active',el.dataset.page===page)});
   document.querySelectorAll('.page').forEach(function(el){el.classList.toggle('active',el.id==='page-'+page)});
-  var titles={overview:'Overview',agents:'Agents',tasks:'Tasks',payments:'Payments',metrics:'Metrics',approvals:'Approvals (HITL)',safety:'Responsible AI'};
+  var titles={overview:'Overview',orchestration:'Agent Orchestration',pipeline:'Hiring Pipeline',tasks:'Tasks',payments:'Payment Ledger',metrics:'Metrics',approvals:'Approvals (HITL)',safety:'Responsible AI'};
   document.getElementById('page-title').textContent=titles[page]||page;
-  if(page==='agents')renderAgentsPage();
+  if(page==='orchestration')renderOrchestrationPage();
+  if(page==='pipeline')renderPipelinePage();
   if(page==='tasks')renderTasksPage();
   if(page==='payments')renderPaymentsPage();
   if(page==='metrics')renderMetricsPage();
@@ -494,22 +562,20 @@ async function refreshOverview(){
   }
 
   if(stats){
-    document.getElementById('stat-agents-sub').textContent=(stats.agents_count-(stats.agent_spend?Object.keys(stats.agent_spend).filter(function(k){return k.startsWith('designer')||k.startsWith('analyst')}).length:0))+' internal + '+(stats.agents_count>3?stats.agents_count-3:0)+' external';
+    var internal=stats.agents_count>3?3:stats.agents_count;
+    var external=stats.agents_count-internal;
+    document.getElementById('stat-agents-sub').textContent=internal+' internal + '+external+' external';
   }
 
-  // Activity feed from API
   if(activity&&activity.length>0){
-    document.getElementById('activity-source').textContent='Live from API ('+activity.length+' events)';
+    document.getElementById('activity-source').textContent='Live ('+activity.length+' events)';
     document.getElementById('activity-feed').innerHTML=activity.map(function(a){
       return'<div class="activity-item"><div class="activity-icon '+a.type+'">'+a.icon+'</div><div class="activity-text">'+a.text+'</div><div class="activity-time">'+a.time+'</div></div>';
     }).join('');
   }
 
-  // Update HITL approval count in nav
   var hitlStats=await fetchJSON('/approvals/stats');
   if(hitlStats){document.getElementById('nav-approval-count').textContent=hitlStats.pending}
-
-  // Overview perf chart
   if(stats&&stats.agent_spend){renderOverviewChart(stats.agent_spend)}
 }
 
@@ -518,37 +584,127 @@ function renderOverviewChart(agentSpend){
   if(chartInstances.ovPerf)chartInstances.ovPerf.destroy();
   var labels=Object.keys(agentSpend).map(function(k){return k.replace(/-ext-\d+/,'')});
   var values=Object.values(agentSpend);
-  chartInstances.ovPerf=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:values,backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:11},padding:8}}}}});
+  chartInstances.ovPerf=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:values,backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:10},padding:6}}}}});
 }
 
-// ── AGENTS ──
-async function renderAgentsPage(){
-  var agents=await fetchJSON('/agents');
-  if(!agents)return;
-  cachedAgents=agents;
-  var el=document.getElementById('agent-list');
-  var internal=agents.filter(function(a){return!a.is_external}).length;
-  var external=agents.filter(function(a){return a.is_external}).length;
-  document.getElementById('agents-total').textContent=agents.length;
-  document.getElementById('agents-internal').textContent=internal;
-  document.getElementById('agents-external').textContent=external;
-  var prices=agents.filter(function(a){return a.is_external}).map(function(a){return parseFloat(a.price_per_call.replace('$',''))||0});
-  var avgPrice=prices.length>0?(prices.reduce(function(s,p){return s+p},0)/prices.length):0;
-  document.getElementById('agents-avg-price').textContent='$'+avgPrice.toFixed(2);
+// ── ORCHESTRATION PAGE ──
+var orchSelectedAgent=null;
 
-  var colors={builder:'var(--accent-glow)',research:'var(--green-dim)',designer:'var(--blue-dim)',analyst:'var(--yellow-dim)'};
-  var textColors={builder:'var(--accent-light)',research:'var(--green)',designer:'var(--blue)',analyst:'var(--yellow)'};
+async function renderOrchestrationPage(){
+  var res=await Promise.all([fetchJSON('/agents'),fetchJSON('/health'),fetchJSON('/stats')]);
+  var agents=res[0]||[],h=res[1],stats=res[2];
+  cachedAgents=agents;
+
+  document.getElementById('orch-total').textContent=agents.length;
+  document.getElementById('orch-active').textContent=h?h.tasks_running:'0';
+  document.getElementById('orch-queue').textContent=h?(h.tasks_pending+h.tasks_running):'0';
+  document.getElementById('orch-avg-resp').textContent=stats?Math.round(stats.avg_response_ms||0)+'ms':'--';
+
+  // Build orchestration flow visualization
+  var agentConfig = [
+    {name:'CEO',icon:'\u{1F451}',role:'Coordinator',bg:'var(--accent-glow)',color:'var(--accent-light)'},
+    {name:'Builder',icon:'\u{1F528}',role:'Developer',bg:'var(--blue-dim)',color:'var(--blue)'},
+    {name:'Research',icon:'\u{1F50D}',role:'Analyst',bg:'var(--green-dim)',color:'var(--green)'},
+    {name:'Social',icon:'\u{1F4E3}',role:'Marketing',bg:'var(--yellow-dim)',color:'var(--yellow)'},
+  ];
+
+  var running=h?h.tasks_running:0;
+  var flowHtml='';
+  agentConfig.forEach(function(a,i){
+    var isActive=i===0?(running>0):false;
+    flowHtml+='<div class="orch-node"><div class="orch-node-box '+(isActive?'active':'idle')+'" style="background:'+(isActive?a.bg:'var(--bg)')+'">';
+    flowHtml+='<div class="icon">'+a.icon+'</div>';
+    flowHtml+='<div class="name">'+a.name+'</div>';
+    flowHtml+='</div><div class="orch-node-status badge '+(isActive?'badge-green':'badge-muted')+'">'+(isActive?'active':'idle')+'</div></div>';
+    if(i<agentConfig.length-1){
+      flowHtml+='<div class="orch-arrow'+(i===0&&running>0?' active':'')+'">'+
+        (i===0?'\u2192 \u2192':'\u2190 \u2192')+'</div>';
+    }
+  });
+  // Add external agents
+  var externals=agents.filter(function(a){return a.is_external});
+  if(externals.length>0){
+    flowHtml+='<div class="orch-arrow">\u2190 \u2192</div>';
+    flowHtml+='<div class="orch-node"><div class="orch-node-box idle" style="background:var(--purple-dim)">';
+    flowHtml+='<div class="icon">\u{1F310}</div>';
+    flowHtml+='<div class="name">External x'+externals.length+'</div>';
+    flowHtml+='</div><div class="orch-node-status badge badge-yellow">x402</div></div>';
+  }
+  document.getElementById('orch-flow').innerHTML=flowHtml;
+
+  // Agent list
+  var colors={builder:'var(--blue-dim)',research:'var(--green-dim)',designer:'var(--purple-dim)',analyst:'var(--yellow-dim)',ceo:'var(--accent-glow)'};
+  var textColors={builder:'var(--blue)',research:'var(--green)',designer:'var(--purple)',analyst:'var(--yellow)',ceo:'var(--accent-light)'};
+  var el=document.getElementById('orch-agent-list');
   el.innerHTML=agents.map(function(a,i){
     var key=a.name.split('-')[0];
     var bg=colors[key]||'var(--accent-glow)';var tc=textColors[key]||'var(--accent-light)';
-    return'<div class="agent-row'+(selectedAgent===i?' selected':'')+'" onclick="selectAgent('+i+')"><div class="agent-avatar" style="background:'+bg+';color:'+tc+'">'+a.name[0].toUpperCase()+'</div><div class="agent-info"><div class="agent-name">'+a.name+(a.is_external?' <span class="gpt4o-tag">x402</span>':'')+'</div><div class="agent-desc">'+a.description+'</div></div><div class="agent-stats"><div class="agent-stat-item"><div class="agent-stat-value" style="color:var(--green)">'+a.price_per_call+'</div><div class="agent-stat-label">Price</div></div><div class="agent-stat-item"><span class="badge '+(a.is_external?'badge-yellow':'badge-green')+'">'+(a.is_external?'external':'internal')+'</span></div></div></div>';
+    return'<div class="agent-row'+(orchSelectedAgent===i?' selected':'')+'" onclick="orchSelectAgent('+i+')"><div class="agent-avatar" style="background:'+bg+';color:'+tc+'">'+a.name[0].toUpperCase()+'</div><div class="agent-info"><div class="agent-name">'+a.name+(a.is_external?' <span class="gpt4o-tag">x402</span>':'')+'</div><div class="agent-desc">'+a.description+'</div></div><div class="agent-stats"><div class="agent-stat-item"><div class="agent-stat-value" style="color:var(--green)">'+a.price_per_call+'</div><div class="agent-stat-label">Price</div></div></div></div>';
   }).join('');
-  if(selectedAgent!==null&&cachedAgents[selectedAgent])renderAgentDetail(selectedAgent);
+  if(orchSelectedAgent!==null&&cachedAgents[orchSelectedAgent])orchRenderDetail(orchSelectedAgent);
 }
-function selectAgent(i){selectedAgent=i;renderAgentsPage();}
-function renderAgentDetail(i){
+
+function orchSelectAgent(i){orchSelectedAgent=i;renderOrchestrationPage();}
+function orchRenderDetail(i){
   var a=cachedAgents[i];if(!a)return;
-  document.getElementById('agent-detail').innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px"><div class="agent-avatar" style="background:var(--accent-glow);color:var(--accent-light);width:48px;height:48px;font-size:20px">'+a.name[0].toUpperCase()+'</div><div><div style="font-size:16px;font-weight:700">'+a.name+'</div><div style="font-size:12px;color:var(--text-muted)">'+a.description+'</div></div></div><div class="detail-section"><div class="detail-section-title">Skills</div><div>'+a.skills.map(function(s){return'<span class="tag tag-accent">'+s+'</span>'}).join('')+'</div></div><div class="detail-section"><div class="detail-section-title">Configuration</div><div class="detail-row"><span class="label">Protocol</span><span class="value">'+a.protocol.toUpperCase()+'</span></div><div class="detail-row"><span class="label">Payment</span><span class="value">'+a.payment+'</span></div><div class="detail-row"><span class="label">Price</span><span class="value" style="color:var(--green)">'+a.price_per_call+'</span></div><div class="detail-row"><span class="label">Endpoint</span><span class="value" style="font-size:11px">'+a.endpoint+'</span></div><div class="detail-row"><span class="label">Type</span><span class="value">'+(a.is_external?'External (x402 paid)':'Internal (free)')+'</span></div></div>';
+  var key=a.name.split('-')[0];
+  var colors={builder:'var(--blue-dim)',research:'var(--green-dim)',designer:'var(--purple-dim)',analyst:'var(--yellow-dim)'};
+  var tc={builder:'var(--blue)',research:'var(--green)',designer:'var(--purple)',analyst:'var(--yellow)'};
+  document.getElementById('orch-agent-detail').innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div class="agent-avatar" style="background:'+(colors[key]||'var(--accent-glow)')+';color:'+(tc[key]||'var(--accent-light)')+';width:44px;height:44px;font-size:18px">'+a.name[0].toUpperCase()+'</div><div><div style="font-size:15px;font-weight:700">'+a.name+'</div><div style="font-size:11px;color:var(--text-muted)">'+a.description+'</div></div></div><div class="detail-section"><div class="detail-section-title">Skills</div><div>'+a.skills.map(function(s){return'<span class="tag tag-accent">'+s+'</span>'}).join('')+'</div></div><div class="detail-section"><div class="detail-section-title">Configuration</div><div class="detail-row"><span class="label">Protocol</span><span class="value">'+a.protocol.toUpperCase()+'</span></div><div class="detail-row"><span class="label">Payment</span><span class="value">'+a.payment+'</span></div><div class="detail-row"><span class="label">Price</span><span class="value" style="color:var(--green)">'+a.price_per_call+'</span></div><div class="detail-row"><span class="label">Endpoint</span><span class="value" style="font-size:10px;word-break:break-all">'+a.endpoint+'</span></div><div class="detail-row"><span class="label">Type</span><span class="value">'+(a.is_external?'External (x402 paid)':'Internal (free)')+'</span></div></div>';
+}
+
+// ── HIRING PIPELINE (KANBAN) ──
+async function renderPipelinePage(){
+  var res=await Promise.all([fetchJSON('/tasks'),fetchJSON('/approvals/all'),fetchJSON('/agents')]);
+  var tasks=res[0]||[],approvals=res[1]||[],agents=res[2]||[];
+
+  // Build pipeline stages from real data
+  var stages = {
+    posting: [],    // tasks that are pending
+    candidate: [],  // running tasks (agent discovery)
+    evaluation: [], // completed with safety score
+    hitl: [],       // has approval record
+    hired: []       // completed with payment
+  };
+
+  tasks.forEach(function(t){
+    var r=t.result||{};
+    var card={id:t.task_id,title:t.description.substring(0,60),agent:r.assigned_agent||'--',cost:'$'+(r.estimated_cost||0).toFixed(2),model:r.model||'mock',status:t.status};
+    if(t.status==='pending') stages.posting.push(card);
+    else if(t.status==='running') stages.candidate.push(card);
+    else if(t.status==='completed'&&!r.hitl_approval_id) stages.evaluation.push(card);
+    else if(t.status==='completed'&&r.hitl_approval_id&&!r.x402_payment) stages.hitl.push(card);
+    else if(t.status==='completed') stages.hired.push(card);
+  });
+
+  document.getElementById('pipe-postings').textContent=stages.posting.length;
+  document.getElementById('pipe-candidates').textContent=stages.candidate.length;
+  document.getElementById('pipe-evaluated').textContent=stages.evaluation.length+stages.hitl.length+stages.hired.length;
+  document.getElementById('pipe-approved').textContent=stages.hitl.length+stages.hired.length;
+
+  var colConfig=[
+    {key:'posting',title:'Job Postings',color:'var(--blue)'},
+    {key:'candidate',title:'Candidates',color:'var(--yellow)'},
+    {key:'evaluation',title:'AI Evaluation',color:'var(--accent-light)'},
+    {key:'hitl',title:'HITL Approval',color:'var(--cyan)'},
+    {key:'hired',title:'Hired',color:'var(--green)'}
+  ];
+
+  var html='';
+  colConfig.forEach(function(col){
+    var cards=stages[col.key];
+    html+='<div class="kanban-col"><div class="kanban-header"><span class="kanban-header-title" style="color:'+col.color+'">'+col.title+'</span><span class="kanban-header-count">'+cards.length+'</span></div><div class="kanban-body">';
+    if(cards.length===0){
+      html+='<div style="text-align:center;padding:20px 8px;font-size:10px;color:var(--text-muted)">No items</div>';
+    } else {
+      cards.slice(0,8).forEach(function(c){
+        html+='<div class="kanban-card"><div class="kanban-card-title">'+c.title+'</div><div class="kanban-card-meta"><span>'+c.agent+'</span><span>'+c.cost+'</span>'+(c.model==='gpt-4o'?'<span class="gpt4o-tag">GPT-4o</span>':'')+'</div></div>';
+      });
+      if(cards.length>8) html+='<div style="text-align:center;font-size:10px;color:var(--text-muted);padding:4px">+'+(cards.length-8)+' more</div>';
+    }
+    html+='</div></div>';
+  });
+  document.getElementById('kanban-board').innerHTML=html;
 }
 
 // ── TASKS ──
@@ -571,7 +727,7 @@ async function renderTasksPage(){
     var modelBadge=model==='gpt-4o'?'<span class="gpt4o-tag">GPT-4o</span>':'<span class="badge badge-muted">'+model+'</span>';
     var preview=r.agent_response_preview||'';
     var responseHtml=preview?'<div class="response-preview">'+preview+'</div>':'<span style="color:var(--text-muted)">--</span>';
-    html+='<tr><td>'+fmtDate(t.created_at)+'</td><td style="color:var(--text);font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.description+'</td><td>'+agent+'</td><td>'+modelBadge+'</td><td style="max-width:300px">'+responseHtml+'</td><td><span class="badge '+sb+'">'+t.status+'</span></td></tr>';
+    html+='<tr><td>'+fmtDate(t.created_at)+'</td><td style="color:var(--text);font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.description+'</td><td>'+agent+'</td><td>'+modelBadge+'</td><td style="max-width:260px">'+responseHtml+'</td><td><span class="badge '+sb+'">'+t.status+'</span></td></tr>';
   });
   html+='</tbody></table>';
   document.getElementById('task-table').innerHTML=html;
@@ -590,20 +746,18 @@ async function renderPaymentsPage(){
   document.getElementById('pay-agents-paid').textContent=agentsPaid;
   document.getElementById('pay-count-label').textContent=txs.length+' transactions';
 
-  // Spend by agent chart
   var agentSpend={};
   txs.forEach(function(t){agentSpend[t.to_agent]=(agentSpend[t.to_agent]||0)+t.amount_usdc});
   var ctx=document.getElementById('pay-spend-chart');
   if(ctx){
     if(chartInstances.paySpend)chartInstances.paySpend.destroy();
-    chartInstances.paySpend=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(agentSpend),datasets:[{data:Object.values(agentSpend),backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:11},padding:8}}}}});
+    chartInstances.paySpend=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(agentSpend),datasets:[{data:Object.values(agentSpend),backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:10},padding:6}}}}});
   }
 
-  // Payment table
   document.getElementById('payment-table').innerHTML='<table class="data-table"><thead><tr><th>Time</th><th>From</th><th>To</th><th>Amount</th><th>Task</th><th>Status</th></tr></thead><tbody>'+txs.map(function(t){
     var sb=t.status==='completed'?'badge-green':t.status==='pending'?'badge-yellow':'badge-muted';
     var isExt=t.to_agent.indexOf('ext')>-1||t.to_agent.indexOf('designer')>-1||t.to_agent.indexOf('analyst')>-1;
-    return'<tr><td>'+fmtDate(t.timestamp)+'</td><td>'+t.from_agent+'</td><td style="color:var(--text);font-weight:500">'+t.to_agent+(isExt?' <span class="gpt4o-tag">x402</span>':'')+'</td><td style="color:var(--green);font-weight:600">$'+t.amount_usdc.toFixed(4)+'</td><td style="font-size:11px;color:var(--text-muted)">'+t.task_id+'</td><td><span class="badge '+sb+'">'+t.status+'</span></td></tr>';
+    return'<tr><td>'+fmtDate(t.timestamp)+'</td><td>'+t.from_agent+'</td><td style="color:var(--text);font-weight:500">'+t.to_agent+(isExt?' <span class="gpt4o-tag">x402</span>':'')+'</td><td style="color:var(--green);font-weight:600">$'+t.amount_usdc.toFixed(4)+'</td><td style="font-size:10px;color:var(--text-muted)">'+t.task_id+'</td><td><span class="badge '+sb+'">'+t.status+'</span></td></tr>';
   }).join('')+'</tbody></table>';
 }
 
@@ -620,23 +774,23 @@ async function renderMetricsPage(){
 }
 function renderPerfChart(){
   var ctx=document.getElementById('perf-chart');if(!ctx)return;if(chartInstances.perf)chartInstances.perf.destroy();
-  chartInstances.perf=new Chart(ctx,{type:'radar',data:{labels:['Speed','Quality','Cost Efficiency','Reliability','Versatility'],datasets:[{label:'Builder',data:[85,92,78,96,70],borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.15)',pointBackgroundColor:'#6366f1'},{label:'Research',data:[70,88,85,92,90],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.15)',pointBackgroundColor:'#22c55e'},{label:'External',data:[75,90,65,88,95],borderColor:'#eab308',backgroundColor:'rgba(234,179,8,0.15)',pointBackgroundColor:'#eab308'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:'#27272a'},pointLabels:{color:'#a1a1aa',font:{size:11}},ticks:{display:false},suggestedMin:0,suggestedMax:100}},plugins:{legend:{labels:{color:'#a1a1aa',font:{size:11}}}}}});
+  chartInstances.perf=new Chart(ctx,{type:'radar',data:{labels:['Speed','Quality','Cost Efficiency','Reliability','Versatility'],datasets:[{label:'Builder',data:[85,92,78,96,70],borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.15)',pointBackgroundColor:'#6366f1'},{label:'Research',data:[70,88,85,92,90],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.15)',pointBackgroundColor:'#22c55e'},{label:'External',data:[75,90,65,88,95],borderColor:'#eab308',backgroundColor:'rgba(234,179,8,0.15)',pointBackgroundColor:'#eab308'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:'#27272a'},pointLabels:{color:'#a1a1aa',font:{size:10}},ticks:{display:false},suggestedMin:0,suggestedMax:100}},plugins:{legend:{labels:{color:'#a1a1aa',font:{size:10}}}}}});
 }
 function renderSpendChart(agentSpend){
   var ctx=document.getElementById('spend-by-agent-chart');if(!ctx)return;if(chartInstances.spend)chartInstances.spend.destroy();
   var labels=Object.keys(agentSpend);var values=Object.values(agentSpend);
   if(labels.length===0){labels=['builder','research','external'];values=[0.06,0.03,0.04]}
-  chartInstances.spend=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:values,backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:11},padding:12}}}}});
+  chartInstances.spend=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:values,backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:10},padding:8}}}}});
 }
 
 // ── DEMO ──
 async function toggleDemo(){
   var btn=document.getElementById('demo-btn'),badge=document.getElementById('demo-badge');btn.disabled=true;
-  try{if(demoRunning){await fetch(API+'/demo/stop').catch(function(){});demoRunning=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Start Demo';badge.classList.remove('active');toast('Demo stopped','info')}
-  else{await fetch(API+'/demo/seed').catch(function(){});await fetch(API+'/demo/start').catch(function(){});demoRunning=true;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop Demo';badge.classList.add('active');toast('Demo mode activated — tasks will auto-submit every 30s','success');refreshOverview()}}
-  catch(e){toast('Demo toggle error','error')}finally{btn.disabled=false}}
+  try{if(demoRunning){await fetch(API+'/demo/stop').catch(function(){});demoRunning=false;btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Auto Demo';badge.classList.remove('active');toast('Demo stopped','info')}
+  else{await fetch(API+'/demo/seed').catch(function(){});await fetch(API+'/demo/start').catch(function(){});demoRunning=true;btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop Demo';badge.classList.add('active');toast('Demo activated','success');refreshOverview()}}
+  catch(e){toast('Demo error','error')}finally{btn.disabled=false}}
 
-async function checkDemoStatus(){try{var d=await fetchJSON('/demo/status');if(d&&d.running){demoRunning=true;document.getElementById('demo-btn').innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop Demo';document.getElementById('demo-badge').classList.add('active')}}catch(e){}}
+async function checkDemoStatus(){try{var d=await fetchJSON('/demo/status');if(d&&d.running){demoRunning=true;document.getElementById('demo-btn').innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop Demo';document.getElementById('demo-badge').classList.add('active')}}catch(e){}}
 
 // ── LIVE DEMO PIPELINE ──
 var liveDemoRunning=false,liveDemoIndex=0;
@@ -660,23 +814,16 @@ async function runLiveDemo(){
   liveDemoRunning=true;
   var btn=document.getElementById('live-demo-btn');
   btn.disabled=true;
-  btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Running...';
+  btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Running...';
 
   resetPipelineUI();
   document.getElementById('pipeline-overlay').classList.add('active');
   document.getElementById('pipeline-task-text').textContent='Submitting to CEO agent...';
 
-  // Animate stages one by one before the real call completes
-  var stageNames=['Task Received','Agent Discovery','Budget Allocation','GPT-4o Execution','Payment Settlement','Result Delivered'];
-  var currentStage=0;
-
   function activateStage(n){
     if(n>6)return;
-    var el=document.getElementById('ps-'+n);
-    el.className='pipeline-stage active';
+    document.getElementById('ps-'+n).className='pipeline-stage active';
   }
-
-  // Start animating stages optimistically
   activateStage(1);
 
   try{
@@ -684,44 +831,36 @@ async function runLiveDemo(){
     if(!r.ok)throw new Error('API error '+r.status);
     var data=await r.json();
 
-    // Update task text
     document.getElementById('pipeline-task-text').textContent=data.description;
 
-    // Animate through all stages with delays
     var stages=data.stages||[];
     for(var i=0;i<stages.length;i++){
       await new Promise(function(res){setTimeout(res,350)});
       var s=stages[i];
       var n=s.stage;
-      // Complete previous stages
       for(var j=1;j<n;j++){
         var prev=document.getElementById('ps-'+j);
         if(prev.className.indexOf('done')<0)prev.className='pipeline-stage done';
       }
-      // Activate current
       var el=document.getElementById('ps-'+n);
       el.className='pipeline-stage active';
       document.getElementById('ps-'+n+'-detail').textContent=s.detail;
-      // Briefly show active then mark done
       await new Promise(function(res){setTimeout(res,300)});
       el.className='pipeline-stage done';
       document.getElementById('ps-'+n+'-time').textContent=s.duration_ms+'ms';
     }
 
-    // Show result panel
     document.getElementById('pr-agent').textContent=data.agent;
     document.getElementById('pr-cost').textContent='$'+data.cost_usdc.toFixed(4);
     document.getElementById('pr-time').textContent=data.total_ms+'ms';
     document.getElementById('pr-model').textContent=data.model.toUpperCase();
     document.getElementById('pr-preview').textContent=data.response_preview;
     document.getElementById('pipeline-result').classList.add('visible');
-    document.getElementById('pipeline-total').innerHTML='Pipeline completed in <strong>'+data.total_ms+'ms</strong> — Task ID: '+data.task_id;
+    document.getElementById('pipeline-total').innerHTML='Pipeline completed in <strong>'+data.total_ms+'ms</strong> — Task: '+data.task_id;
     document.getElementById('pipeline-again-btn').style.display='inline-flex';
 
-    toast('Live demo completed — '+data.agent+' finished in '+data.total_ms+'ms','success');
+    toast('Live demo completed — '+data.agent+' in '+data.total_ms+'ms','success');
     liveDemoIndex=(liveDemoIndex+1)%3;
-
-    // Refresh dashboard data
     setTimeout(refreshOverview,1000);
   }catch(e){
     toast('Live demo error: '+e.message,'error');
@@ -730,7 +869,7 @@ async function runLiveDemo(){
   }finally{
     liveDemoRunning=false;
     btn.disabled=false;
-    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Live Demo';
+    btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Live Demo';
   }
 }
 
@@ -748,7 +887,7 @@ async function renderApprovalsPage(){
   }
   if(pending&&pending.length>0){
     document.getElementById('hitl-pending-list').innerHTML=pending.map(function(r){
-      return'<div style="padding:12px;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-weight:600;color:var(--text)">'+r.action+'</span><span class="badge badge-yellow">pending</span></div><div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">'+r.description+'</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Cost: <strong style="color:var(--green)">$'+r.cost_usdc.toFixed(2)+' USDC</strong></div><div style="display:flex;gap:8px"><button class="btn btn-sm btn-success" onclick="approveRequest(\''+r.request_id+'\')">Approve</button><button class="btn btn-sm" style="border-color:var(--red);color:var(--red)" onclick="rejectRequest(\''+r.request_id+'\')">Reject</button></div></div>';
+      return'<div style="padding:10px;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-weight:600;color:var(--text);font-size:12px">'+r.action+'</span><span class="badge badge-yellow">pending</span></div><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">'+r.description+'</div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Cost: <strong style="color:var(--green)">$'+r.cost_usdc.toFixed(2)+' USDC</strong></div><div style="display:flex;gap:6px"><button class="btn btn-sm btn-success" onclick="approveRequest(\''+r.request_id+'\')">Approve</button><button class="btn btn-sm" style="border-color:var(--red);color:var(--red)" onclick="rejectRequest(\''+r.request_id+'\')">Reject</button></div></div>';
     }).join('');
   }else{
     document.getElementById('hitl-pending-list').innerHTML='<div class="empty-state">No pending approvals</div>';
@@ -757,7 +896,7 @@ async function renderApprovalsPage(){
     var html='<table class="data-table"><thead><tr><th>Action</th><th>Cost</th><th>Status</th><th>Reviewer</th><th>Time</th></tr></thead><tbody>';
     all.forEach(function(r){
       var sb=r.status==='approved'?'badge-green':r.status==='rejected'?'badge-red':r.status==='auto_approved'?'badge-blue':r.status==='pending'?'badge-yellow':'badge-muted';
-      html+='<tr><td style="color:var(--text);font-weight:500">'+r.action+'</td><td style="color:var(--green)">$'+r.cost_usdc.toFixed(2)+'</td><td><span class="badge '+sb+'">'+r.status+'</span></td><td>'+r.reviewer+'</td><td>'+fmtDate(r.created_at)+'</td></tr>';
+      html+='<tr><td style="color:var(--text);font-weight:500;font-size:11px">'+r.action+'</td><td style="color:var(--green)">$'+r.cost_usdc.toFixed(2)+'</td><td><span class="badge '+sb+'">'+r.status+'</span></td><td style="font-size:11px">'+r.reviewer+'</td><td style="font-size:11px">'+fmtDate(r.created_at)+'</td></tr>';
     });
     html+='</tbody></table>';
     document.getElementById('hitl-history').innerHTML=html;
@@ -782,7 +921,17 @@ async function renderSafetyPage(){
     document.getElementById('rai-postings').textContent=status.job_postings_checked;
     document.getElementById('rai-safe').textContent=status.safe;
     document.getElementById('rai-warnings').textContent=status.warnings;
-    document.getElementById('rai-flag-rate').textContent=(status.flagged_rate*100).toFixed(1)+'%';
+    // Calculate percentages
+    var total=status.total_checked||1;
+    var safePct=Math.round((status.safe/total)*100);
+    var warnPct=Math.round((status.warnings/total)*100);
+    var blockPct=Math.round(((status.blocked||0)/total)*100);
+    document.getElementById('rai-safe-pct').textContent=safePct+'%';
+    document.getElementById('rai-warn-pct').textContent=warnPct+'%';
+    document.getElementById('rai-block-pct').textContent=blockPct+'%';
+    document.getElementById('rai-safe-bar').style.width=safePct+'%';
+    document.getElementById('rai-warn-bar').style.width=warnPct+'%';
+    document.getElementById('rai-block-bar').style.width=blockPct+'%';
   }
   if(bias){
     document.getElementById('rai-fairness').textContent=(bias.fairness_score*100).toFixed(0)+'%';
@@ -793,14 +942,14 @@ async function renderSafetyPage(){
       indHtml+='<div class="detail-row"><span class="label">'+k+'</span><span class="value">'+bias.bias_indicators[k]+' indicators</span></div>';
     });
     document.getElementById('rai-bias-indicators').innerHTML=indHtml;
-    var recHtml=bias.recommendations.map(function(r){return'<div style="font-size:12px;color:var(--text-secondary);padding:4px 0;border-bottom:1px solid var(--border)">'+r+'</div>'}).join('');
+    var recHtml=bias.recommendations.map(function(r){return'<div style="font-size:11px;color:var(--text-secondary);padding:3px 0;border-bottom:1px solid var(--border)">'+r+'</div>'}).join('');
     document.getElementById('rai-recommendations').innerHTML=recHtml;
   }
 }
 
 // Init
 refreshOverview();checkDemoStatus();
-setInterval(function(){if(currentPage==='overview')refreshOverview();if(currentPage==='tasks')renderTasksPage()},5000);
+setInterval(function(){if(currentPage==='overview')refreshOverview();if(currentPage==='tasks')renderTasksPage();if(currentPage==='orchestration')renderOrchestrationPage()},5000);
 </script>
 </body>
 </html>

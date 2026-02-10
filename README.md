@@ -3,7 +3,7 @@
 **An agent operating system where AI agents hire other agents with real payments.**
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)](https://python.org)
-[![Tests](https://img.shields.io/badge/Tests-1056%20passing-brightgreen?logo=pytest&logoColor=white)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-1218%20passing-brightgreen?logo=pytest&logoColor=white)](#testing)
 [![Azure](https://img.shields.io/badge/Azure-GPT--4o%20%7C%20CosmosDB%20%7C%20Container%20Apps-0078D4?logo=microsoftazure&logoColor=white)](#azure-integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
@@ -19,7 +19,7 @@ It implements the full lifecycle of agent-to-agent commerce: **discovery → hir
 
 ![HireWire Architecture](docs/architecture.svg)
 
-> See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed system design, module breakdown, and x402 payment flow.
+> See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed system design, [architecture-diagram.md](./docs/architecture-diagram.md) for Mermaid diagrams of the full system, hiring pipeline, and x402 payment flow.
 
 ---
 
@@ -325,7 +325,8 @@ hirewire/
 │   ├── mcp_server.py        # Standalone MCP server (stdio + SSE)
 │   ├── storage.py           # SQLite persistence layer
 │   └── config.py            # Multi-provider configuration
-├── tests/                   # 1056+ tests across 27 test files
+├── deploy/                  # Azure Container Apps deployment (Bicep + scripts)
+├── tests/                   # 1218+ tests across 34 test files
 ├── demo/                    # 3 runnable demo scenarios with CLI
 ├── scripts/                 # Deployment and utility scripts
 ├── ARCHITECTURE.md          # Detailed system design
@@ -415,13 +416,20 @@ HireWire is live on Azure Container Apps:
 cp .env.example .env
 # Fill in your Azure credentials
 
-# Build, push, and deploy in one step
-./scripts/deploy.sh
+# Option 1: Bicep-based deployment (provisions all Azure resources)
+./deploy/azure/deploy.sh              # Full deploy: infra + build + push + app + smoke
+./deploy/azure/deploy.sh infra        # Deploy Azure infrastructure only (Bicep)
+./deploy/azure/deploy.sh smoke        # Run smoke tests against deployed app
 
-# Or run individual steps
-./scripts/deploy.sh build    # Build Docker image
-./scripts/deploy.sh push     # Push to ACR
-./scripts/deploy.sh deploy   # Deploy to Container Apps
+# Option 2: Script-based deployment (existing resources)
+./scripts/deploy.sh                   # Build, push, and deploy
+./scripts/deploy.sh build             # Build Docker image
+./scripts/deploy.sh push              # Push to ACR
+./scripts/deploy.sh deploy            # Deploy to Container Apps
+
+# Local development with Docker Compose
+docker compose up --build              # Build and start locally
+docker compose up -d                   # Start in background
 ```
 
 ### Azure Resources
