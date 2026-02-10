@@ -36,15 +36,15 @@ class TestDashboardServing:
     @pytest.mark.asyncio
     async def test_root_contains_dashboard_panels(self, client):
         resp = await client.get("/")
-        assert "Task Feed" in resp.text
+        assert "Activity Feed" in resp.text
         assert "Agent Roster" in resp.text
         assert "Payment Log" in resp.text
-        assert "System Stats" in resp.text
+        assert "Submit Task" in resp.text
 
     @pytest.mark.asyncio
     async def test_root_contains_submit_form(self, client):
         resp = await client.get("/")
-        assert "task-input" in resp.text
+        assert "inline-task-input" in resp.text
         assert "submit-btn" in resp.text
 
     @pytest.mark.asyncio
@@ -57,7 +57,7 @@ class TestDashboardServing:
     async def test_root_has_auto_refresh(self, client):
         resp = await client.get("/")
         assert "setInterval" in resp.text
-        assert "refreshAll" in resp.text
+        assert "refreshOverview" in resp.text
 
 
 class TestListTasksEndpoint:

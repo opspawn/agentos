@@ -355,17 +355,17 @@ class TestDashboardMetricsTab:
         resp = await client.get("/")
         assert resp.status_code == 200
         html = resp.text
-        assert "switchTab" in html
+        assert "navigateTo" in html
         assert "metrics" in html.lower()
 
     @pytest.mark.asyncio
     async def test_dashboard_has_leaderboard(self, client):
         resp = await client.get("/")
         html = resp.text
-        assert "agent-leaderboard" in html
+        assert "spend-by-agent-chart" in html
 
     @pytest.mark.asyncio
     async def test_dashboard_has_roi_panel(self, client):
         resp = await client.get("/")
         html = resp.text
-        assert "roi-panel" in html
+        assert "perf-chart" in html

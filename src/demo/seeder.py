@@ -2,17 +2,27 @@
 
 Populates tasks, payments, and agents so judges see a rich dashboard
 on first load rather than an empty screen.
+
+When HIREWIRE_DEMO=1, the startup hook calls seed_demo_data() which:
+1. Registers external demo agents
+2. Creates completed tasks with REAL GPT-4o responses (when Azure is available)
+3. Records x402 payment transactions for each task
+4. Creates a few active/pending tasks for visual variety
 """
 
 from __future__ import annotations
 
+import logging
 import random
 import time
 import uuid
+from typing import Any
 
 from src.mcp_servers.payment_hub import ledger
 from src.mcp_servers.registry_server import registry, AgentCard
 from src.storage import get_storage
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Demo agents (external mock agents beyond the 3 built-in)
@@ -44,36 +54,108 @@ DEMO_AGENTS: list[dict] = [
 ]
 
 # ---------------------------------------------------------------------------
-# Completed demo tasks
+# Demo scenarios — realistic business tasks with agent routing
 # ---------------------------------------------------------------------------
 
-COMPLETED_TASKS: list[dict] = [
-    {"description": "Build landing page for AI startup", "budget": 3.50, "workflow": "ceo"},
-    {"description": "Analyze competitor pricing across 5 SaaS tools", "budget": 2.00, "workflow": "ceo"},
-    {"description": "Design logo and brand identity kit", "budget": 1.50, "workflow": "ceo"},
-    {"description": "Write API documentation for payment endpoints", "budget": 1.00, "workflow": "ceo"},
-    {"description": "Deploy microservice to production with CI/CD", "budget": 5.00, "workflow": "ceo"},
+DEMO_SCENARIOS: list[dict[str, Any]] = [
+    {
+        "description": "Analyze competitor pricing across top 5 AI agent platforms",
+        "budget": 2.50,
+        "agents": ["research", "analyst-ext-001"],
+        "task_type": "research",
+        "gpt_prompt": (
+            "You are a market research analyst. Analyze competitor pricing for AI agent platforms. "
+            "Compare pricing models of Fixie, CrewAI, AutoGen, LangGraph, and SuperAGI. "
+            "Return a concise competitive analysis with pricing tiers and key differentiators. "
+            "Keep response under 200 words."
+        ),
+    },
+    {
+        "description": "Design landing page mockup for HireWire agent marketplace",
+        "budget": 3.00,
+        "agents": ["designer-ext-001", "builder"],
+        "task_type": "build",
+        "gpt_prompt": (
+            "You are a UI/UX designer. Describe a landing page design for HireWire, an AI agent marketplace "
+            "where agents can hire other agents using x402 micropayments. Include: hero section copy, "
+            "3 key feature sections, CTA button text, and color scheme recommendations. "
+            "Keep response under 200 words."
+        ),
+    },
+    {
+        "description": "Research market trends in autonomous AI agent infrastructure",
+        "budget": 1.75,
+        "agents": ["research"],
+        "task_type": "research",
+        "gpt_prompt": (
+            "You are a technology analyst. Summarize the current market trends in AI agent infrastructure "
+            "for Q1 2026. Cover: agent-to-agent protocols, micropayment adoption, MCP tool ecosystem, "
+            "and enterprise agent orchestration. Include 3 key insights. "
+            "Keep response under 200 words."
+        ),
+    },
+    {
+        "description": "Build automated testing pipeline for x402 payment verification",
+        "budget": 4.00,
+        "agents": ["builder", "research"],
+        "task_type": "research+build",
+        "gpt_prompt": (
+            "You are a senior software engineer. Outline a testing pipeline for x402 micropayment verification "
+            "in an agent marketplace. Cover: unit tests for escrow logic, integration tests for payment flow, "
+            "mock facilitator setup, and CI/CD integration steps. "
+            "Keep response under 200 words."
+        ),
+    },
+    {
+        "description": "Evaluate agent scoring algorithms for marketplace optimization",
+        "budget": 2.00,
+        "agents": ["analyst-ext-001", "research"],
+        "task_type": "research",
+        "gpt_prompt": (
+            "You are a data scientist. Compare Thompson Sampling vs UCB1 vs Epsilon-Greedy for "
+            "optimizing agent hiring in a marketplace. Consider: convergence speed, exploration/exploitation "
+            "tradeoff, cold start handling, and computational cost. Recommend the best approach. "
+            "Keep response under 200 words."
+        ),
+    },
 ]
 
-# ---------------------------------------------------------------------------
-# Active demo tasks (pending/running)
-# ---------------------------------------------------------------------------
-
+# Active tasks (pending/running, no GPT-4o needed)
 ACTIVE_TASKS: list[dict] = [
     {"description": "Research best vector databases for agent memory", "budget": 1.50, "status": "running"},
     {"description": "Build real-time WebSocket dashboard for agent metrics", "budget": 4.00, "status": "running"},
     {"description": "Evaluate agent marketplace pricing strategies", "budget": 0.75, "status": "pending"},
 ]
 
-# ---------------------------------------------------------------------------
-# Agent names used for payments
-# ---------------------------------------------------------------------------
-
 AGENT_NAMES = ["ceo", "builder", "research", "designer-ext-001", "designer-ext-002", "analyst-ext-001"]
+
+
+def _get_gpt4o_response(prompt: str) -> str | None:
+    """Call Azure OpenAI GPT-4o for a real response. Returns None if unavailable."""
+    try:
+        from src.framework.azure_llm import azure_available, get_azure_llm
+        if not azure_available():
+            return None
+        provider = get_azure_llm()
+        result = provider.chat_completion(
+            messages=[
+                {"role": "system", "content": "You are a HireWire AI agent providing professional analysis. Be concise and actionable."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.7,
+            max_tokens=300,
+        )
+        return result.get("content", "")
+    except Exception as e:
+        logger.warning("GPT-4o call failed during demo seed: %s", e)
+        return None
 
 
 def seed_demo_data() -> dict:
     """Populate the database with realistic demo data.
+
+    If Azure OpenAI (GPT-4o) is available, tasks will contain real AI-generated
+    responses. Otherwise, falls back to structured mock results.
 
     Returns a summary dict with counts of seeded items.
     """
@@ -82,6 +164,7 @@ def seed_demo_data() -> dict:
     tasks_created = 0
     payments_created = 0
     agents_registered = 0
+    gpt4o_responses = 0
 
     # 1. Register additional demo agents
     for agent_def in DEMO_AGENTS:
@@ -99,45 +182,83 @@ def seed_demo_data() -> dict:
             ))
             agents_registered += 1
 
-    # 2. Create completed tasks (spread over the last hour)
-    for i, t in enumerate(COMPLETED_TASKS):
+    # 2. Create completed tasks with real GPT-4o responses
+    for i, scenario in enumerate(DEMO_SCENARIOS):
         task_id = f"demo_{uuid.uuid4().hex[:8]}"
         created = now - (3600 - i * 600)  # spaced ~10 min apart over last hour
+
+        # Get real GPT-4o response
+        gpt_response = _get_gpt4o_response(scenario["gpt_prompt"])
+        if gpt_response:
+            gpt4o_responses += 1
+
+        # Build rich result
+        primary_agent = scenario["agents"][0]
+        secondary_agent = scenario["agents"][1] if len(scenario["agents"]) > 1 else None
+        subtasks = [
+            {
+                "id": "s1",
+                "description": f"Phase 1: Research & analysis for '{scenario['description']}'",
+                "agent": primary_agent,
+                "status": "completed",
+            },
+        ]
+        if secondary_agent:
+            subtasks.append({
+                "id": "s2",
+                "description": f"Phase 2: Execute & deliver for '{scenario['description']}'",
+                "agent": secondary_agent,
+                "status": "completed",
+            })
+
+        estimated_cost = round(scenario["budget"] * random.uniform(0.3, 0.7), 4)
+
+        result = {
+            "original_task": scenario["description"],
+            "subtasks": subtasks,
+            "execution_order": "sequential" if secondary_agent else "parallel",
+            "estimated_cost": estimated_cost,
+            "complexity": "moderate" if scenario["budget"] < 3.0 else "complex",
+            "task_type": scenario["task_type"],
+            "status": "completed",
+            "agent_response": gpt_response or f"Analysis complete for: {scenario['description']}. Key findings documented.",
+            "agent_response_preview": (gpt_response or "Analysis complete.")[:150],
+            "model": "gpt-4o" if gpt_response else "mock",
+            "response_time_ms": round(random.uniform(800, 3500), 0),
+        }
+
         storage.save_task(
             task_id=task_id,
-            description=t["description"],
-            workflow=t["workflow"],
-            budget_usd=t["budget"],
+            description=scenario["description"],
+            workflow="ceo",
+            budget_usd=scenario["budget"],
             status="completed",
             created_at=created,
-            result={
-                "original_task": t["description"],
-                "subtasks": [
-                    {"id": "s1", "description": f"Phase 1: {t['description']}", "agent": "research"},
-                    {"id": "s2", "description": f"Phase 2: Execute {t['description']}", "agent": "builder"},
-                ],
-                "execution_order": "sequential",
-                "estimated_cost": round(t["budget"] * 0.6, 2),
-                "complexity": "moderate",
-                "status": "planned",
-            },
+            result=result,
         )
         tasks_created += 1
 
-        # Create 1-2 payment transactions per completed task
-        cost = round(t["budget"] * random.uniform(0.3, 0.7), 4)
-        ledger.allocate_budget(task_id, t["budget"])
+        # Create payment transactions
+        ledger.allocate_budget(task_id, scenario["budget"])
 
-        # Payment from CEO to worker
-        to_agent = random.choice(["builder", "research", "designer-ext-001", "analyst-ext-001"])
-        ledger.record_payment(from_agent="ceo", to_agent=to_agent, amount=cost, task_id=task_id)
+        # Primary agent payment
+        ledger.record_payment(
+            from_agent="ceo",
+            to_agent=primary_agent,
+            amount=estimated_cost,
+            task_id=task_id,
+        )
         payments_created += 1
 
-        # Sometimes a second payment for multi-agent tasks
-        if random.random() > 0.5:
-            cost2 = round(cost * random.uniform(0.2, 0.5), 4)
-            to2 = random.choice([a for a in AGENT_NAMES if a not in ("ceo", to_agent)])
-            ledger.record_payment(from_agent="ceo", to_agent=to2, amount=cost2, task_id=task_id)
+        # Secondary agent payment (x402 external)
+        if secondary_agent and secondary_agent.startswith(("designer", "analyst")):
+            ext_cost = round(estimated_cost * random.uniform(0.2, 0.5), 4)
+            ledger.record_payment(
+                from_agent="ceo",
+                to_agent=secondary_agent,
+                amount=ext_cost,
+                task_id=task_id,
+            )
             payments_created += 1
 
     # 3. Create active tasks
@@ -154,7 +275,6 @@ def seed_demo_data() -> dict:
         )
         tasks_created += 1
 
-        # Running tasks may have a partial payment
         if t["status"] == "running":
             partial = round(t["budget"] * 0.2, 4)
             ledger.allocate_budget(task_id, t["budget"])
@@ -166,8 +286,14 @@ def seed_demo_data() -> dict:
             )
             payments_created += 1
 
+    logger.info(
+        "Demo seeded: %d tasks, %d payments, %d agents, %d GPT-4o responses",
+        tasks_created, payments_created, agents_registered, gpt4o_responses,
+    )
+
     return {
         "tasks_created": tasks_created,
         "payments_created": payments_created,
         "agents_registered": agents_registered,
+        "gpt4o_responses": gpt4o_responses,
     }

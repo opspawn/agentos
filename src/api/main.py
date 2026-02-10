@@ -6,6 +6,7 @@ Provides interactive REST endpoints for judges / demos:
 - GET  /transactions — list payment transactions
 - GET  /agents       — list available agents
 - GET  /health       — system health / stats
+- GET  /activity     — recent activity feed for dashboard
 - GET  /demo         — run a pre-configured demo scenario
 - GET  /demo/start   — start live demo runner
 - GET  /demo/stop    — stop live demo runner
@@ -19,10 +20,11 @@ Start standalone:
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
+import random
 import time
 import uuid
-from dataclasses import asdict
 from typing import Any
 
 from pathlib import Path
@@ -42,6 +44,8 @@ from src.metrics.collector import get_metrics_collector
 from src.metrics.analytics import CostAnalyzer, ROICalculator
 from src.storage import get_storage
 
+logger = logging.getLogger(__name__)
+
 # ── App ──────────────────────────────────────────────────────────────────────
 
 _START_TIME = time.time()
@@ -49,7 +53,7 @@ _START_TIME = time.time()
 app = FastAPI(
     title="HireWire Dashboard",
     description="Interactive dashboard API for HireWire — Microsoft AI Dev Days",
-    version="1.0.0",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -111,8 +115,18 @@ class HealthResponse(BaseModel):
     tasks_total: int
     tasks_completed: int
     tasks_pending: int
+    tasks_running: int
     agents_count: int
     total_spent_usdc: float
+    gpt4o_available: bool
+
+
+class ActivityItem(BaseModel):
+    type: str  # green, blue, accent, yellow
+    icon: str
+    text: str
+    time: str
+    timestamp: float
 
 
 class DemoResponse(BaseModel):
@@ -128,35 +142,119 @@ class DemoResponse(BaseModel):
 
 _demo_runner = DemoRunner()
 
+# ── GPT-4o helper ────────────────────────────────────────────────────────────
+
+
+def _get_gpt4o_response(task_description: str, agent_role: str = "builder") -> str | None:
+    """Call Azure OpenAI GPT-4o for a real task response."""
+    try:
+        from src.framework.azure_llm import azure_available, get_azure_llm
+        if not azure_available():
+            return None
+
+        role_prompts = {
+            "builder": "You are an expert software engineer. Provide a concise implementation plan and key deliverables.",
+            "research": "You are a research analyst. Provide concise findings with key data points and recommendations.",
+            "designer-ext-001": "You are a UI/UX designer. Describe the design approach, visual elements, and user experience improvements.",
+            "designer-ext-002": "You are a brand designer. Describe branding elements, visual identity, and marketing materials.",
+            "analyst-ext-001": "You are a data analyst. Provide quantitative analysis, key metrics, and strategic insights.",
+        }
+
+        system_prompt = role_prompts.get(agent_role, role_prompts["builder"])
+        provider = get_azure_llm()
+        result = provider.chat_completion(
+            messages=[
+                {"role": "system", "content": f"{system_prompt} Be concise (under 150 words). Format with bullet points."},
+                {"role": "user", "content": f"Complete this task: {task_description}"},
+            ],
+            temperature=0.7,
+            max_tokens=250,
+        )
+        return result.get("content", "")
+    except Exception as e:
+        logger.warning("GPT-4o call failed: %s", e)
+        return None
+
+
+def _detect_agent(description: str) -> str:
+    """Detect which agent should handle a task based on keywords."""
+    desc_lower = description.lower()
+    research_keywords = {"search", "find", "compare", "analyze", "research", "investigate",
+                         "evaluate", "review", "assess", "study", "explore", "report", "survey"}
+    design_keywords = {"design", "mockup", "ui", "ux", "landing", "brand", "visual", "logo"}
+    analysis_keywords = {"data", "pricing", "market", "financial", "metrics", "benchmark", "competitor"}
+
+    if any(kw in desc_lower for kw in design_keywords):
+        return "designer-ext-001"
+    if any(kw in desc_lower for kw in analysis_keywords):
+        return "analyst-ext-001"
+    if any(kw in desc_lower for kw in research_keywords):
+        return "research"
+    return "builder"
+
+
 # ── Background task execution ────────────────────────────────────────────────
 
 _running_tasks: dict[str, asyncio.Task] = {}
 
 
 async def _execute_task(task_id: str, description: str, budget: float) -> None:
-    """Analyse the task via CEO tools and persist the result."""
+    """Execute a task via CEO orchestration with real GPT-4o responses."""
     storage = get_storage()
     storage.update_task_status(task_id, "running")
     t0 = time.time()
     try:
+        # 1. CEO analyzes the task
         analysis = await analyze_task(description)
-        # Record a simulated payment for the estimated cost
+
+        # 2. Route to appropriate agent
+        primary_agent = _detect_agent(description)
         estimated_cost = analysis.get("estimated_cost", 0.0)
+
+        # 3. Get REAL GPT-4o response for the agent's work
+        gpt_response = await asyncio.get_event_loop().run_in_executor(
+            None, _get_gpt4o_response, description, primary_agent
+        )
+
+        elapsed_ms = (time.time() - t0) * 1000
+
+        # 4. Enrich analysis with agent response
+        analysis["agent_response"] = gpt_response or f"Task '{description}' completed by {primary_agent}."
+        analysis["agent_response_preview"] = (gpt_response or "Task completed.")[:150]
+        analysis["assigned_agent"] = primary_agent
+        analysis["model"] = "gpt-4o" if gpt_response else "mock"
+        analysis["response_time_ms"] = round(elapsed_ms, 0)
+
+        # 5. Record budget and payment
         if estimated_cost > 0:
             ledger.allocate_budget(task_id, budget)
+            payment_amount = min(estimated_cost, budget)
             ledger.record_payment(
                 from_agent="ceo",
-                to_agent="builder",
-                amount=min(estimated_cost, budget),
+                to_agent=primary_agent,
+                amount=payment_amount,
                 task_id=task_id,
             )
+
+            # If external agent, record x402 payment
+            if primary_agent.startswith(("designer", "analyst")):
+                ext_fee = round(payment_amount * 0.15, 4)  # 15% facilitator fee
+                analysis["x402_payment"] = {
+                    "agent": primary_agent,
+                    "amount_usdc": payment_amount,
+                    "facilitator_fee": ext_fee,
+                    "network": "eip155:8453",
+                    "protocol": "x402",
+                }
+
+        # 6. Complete the task
         storage.update_task_status(task_id, "completed", result=analysis)
-        # Record metrics
-        elapsed_ms = (time.time() - t0) * 1000
+
+        # 7. Record metrics
         mc = get_metrics_collector()
         mc.update_metrics({
             "task_id": task_id,
-            "agent_id": "ceo",
+            "agent_id": primary_agent,
             "task_type": analysis.get("task_type", "general"),
             "status": "success",
             "cost_usdc": estimated_cost,
@@ -164,7 +262,7 @@ async def _execute_task(task_id: str, description: str, budget: float) -> None:
         })
         if estimated_cost > 0:
             mc.record_payment({
-                "to_agent": "builder",
+                "to_agent": primary_agent,
                 "task_id": task_id,
                 "amount_usdc": min(estimated_cost, budget),
                 "status": "completed",
@@ -297,18 +395,22 @@ async def list_agents():
 @app.get("/health", response_model=HealthResponse)
 async def health():
     """Health check with system stats."""
+    from src.framework.azure_llm import azure_available
     storage = get_storage()
     total = storage.count_tasks()
     completed = storage.count_tasks(status="completed")
     pending = storage.count_tasks(status="pending")
+    running = storage.count_tasks(status="running")
     return HealthResponse(
         status="healthy",
         uptime_seconds=round(time.time() - _START_TIME, 2),
         tasks_total=total,
         tasks_completed=completed,
         tasks_pending=pending,
+        tasks_running=running,
         agents_count=len(registry.list_all()),
         total_spent_usdc=ledger.total_spent(),
+        gpt4o_available=azure_available(),
     )
 
 
@@ -347,6 +449,81 @@ async def health_azure():
     }
 
 
+# ── Activity Feed endpoint ────────────────────────────────────────────────
+
+
+@app.get("/activity", response_model=list[ActivityItem])
+async def get_activity():
+    """Generate a real-time activity feed from tasks, transactions, and agents."""
+    storage = get_storage()
+    activities: list[dict[str, Any]] = []
+    now = time.time()
+
+    # Recent tasks
+    tasks = storage.list_tasks()
+    for t in tasks[:15]:
+        age = now - t["created_at"]
+        time_str = _format_age(age)
+        result = t.get("result") or {}
+        agent = result.get("assigned_agent", "builder")
+        preview = result.get("agent_response_preview", "")
+
+        if t["status"] == "completed":
+            text = f"<strong>{agent.title()}</strong> completed task <em>\"{t['description'][:60]}\"</em>"
+            if preview:
+                text += f"<br><span style='font-size:11px;color:var(--text-muted)'>{preview[:100]}...</span>"
+            activities.append({
+                "type": "green", "icon": "\u2713", "text": text,
+                "time": time_str, "timestamp": t["created_at"],
+            })
+        elif t["status"] == "running":
+            activities.append({
+                "type": "yellow", "icon": "\u25B6", "text": f"<strong>CEO</strong> dispatched task to <strong>{agent}</strong>: <em>\"{t['description'][:50]}\"</em>",
+                "time": time_str, "timestamp": t["created_at"],
+            })
+        elif t["status"] == "pending":
+            activities.append({
+                "type": "blue", "icon": "+", "text": f"New task submitted: <em>\"{t['description'][:60]}\"</em>",
+                "time": time_str, "timestamp": t["created_at"],
+            })
+
+    # Recent payments
+    txs = ledger.get_transactions()
+    for tx in txs[-10:]:
+        age = now - tx.timestamp
+        time_str = _format_age(age)
+        is_external = tx.to_agent.startswith(("designer", "analyst"))
+        if is_external:
+            text = f"x402 payment: <strong>${tx.amount_usdc:.4f} USDC</strong> to <strong>{tx.to_agent}</strong>"
+        else:
+            text = f"Payment: <strong>${tx.amount_usdc:.4f} USDC</strong> released to <strong>{tx.to_agent}</strong>"
+        activities.append({
+            "type": "accent", "icon": "$", "text": text,
+            "time": time_str, "timestamp": tx.timestamp,
+        })
+
+    # Sort by timestamp (newest first) and return top 20
+    activities.sort(key=lambda a: a["timestamp"], reverse=True)
+    return [
+        ActivityItem(
+            type=a["type"], icon=a["icon"], text=a["text"],
+            time=a["time"], timestamp=a["timestamp"],
+        )
+        for a in activities[:20]
+    ]
+
+
+def _format_age(seconds: float) -> str:
+    """Format seconds into human-readable relative time."""
+    if seconds < 60:
+        return f"{int(seconds)}s ago"
+    if seconds < 3600:
+        return f"{int(seconds / 60)}m ago"
+    if seconds < 86400:
+        return f"{int(seconds / 3600)}h ago"
+    return f"{int(seconds / 86400)}d ago"
+
+
 # ── Metrics endpoints ──────────────────────────────────────────────────────
 
 
@@ -380,6 +557,66 @@ async def cost_metrics():
     }
 
 
+# ── Dashboard stats endpoint ──────────────────────────────────────────────
+
+
+@app.get("/stats")
+async def dashboard_stats():
+    """Aggregated stats for the dashboard overview."""
+    storage = get_storage()
+    txs = ledger.get_transactions()
+    now = time.time()
+
+    total_tasks = storage.count_tasks()
+    completed = storage.count_tasks(status="completed")
+    running = storage.count_tasks(status="running")
+    pending = storage.count_tasks(status="pending")
+    total_spent = ledger.total_spent()
+
+    # Agent-level spend breakdown
+    agent_spend: dict[str, float] = {}
+    for tx in txs:
+        agent_spend[tx.to_agent] = agent_spend.get(tx.to_agent, 0) + tx.amount_usdc
+
+    # External vs internal spend
+    ext_spend = sum(v for k, v in agent_spend.items() if k.startswith(("designer", "analyst")))
+    int_spend = total_spent - ext_spend
+
+    # Completion rate
+    completion_rate = (completed / total_tasks * 100) if total_tasks > 0 else 0
+
+    # Average response time from completed tasks
+    tasks = storage.list_tasks()
+    response_times = []
+    gpt4o_count = 0
+    for t in tasks:
+        result = t.get("result") or {}
+        rt = result.get("response_time_ms")
+        if rt:
+            response_times.append(rt)
+        if result.get("model") == "gpt-4o":
+            gpt4o_count += 1
+
+    avg_response_ms = sum(response_times) / len(response_times) if response_times else 0
+
+    return {
+        "total_tasks": total_tasks,
+        "completed": completed,
+        "running": running,
+        "pending": pending,
+        "total_spent_usdc": round(total_spent, 4),
+        "external_spend_usdc": round(ext_spend, 4),
+        "internal_spend_usdc": round(int_spend, 4),
+        "agent_spend": agent_spend,
+        "agents_count": len(registry.list_all()),
+        "transaction_count": len(txs),
+        "completion_rate": round(completion_rate, 1),
+        "avg_response_ms": round(avg_response_ms, 0),
+        "gpt4o_tasks": gpt4o_count,
+        "uptime_seconds": round(now - _START_TIME, 0),
+    }
+
+
 # ── Demo endpoints ─────────────────────────────────────────────────────────
 
 
@@ -394,6 +631,13 @@ async def run_demo():
 
     # Analyze the task
     analysis = await analyze_task(demo_description)
+
+    # Get real GPT-4o response
+    gpt_response = _get_gpt4o_response(demo_description, "builder")
+    if gpt_response:
+        analysis["agent_response"] = gpt_response
+        analysis["agent_response_preview"] = gpt_response[:150]
+        analysis["model"] = "gpt-4o"
 
     # Create and persist the task
     task_id = f"demo_{uuid.uuid4().hex[:8]}"
@@ -480,4 +724,6 @@ async def demo_status():
 async def _on_startup():
     """Auto-seed demo data if HIREWIRE_DEMO=1."""
     if os.environ.get("HIREWIRE_DEMO") == "1":
-        seed_demo_data()
+        logger.info("HIREWIRE_DEMO=1: Seeding demo data on startup...")
+        result = seed_demo_data()
+        logger.info("Demo seed complete: %s", result)

@@ -5,7 +5,8 @@ Covers:
 - DemoRunner start/stop lifecycle
 - /demo/start, /demo/stop, /demo/seed, /demo/status endpoints
 - Auto-seed on startup with HIREWIRE_DEMO=1
-- Target: 15+ new tests
+- /activity and /stats endpoints
+- Target: 20+ tests
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ from src.api.main import app, _demo_runner, _running_tasks
 from src.demo.runner import DemoRunner, DEMO_TASK_LIST
 from src.demo.seeder import (
     seed_demo_data,
-    COMPLETED_TASKS,
+    DEMO_SCENARIOS,
     ACTIVE_TASKS,
     DEMO_AGENTS,
 )
@@ -97,12 +98,12 @@ def _clean_demo_agents():
 class TestSeeder:
     def test_seed_creates_tasks(self):
         result = seed_demo_data()
-        expected = len(COMPLETED_TASKS) + len(ACTIVE_TASKS)
+        expected = len(DEMO_SCENARIOS) + len(ACTIVE_TASKS)
         assert result["tasks_created"] == expected
 
     def test_seed_creates_payments(self):
         result = seed_demo_data()
-        assert result["payments_created"] >= len(COMPLETED_TASKS)
+        assert result["payments_created"] >= len(DEMO_SCENARIOS)
 
     def test_seed_registers_agents(self):
         result = seed_demo_data()
@@ -112,15 +113,35 @@ class TestSeeder:
         seed_demo_data()
         storage = get_storage()
         all_tasks = storage.list_tasks()
-        assert len(all_tasks) >= len(COMPLETED_TASKS) + len(ACTIVE_TASKS)
+        assert len(all_tasks) >= len(DEMO_SCENARIOS) + len(ACTIVE_TASKS)
 
     def test_seed_completed_tasks_have_results(self):
         seed_demo_data()
         storage = get_storage()
         completed = storage.list_tasks(status="completed")
-        assert len(completed) >= len(COMPLETED_TASKS)
+        assert len(completed) >= len(DEMO_SCENARIOS)
         for t in completed:
             assert t["result"] is not None
+
+    def test_seed_completed_tasks_have_agent_response(self):
+        """Completed tasks must have agent_response field in result."""
+        seed_demo_data()
+        storage = get_storage()
+        completed = storage.list_tasks(status="completed")
+        for t in completed:
+            result = t["result"]
+            assert "agent_response" in result
+            assert len(result["agent_response"]) > 0
+
+    def test_seed_completed_tasks_have_preview(self):
+        """Completed tasks must have agent_response_preview."""
+        seed_demo_data()
+        storage = get_storage()
+        completed = storage.list_tasks(status="completed")
+        for t in completed:
+            result = t["result"]
+            assert "agent_response_preview" in result
+            assert len(result["agent_response_preview"]) <= 150
 
     def test_seed_running_tasks_exist(self):
         seed_demo_data()
@@ -132,7 +153,7 @@ class TestSeeder:
     def test_seed_transactions_in_ledger(self):
         seed_demo_data()
         txs = ledger.get_transactions()
-        assert len(txs) >= len(COMPLETED_TASKS)
+        assert len(txs) >= len(DEMO_SCENARIOS)
 
     def test_seed_agents_in_registry(self):
         seed_demo_data()
@@ -151,6 +172,13 @@ class TestSeeder:
         storage = get_storage()
         for t in storage.list_tasks():
             assert 0.50 <= t["budget_usd"] <= 5.00
+
+    def test_seed_returns_gpt4o_count(self):
+        """Seed result includes gpt4o_responses count."""
+        result = seed_demo_data()
+        assert "gpt4o_responses" in result
+        # In test mode (mock), this will be 0
+        assert result["gpt4o_responses"] >= 0
 
 
 # ---------------------------------------------------------------------------
@@ -271,8 +299,58 @@ class TestDemoEndpoints:
         await client.get("/demo/seed")
         resp = await client.get("/health")
         data = resp.json()
-        assert data["tasks_total"] >= len(COMPLETED_TASKS)
+        assert data["tasks_total"] >= len(DEMO_SCENARIOS)
         assert data["agents_count"] >= 3  # built-in + demo agents
+
+
+# ---------------------------------------------------------------------------
+# Activity and Stats endpoint tests
+# ---------------------------------------------------------------------------
+
+
+class TestActivityAndStats:
+    @pytest.mark.asyncio
+    async def test_activity_endpoint_empty(self, client):
+        resp = await client.get("/activity")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data, list)
+
+    @pytest.mark.asyncio
+    async def test_activity_endpoint_after_seed(self, client):
+        await client.get("/demo/seed")
+        resp = await client.get("/activity")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data) > 0
+        # Activity items have required fields
+        for item in data:
+            assert "type" in item
+            assert "icon" in item
+            assert "text" in item
+            assert "time" in item
+
+    @pytest.mark.asyncio
+    async def test_stats_endpoint(self, client):
+        await client.get("/demo/seed")
+        resp = await client.get("/stats")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "total_tasks" in data
+        assert "completed" in data
+        assert "total_spent_usdc" in data
+        assert "agent_spend" in data
+        assert "completion_rate" in data
+        assert data["total_tasks"] > 0
+
+    @pytest.mark.asyncio
+    async def test_health_includes_gpt4o(self, client):
+        """Health endpoint includes gpt4o_available field."""
+        resp = await client.get("/health")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "gpt4o_available" in data
+        assert "tasks_running" in data
 
 
 # ---------------------------------------------------------------------------
@@ -290,7 +368,7 @@ class TestAutoSeed:
         await _on_startup()
         storage = get_storage()
         tasks = storage.list_tasks()
-        assert len(tasks) >= len(COMPLETED_TASKS)
+        assert len(tasks) >= len(DEMO_SCENARIOS)
 
     @pytest.mark.asyncio
     async def test_startup_without_demo_env(self, client, monkeypatch):

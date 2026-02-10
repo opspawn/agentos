@@ -64,6 +64,8 @@
   .top-bar-left { display: flex; align-items: center; gap: 12px; }
   .page-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
   .top-bar-right { display: flex; align-items: center; gap: 10px; }
+  .gpt4o-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; background: var(--green-dim); color: var(--green); text-transform: uppercase; letter-spacing: 0.05em; display: none; }
+  .gpt4o-badge.active { display: inline-block; }
   .demo-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; background: var(--yellow-dim); color: var(--yellow); text-transform: uppercase; letter-spacing: 0.05em; display: none; }
   .demo-badge.active { display: inline-block; }
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); transition: all 0.15s ease; }
@@ -162,11 +164,8 @@
   .flow-dot.filled { background: var(--accent); }
   .flow-text { font-size: 12px; color: var(--text-secondary); }
   .flow-text strong { color: var(--text); }
-  .kb-entry { padding: 14px 18px; border-bottom: 1px solid var(--border); }
-  .kb-entry:last-child { border-bottom: none; }
-  .kb-entry-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-  .kb-entry-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-  .kb-entry-meta { display: flex; gap: 10px; margin-top: 6px; }
+  .response-preview { font-size: 12px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; margin-top: 6px; line-height: 1.4; max-height: 80px; overflow: hidden; }
+  .gpt4o-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; background: var(--green-dim); color: var(--green); letter-spacing: 0.05em; margin-left: 6px; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -185,6 +184,11 @@
   .escrow-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg); border-radius: 8px; margin-bottom: 8px; }
   .escrow-bar-fill { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
   .escrow-bar-fill .fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+  .kb-entry { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .kb-entry:last-child { border-bottom: none; }
+  .kb-entry-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .kb-entry-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .kb-entry-meta { display: flex; gap: 10px; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -195,9 +199,8 @@
       <div class="nav-section">
         <div class="nav-section-label">Platform</div>
         <div class="nav-item active" data-page="overview" onclick="navigateTo('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</div>
-        <div class="nav-item" data-page="agents" onclick="navigateTo('agents')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Agents<span class="nav-badge" id="nav-agent-count">3</span></div>
-        <div class="nav-item" data-page="marketplace" onclick="navigateTo('marketplace')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 7v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-3-5z"/><line x1="3" y1="7" x2="21" y2="7"/><path d="M16 11a4 4 0 0 1-8 0"/></svg>Marketplace</div>
-        <div class="nav-item" data-page="workflows" onclick="navigateTo('workflows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Workflows</div>
+        <div class="nav-item" data-page="agents" onclick="navigateTo('agents')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Agents<span class="nav-badge" id="nav-agent-count">5</span></div>
+        <div class="nav-item" data-page="tasks" onclick="navigateTo('tasks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Tasks<span class="nav-badge" id="nav-task-count">0</span></div>
       </div>
       <div class="nav-section">
         <div class="nav-section-label">Finance</div>
@@ -206,14 +209,13 @@
       <div class="nav-section">
         <div class="nav-section-label">Intelligence</div>
         <div class="nav-item" data-page="metrics" onclick="navigateTo('metrics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Metrics</div>
-        <div class="nav-item" data-page="learning" onclick="navigateTo('learning')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Learning</div>
       </div>
     </nav>
     <div class="sidebar-footer"><div class="system-status"><div class="status-dot" id="sidebar-status-dot"></div><span id="sidebar-status-text">connecting...</span></div></div>
   </aside>
   <div class="main-content">
     <div class="top-bar">
-      <div class="top-bar-left"><span class="page-title" id="page-title">Overview</span><span class="demo-badge" id="demo-badge">DEMO MODE</span></div>
+      <div class="top-bar-left"><span class="page-title" id="page-title">Overview</span><span class="gpt4o-badge" id="gpt4o-badge">GPT-4o LIVE</span><span class="demo-badge" id="demo-badge">DEMO MODE</span></div>
       <div class="top-bar-right">
         <button class="btn btn-sm" id="demo-btn" onclick="toggleDemo()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Start Demo</button>
         <button class="btn btn-sm btn-primary" onclick="openTaskModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Task</button>
@@ -222,82 +224,60 @@
     <div class="page-area">
       <!-- OVERVIEW -->
       <div class="page active" id="page-overview">
-        <!-- System Stats -->
         <div class="stat-grid">
-          <div class="stat-card"><div class="stat-label">Total Agents</div><div class="stat-value accent" id="stat-agents">--</div><div class="stat-change up">+2 this sprint</div></div>
-          <div class="stat-card"><div class="stat-label">Active Workflows</div><div class="stat-value" id="stat-workflows">--</div><div class="stat-change up">3 running</div></div>
-          <div class="stat-card"><div class="stat-label">Total Jobs</div><div class="stat-value" id="stat-jobs">--</div><div class="stat-change up">+14 today</div></div>
-          <div class="stat-card"><div class="stat-label">USDC Earned</div><div class="stat-value green" id="stat-earned">--</div><div class="stat-change up">via x402</div></div>
+          <div class="stat-card"><div class="stat-label">Total Agents</div><div class="stat-value accent" id="stat-agents">--</div><div class="stat-change up" id="stat-agents-sub">3 internal + 2 external</div></div>
+          <div class="stat-card"><div class="stat-label">Tasks Completed</div><div class="stat-value green" id="stat-completed">--</div><div class="stat-change up" id="stat-completion-rate">--</div></div>
+          <div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value" id="stat-jobs">--</div><div class="stat-change" id="stat-running-info">--</div></div>
+          <div class="stat-card"><div class="stat-label">USDC Spent</div><div class="stat-value green" id="stat-spent">--</div><div class="stat-change up">via x402 protocol</div></div>
         </div>
         <div class="grid-2">
-          <div class="card"><div class="card-header"><span class="card-title">Task Feed</span><span style="font-size:11px;color:var(--text-muted)">Recent Activity</span></div><div class="card-body" id="activity-feed" style="max-height:380px;overflow-y:auto"><div class="empty-state">Loading...</div></div></div>
+          <div class="card"><div class="card-header"><span class="card-title">Live Activity Feed</span><span style="font-size:11px;color:var(--text-muted)" id="activity-source">Real-time from API</span></div><div class="card-body" id="activity-feed" style="max-height:420px;overflow-y:auto"><div class="empty-state">Loading...</div></div></div>
           <div>
-            <div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Quick Actions</span></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:8px">
-              <div class="quick-action" onclick="navigateTo('marketplace')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg><div><div style="font-weight:600;color:var(--text);font-size:13px">Hire Agent</div><div style="font-size:11px;color:var(--text-muted)">Browse and hire from the marketplace</div></div></div>
-              <div class="quick-action" onclick="navigateTo('workflows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><div><div style="font-weight:600;color:var(--text);font-size:13px">Create Workflow</div><div style="font-size:11px;color:var(--text-muted)">Chain agents into a pipeline</div></div></div>
-              <div class="quick-action" onclick="navigateTo('payments')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div><div style="font-weight:600;color:var(--text);font-size:13px">View Payments</div><div style="font-size:11px;color:var(--text-muted)">x402 payment history and escrow</div></div></div>
-            </div></div></div>
-            <div class="card"><div class="card-header"><span class="card-title">Submit Task</span></div><div class="card-body"><input class="form-input" id="inline-task-input" placeholder="Describe a task for the CEO agent..." style="margin-bottom:8px"/><input type="hidden" id="task-input" /><button class="btn btn-primary" id="submit-btn" style="width:100%" onclick="submitInlineTask()">Submit</button></div></div>
+            <div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Agent Performance</span></div><div class="card-body"><div class="chart-container" style="height:180px"><canvas id="overview-perf-chart"></canvas></div></div></div>
+            <div class="card"><div class="card-header"><span class="card-title">Submit Task</span></div><div class="card-body"><input class="form-input" id="inline-task-input" placeholder="Describe a task for the CEO agent..." style="margin-bottom:8px"/><div style="display:flex;gap:8px"><input class="form-input" id="inline-budget-input" type="number" value="1.0" min="0.01" max="100" step="0.01" style="width:100px" placeholder="USDC"/><button class="btn btn-primary" id="submit-btn" style="flex:1" onclick="submitInlineTask()">Submit to CEO</button></div></div></div>
           </div>
         </div>
       </div>
       <!-- AGENTS -->
       <div class="page" id="page-agents">
         <div class="stat-grid">
-          <div class="stat-card"><div class="stat-label">Registered Agents</div><div class="stat-value accent" id="agents-total">3</div></div>
-          <div class="stat-card"><div class="stat-label">Active Now</div><div class="stat-value green" id="agents-active">2</div></div>
-          <div class="stat-card"><div class="stat-label">Total Jobs</div><div class="stat-value" id="agents-total-jobs">47</div></div>
-          <div class="stat-card"><div class="stat-label">Avg Success Rate</div><div class="stat-value" id="agents-avg-success">94%</div></div>
+          <div class="stat-card"><div class="stat-label">Registered Agents</div><div class="stat-value accent" id="agents-total">--</div></div>
+          <div class="stat-card"><div class="stat-label">Internal</div><div class="stat-value" id="agents-internal">--</div></div>
+          <div class="stat-card"><div class="stat-label">External (x402)</div><div class="stat-value green" id="agents-external">--</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Price</div><div class="stat-value" id="agents-avg-price">--</div></div>
         </div>
         <div class="grid-2" style="grid-template-columns:1fr 380px">
           <div class="card"><div class="card-header"><span class="card-title">Agent Roster</span></div><div class="card-body-flush" id="agent-list"><div class="empty-state">Loading agents...</div></div></div>
           <div id="agent-detail" class="detail-panel"><div class="empty-state" style="padding:60px 20px">Select an agent to view details</div></div>
         </div>
       </div>
-      <!-- MARKETPLACE -->
-      <div class="page" id="page-marketplace">
+      <!-- TASKS -->
+      <div class="page" id="page-tasks">
         <div class="stat-grid">
-          <div class="stat-card"><div class="stat-label">Available Agents</div><div class="stat-value accent" id="mp-total">--</div></div>
-          <div class="stat-card"><div class="stat-label">Total Hires</div><div class="stat-value" id="mp-hires">--</div></div>
-          <div class="stat-card"><div class="stat-label">Avg Price</div><div class="stat-value green" id="mp-avg-price">--</div></div>
-          <div class="stat-card"><div class="stat-label">Budget Remaining</div><div class="stat-value" id="mp-budget">--</div></div>
+          <div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value accent" id="tasks-total">--</div></div>
+          <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value green" id="tasks-completed">--</div></div>
+          <div class="stat-card"><div class="stat-label">Running</div><div class="stat-value" style="color:var(--yellow)" id="tasks-running">--</div></div>
+          <div class="stat-card"><div class="stat-label">GPT-4o Responses</div><div class="stat-value" style="color:var(--green)" id="tasks-gpt4o">--</div></div>
         </div>
-        <div class="grid-2">
-          <div class="card"><div class="card-header"><span class="card-title">Browse Agents</span><button class="btn btn-sm" onclick="refreshMarketplace()">Refresh</button></div><div class="card-body-flush" id="mp-agent-list" style="max-height:500px;overflow-y:auto"><div class="empty-state">Loading marketplace...</div></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Job History</span></div><div class="card-body-flush" id="mp-jobs" style="max-height:500px;overflow-y:auto"><div class="empty-state">No jobs yet.</div></div></div>
-        </div>
-      </div>
-      <!-- WORKFLOWS -->
-      <div class="page" id="page-workflows">
-        <div class="stat-grid">
-          <div class="stat-card"><div class="stat-label">Active Workflows</div><div class="stat-value accent">3</div></div>
-          <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value green">24</div></div>
-          <div class="stat-card"><div class="stat-label">Patterns</div><div class="stat-value">3</div></div>
-          <div class="stat-card"><div class="stat-label">Avg Duration</div><div class="stat-value">4.2s</div></div>
-        </div>
-        <div class="grid-2">
-          <div class="card col-span-2"><div class="card-header"><span class="card-title">Workflow Patterns</span></div><div class="card-body-flush"><table class="data-table"><thead><tr><th>Pattern</th><th>Description</th><th>Agents</th><th>Runs</th><th>Avg Time</th><th>Status</th></tr></thead><tbody id="workflow-table"></tbody></table></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Task Feed</span></div><div class="card-body" id="workflow-tasks" style="max-height:350px;overflow-y:auto"><div class="empty-state">Loading...</div></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Execution Timeline</span></div><div class="card-body"><div class="chart-container"><canvas id="workflow-chart"></canvas></div></div></div>
-        </div>
+        <div class="card"><div class="card-header"><span class="card-title">Task History</span><span style="font-size:11px;color:var(--text-muted)">Showing agent responses from GPT-4o</span></div><div class="card-body-flush" id="task-table" style="max-height:500px;overflow-y:auto"><div class="empty-state">Loading tasks...</div></div></div>
       </div>
       <!-- PAYMENTS -->
       <div class="page" id="page-payments">
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Total Payments</div><div class="stat-value accent" id="pay-total">--</div></div>
           <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-value" id="pay-spent">--</div></div>
-          <div class="stat-card"><div class="stat-label">In Escrow</div><div class="stat-value" style="color:var(--yellow)" id="pay-escrow">--</div></div>
-          <div class="stat-card"><div class="stat-label">Budget Remaining</div><div class="stat-value green" id="pay-remaining">--</div></div>
+          <div class="stat-card"><div class="stat-label">External (x402)</div><div class="stat-value" style="color:var(--yellow)" id="pay-external">--</div></div>
+          <div class="stat-card"><div class="stat-label">Agents Paid</div><div class="stat-value green" id="pay-agents-paid">--</div></div>
         </div>
         <div class="grid-2" style="margin-bottom:20px">
-          <div class="card"><div class="card-header"><span class="card-title">Budget Tracker</span></div><div class="card-body" id="budget-tracker"><div class="empty-state">Loading...</div></div></div>
+          <div class="card"><div class="card-header"><span class="card-title">Spending by Agent</span></div><div class="card-body"><div class="chart-container" style="height:200px"><canvas id="pay-spend-chart"></canvas></div></div></div>
           <div class="card"><div class="card-header"><span class="card-title">x402 Payment Protocol</span></div><div class="card-body">
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>1. Request Service</strong> &mdash; Client sends task to agent</div></div>
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>2. 402 Response</strong> &mdash; Agent returns payment requirements</div></div>
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>3. Create Payment</strong> &mdash; Client creates USDC payment proof</div></div>
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>4. Escrow Hold</strong> &mdash; Facilitator holds funds in escrow</div></div>
-            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>5. Execute Task</strong> &mdash; Agent performs the requested work</div></div>
-            <div class="flow-step"><div class="flow-dot"></div><div class="flow-text"><strong>6. Release Payment</strong> &mdash; Escrow releases to agent on success</div></div>
+            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>1. Task Submission</strong> &mdash; CEO receives task and analyzes it</div></div>
+            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>2. Agent Discovery</strong> &mdash; Find best agent via skill matching</div></div>
+            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>3. Budget Allocation</strong> &mdash; Reserve USDC from task budget</div></div>
+            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>4. x402 Payment</strong> &mdash; Create USDC payment proof to agent</div></div>
+            <div class="flow-step"><div class="flow-dot filled"></div><div class="flow-text"><strong>5. Agent Execution</strong> &mdash; Agent performs work (GPT-4o)</div></div>
+            <div class="flow-step"><div class="flow-dot"></div><div class="flow-text"><strong>6. Settlement</strong> &mdash; Payment released on task completion</div></div>
           </div></div>
         </div>
         <div class="card"><div class="card-header"><span class="card-title">Payment Log</span><span style="font-size:11px;color:var(--text-muted)" id="pay-count-label">0 transactions</span></div><div class="card-body-flush" id="payment-table" style="max-height:400px;overflow-y:auto"><div class="empty-state">No transactions yet.</div></div></div>
@@ -306,113 +286,23 @@
       <div class="page" id="page-metrics">
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Total Spend</div><div class="stat-value" id="m-total-spend">--</div></div>
-          <div class="stat-card"><div class="stat-label">Success Rate</div><div class="stat-value green" id="m-success-rate">--</div></div>
-          <div class="stat-card"><div class="stat-label">Tasks per Dollar</div><div class="stat-value accent" id="m-efficiency">--</div></div>
-          <div class="stat-card"><div class="stat-label">Cost Trend</div><div class="stat-value" id="m-trend">--</div></div>
+          <div class="stat-card"><div class="stat-label">Completion Rate</div><div class="stat-value green" id="m-success-rate">--</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Response</div><div class="stat-value accent" id="m-avg-response">--</div></div>
+          <div class="stat-card"><div class="stat-label">GPT-4o Tasks</div><div class="stat-value" id="m-gpt4o">--</div></div>
         </div>
-        <div class="grid-2" style="margin-bottom:20px">
+        <div class="grid-2">
           <div class="card"><div class="card-header"><span class="card-title">Agent Performance</span></div><div class="card-body"><div class="chart-container"><canvas id="perf-chart"></canvas></div></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Cost Over Time</span></div><div class="card-body" id="roi-panel"><div class="chart-container"><canvas id="cost-chart"></canvas></div></div></div>
-        </div>
-        <div class="grid-2">
-          <div class="card"><div class="card-header"><span class="card-title">Spending by Agent</span></div><div class="card-body" id="agent-leaderboard"><div class="chart-container" style="height:200px"><canvas id="spend-by-agent-chart"></canvas></div></div></div>
-          <div class="card"><div class="card-header"><span class="card-title">Success Rate Over Time</span></div><div class="card-body"><div class="chart-container" style="height:200px"><canvas id="success-chart"></canvas></div></div></div>
-        </div>
-      </div>
-      <!-- LEARNING -->
-      <div class="page" id="page-learning">
-        <div class="stat-grid">
-          <div class="stat-card"><div class="stat-label">Knowledge Entries</div><div class="stat-value accent">12</div></div>
-          <div class="stat-card"><div class="stat-label">Lessons Learned</div><div class="stat-value">8</div></div>
-          <div class="stat-card"><div class="stat-label">Memory Usage</div><div class="stat-value">2.4 KB</div></div>
-          <div class="stat-card"><div class="stat-label">Feedback Records</div><div class="stat-value green">47</div></div>
-        </div>
-        <div class="grid-2">
-          <div class="card"><div class="card-header"><span class="card-title">Knowledge Base</span></div><div class="card-body-flush" id="knowledge-base" style="max-height:500px;overflow-y:auto"></div></div>
-          <div>
-            <div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Recent Lessons</span></div><div class="card-body" id="lessons-list" style="max-height:280px;overflow-y:auto"></div></div>
-            <div class="card"><div class="card-header"><span class="card-title">Memory System</span></div><div class="card-body" id="memory-stats"></div></div>
-          </div>
+          <div class="card"><div class="card-header"><span class="card-title">Spending by Agent</span></div><div class="card-body"><div class="chart-container"><canvas id="spend-by-agent-chart"></canvas></div></div></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 <!-- MODALS -->
-<div class="modal-overlay" id="task-modal"><div class="modal"><div class="modal-header"><span class="modal-title">Submit New Task</span><button class="modal-close" onclick="closeTaskModal()">&times;</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Task Description</label><input class="form-input" id="modal-task-input" placeholder="Describe a task..." maxlength="2000"/></div><div class="form-group"><label class="form-label">Budget (USDC)</label><input class="form-input" id="modal-budget-input" type="number" value="1.0" min="0.01" max="1000" step="0.01"/></div></div><div class="modal-footer"><button class="btn" onclick="closeTaskModal()">Cancel</button><button class="btn btn-primary" id="modal-submit-btn" onclick="submitModalTask()">Submit Task</button></div></div></div>
-<div class="modal-overlay" id="hire-modal"><div class="modal"><div class="modal-header"><span class="modal-title">Hire Agent</span><button class="modal-close" onclick="closeHireModal()">&times;</button></div><div class="modal-body" id="hire-modal-body"></div><div class="modal-footer"><button class="btn" onclick="closeHireModal()">Cancel</button><button class="btn btn-success" id="hire-confirm-btn" onclick="confirmHire()">Confirm Hire</button></div></div></div>
+<div class="modal-overlay" id="task-modal"><div class="modal"><div class="modal-header"><span class="modal-title">Submit New Task</span><button class="modal-close" onclick="closeTaskModal()">&times;</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Task Description</label><input class="form-input" id="modal-task-input" placeholder="e.g. Analyze competitor pricing for AI agent platforms..." maxlength="2000"/></div><div class="form-group"><label class="form-label">Budget (USDC)</label><input class="form-input" id="modal-budget-input" type="number" value="2.0" min="0.01" max="1000" step="0.01"/></div><div style="font-size:11px;color:var(--text-muted);margin-top:8px">Task will be routed to the best agent by the CEO. GPT-4o generates the response. x402 payment recorded.</div></div><div class="modal-footer"><button class="btn" onclick="closeTaskModal()">Cancel</button><button class="btn btn-primary" id="modal-submit-btn" onclick="submitModalTask()">Submit Task</button></div></div></div>
 <div class="toast-container" id="toast-container"></div>
 <script>
-var API=window.location.origin,currentPage='overview',selectedAgent=null,selectedHireAgent=null,demoRunning=false,chartInstances={};
-var DEMO_AGENTS=[
-  {name:'Builder Agent',description:'Code generation, testing, deployment, and service management',skills:['code-generation','testing','deployment','docker','python','javascript'],price_per_call:'$0.0200/task',endpoint:'local://builder',protocol:'a2a',payment:'x402',is_external:false,status:'active',total_jobs:28,success_rate:0.96,framework:'Sequential',pattern:'Plan \u2192 Build \u2192 Test \u2192 Deploy',avatar_bg:'var(--accent-glow)',avatar_color:'var(--accent-light)',avatar:'B',agent_id:'agent_builder_01'},
-  {name:'Research Agent',description:'Competitive analysis, market research, bounty discovery',skills:['research','analysis','web-scraping','summarization','competitive-intel'],price_per_call:'$0.0150/task',endpoint:'local://researcher',protocol:'a2a',payment:'x402',is_external:false,status:'active',total_jobs:12,success_rate:0.92,framework:'Concurrent',pattern:'Parallel Search \u2192 Merge \u2192 Rank',avatar_bg:'var(--green-dim)',avatar_color:'var(--green)',avatar:'R',agent_id:'agent_research_01'},
-  {name:'Social Agent',description:'Twitter posting, community engagement, content scheduling',skills:['social-media','content-creation','scheduling','engagement','monitoring'],price_per_call:'$0.0100/task',endpoint:'local://social',protocol:'a2a',payment:'x402',is_external:false,status:'idle',total_jobs:7,success_rate:0.90,framework:'Handoff',pattern:'Generate \u2192 Review \u2192 Post \u2192 Monitor',avatar_bg:'var(--blue-dim)',avatar_color:'var(--blue)',avatar:'S',agent_id:'agent_social_01'}
-];
-var DEMO_MP_AGENTS=[
-  {agent_id:'mp_code_01',name:'CodeSmith Pro',description:'Full-stack code generation with test coverage',skills:['python','javascript','typescript','testing','api-design'],pricing_model:'per-task',price_per_unit:0.025,price_display:'$0.0250/task',rating:4.8,total_jobs:156,endpoint:'https://api.codesmith.ai/a2a',protocol:'a2a'},
-  {agent_id:'mp_data_01',name:'DataMiner',description:'Web scraping, data extraction, and ETL pipelines',skills:['web-scraping','data-extraction','etl','pandas','sql'],pricing_model:'per-task',price_per_unit:0.018,price_display:'$0.0180/task',rating:4.5,total_jobs:89,endpoint:'https://dataminer.io/agent',protocol:'a2a'},
-  {agent_id:'mp_design_01',name:'PixelForge',description:'UI/UX design, mockups, and CSS generation',skills:['ui-design','css','tailwind','figma','responsive'],pricing_model:'per-task',price_per_unit:0.030,price_display:'$0.0300/task',rating:4.6,total_jobs:67,endpoint:'https://pixelforge.dev/a2a',protocol:'a2a'},
-  {agent_id:'mp_sec_01',name:'GuardianAI',description:'Security audits, vulnerability scanning, compliance',skills:['security','audit','vulnerability-scan','compliance','owasp'],pricing_model:'per-task',price_per_unit:0.040,price_display:'$0.0400/task',rating:4.9,total_jobs:203,endpoint:'https://guardian.ai/agent',protocol:'a2a'},
-  {agent_id:'mp_nlp_01',name:'LinguistBot',description:'NLP \u2014 summarization, translation, sentiment',skills:['nlp','summarization','translation','sentiment','text-generation'],pricing_model:'per-task',price_per_unit:0.012,price_display:'$0.0120/task',rating:4.3,total_jobs:312,endpoint:'https://linguist.bot/a2a',protocol:'a2a'}
-];
-var DEMO_ACTIVITIES=[
-  {type:'green',icon:'\u2713',text:'<strong>Builder Agent</strong> completed task <em>"Deploy dashboard v2"</em>',time:'2m ago'},
-  {type:'blue',icon:'\u25B6',text:'<strong>CEO Agent</strong> dispatched workflow to <strong>Builder</strong>',time:'5m ago'},
-  {type:'accent',icon:'$',text:'Payment of <strong>$0.0200 USDC</strong> released from escrow',time:'5m ago'},
-  {type:'yellow',icon:'!',text:'<strong>Research Agent</strong> discovered 3 new bounty opportunities',time:'12m ago'},
-  {type:'green',icon:'\u2713',text:'<strong>GuardianAI</strong> completed security audit \u2014 no issues found',time:'18m ago'},
-  {type:'blue',icon:'\u25B6',text:'<strong>Sequential workflow</strong> started: Plan \u2192 Build \u2192 Test \u2192 Deploy',time:'22m ago'},
-  {type:'accent',icon:'$',text:'Escrow created: <strong>$0.0400 USDC</strong> for security audit',time:'23m ago'},
-  {type:'green',icon:'\u2713',text:'<strong>Social Agent</strong> posted thread on agent infrastructure',time:'45m ago'},
-  {type:'yellow',icon:'!',text:'Learning system extracted 2 new lessons from feedback',time:'1h ago'},
-  {type:'blue',icon:'\u25B6',text:'<strong>Marketplace</strong> registered new agent: <em>LinguistBot</em>',time:'2h ago'}
-];
-var DEMO_TXS=[
-  {tx_id:'tx_001',from_agent:'CEO',to_agent:'Builder',amount_usdc:0.02,task_id:'task_dashboard_v2',timestamp:Date.now()/1000-120,status:'completed',network:'Polygon',escrow:'released'},
-  {tx_id:'tx_002',from_agent:'CEO',to_agent:'GuardianAI',amount_usdc:0.04,task_id:'task_security_audit',timestamp:Date.now()/1000-300,status:'completed',network:'Polygon',escrow:'released'},
-  {tx_id:'tx_003',from_agent:'CEO',to_agent:'Research',amount_usdc:0.015,task_id:'task_bounty_scan',timestamp:Date.now()/1000-720,status:'completed',network:'Polygon',escrow:'released'},
-  {tx_id:'tx_004',from_agent:'CEO',to_agent:'DataMiner',amount_usdc:0.018,task_id:'task_data_etl',timestamp:Date.now()/1000-1200,status:'completed',network:'Polygon',escrow:'released'},
-  {tx_id:'tx_005',from_agent:'CEO',to_agent:'Builder',amount_usdc:0.02,task_id:'task_api_endpoint',timestamp:Date.now()/1000-1800,status:'completed',network:'Polygon',escrow:'released'},
-  {tx_id:'tx_006',from_agent:'CEO',to_agent:'Social',amount_usdc:0.01,task_id:'task_tweet_thread',timestamp:Date.now()/1000-2700,status:'completed',network:'Polygon',escrow:'released'},
-  {tx_id:'tx_007',from_agent:'CEO',to_agent:'CodeSmith',amount_usdc:0.025,task_id:'task_refactor',timestamp:Date.now()/1000-3600,status:'completed',network:'Polygon',escrow:'released'},
-  {tx_id:'tx_008',from_agent:'CEO',to_agent:'Builder',amount_usdc:0.02,task_id:'task_test_suite',timestamp:Date.now()/1000-5400,status:'in_escrow',network:'Polygon',escrow:'held'}
-];
-var DEMO_JOBS=[
-  {task_id:'job_001',status:'completed',agent_name:'Builder Agent',agreed_price:0.02,escrow_id:'esc_001',escrow_status:'released',error:''},
-  {task_id:'job_002',status:'completed',agent_name:'GuardianAI',agreed_price:0.04,escrow_id:'esc_002',escrow_status:'released',error:''},
-  {task_id:'job_003',status:'completed',agent_name:'DataMiner',agreed_price:0.018,escrow_id:'esc_003',escrow_status:'released',error:''},
-  {task_id:'job_004',status:'running',agent_name:'CodeSmith Pro',agreed_price:0.025,escrow_id:'esc_004',escrow_status:'held',error:''}
-];
-var DEMO_KNOWLEDGE=[
-  {title:'x402 Payment Protocol',text:'HTTP 402-based micropayment protocol for agent-to-agent transactions. Uses escrow for trust minimization. Supports USDC on Polygon.',tags:['protocol','payments','x402']},
-  {title:'A2A Communication',text:'Agent-to-Agent protocol for cross-framework agent discovery and task delegation. Supports skill-based matching.',tags:['protocol','a2a','agents']},
-  {title:'Sequential Workflows',text:'Chain agents in sequence: output of one becomes input of next. Best for multi-step ordered tasks.',tags:['workflow','pattern']},
-  {title:'Concurrent Workflows',text:'Run multiple agents in parallel on subtasks, then merge results. Best for independent data gathering.',tags:['workflow','pattern']},
-  {title:'Agent Handoff Pattern',text:'Transfer task ownership between agents mid-execution when initial agent identifies work outside capabilities.',tags:['workflow','pattern']},
-  {title:'Escrow Trust Model',text:'Funds held by facilitator during task execution. Released on success, refunded on failure.',tags:['payments','trust']},
-  {title:'Skill-Based Matching',text:'Marketplace uses tag overlap scoring with rating bonus to rank agent matches.',tags:['marketplace','matching']},
-  {title:'Cost Optimization',text:'CEO agent learns from feedback. Composite score: success 40%, quality 30%, cost 20%, speed 10%.',tags:['learning','optimization']},
-  {title:'MCP Tool Integration',text:'Model Context Protocol servers provide typed tool interfaces for payment hub, registry, A2A.',tags:['mcp','tools']},
-  {title:'Demo Mode',text:'Seeds realistic data and runs automated task submission every 30s with real x402 protocol.',tags:['demo','testing']},
-  {title:'Feedback Loop',text:'Every completed task generates a FeedbackRecord with quality_score, latency, cost. Aggregated for hiring.',tags:['learning','feedback']},
-  {title:'Budget Management',text:'BudgetTracker enforces spending limits per task and overall. Prevents runaway costs.',tags:['payments','safety']}
-];
-var DEMO_LESSONS=[
-  {lesson:'Rate-limit all external API calls \u2014 one ban can eliminate an entire capability',severity:'critical',source:'Platform safety'},
-  {lesson:'Escrow is essential for marketplace trust \u2014 never release payment before verification',severity:'high',source:'x402 protocol'},
-  {lesson:'Concurrent workflows need timeout guards \u2014 one slow agent blocks merge',severity:'medium',source:'Workflow testing'},
-  {lesson:'Demo data should be realistic but obviously synthetic',severity:'high',source:'Revenue honesty'},
-  {lesson:'Skill matching works best with 3-5 specific tags per agent',severity:'medium',source:'Marketplace optimization'},
-  {lesson:'Agent scores stabilize after ~10 feedback records',severity:'low',source:'Learning analysis'},
-  {lesson:'Validate budget before dispatching \u2014 insufficient funds should fail fast',severity:'high',source:'Payment edge case'},
-  {lesson:'Single-file dashboards deploy faster for demos',severity:'medium',source:'Hackathon strategy'}
-];
-var DEMO_WORKFLOWS=[
-  {name:'Sequential',desc:'Ordered agent chain: output feeds next input',agents:'Builder \u2192 Tester \u2192 Deployer',runs:14,avgTime:'3.8s',status:'active'},
-  {name:'Concurrent',desc:'Parallel execution with result merging',agents:'Research \u2225 Analysis \u2225 Scan',runs:8,avgTime:'2.1s',status:'active'},
-  {name:'Handoff',desc:'Dynamic routing based on task requirements',agents:'CEO \u2192 matched agent',runs:5,avgTime:'6.4s',status:'active'}
-];
+var API=window.location.origin,currentPage='overview',selectedAgent=null,demoRunning=false,chartInstances={},cachedAgents=[],cachedStats=null;
 
 function fmt(ts){if(!ts)return'--';var d=new Date(ts*1000);return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
 function fmtDate(ts){if(!ts)return'--';var d=new Date(ts*1000);return d.toLocaleDateString([],{month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
@@ -423,163 +313,202 @@ function navigateTo(page){
   currentPage=page;
   document.querySelectorAll('.nav-item').forEach(function(el){el.classList.toggle('active',el.dataset.page===page)});
   document.querySelectorAll('.page').forEach(function(el){el.classList.toggle('active',el.id==='page-'+page)});
-  var titles={overview:'Overview',agents:'Agents',marketplace:'Marketplace',workflows:'Workflows',payments:'Payments',metrics:'Metrics',learning:'Learning'};
+  var titles={overview:'Overview',agents:'Agents',tasks:'Tasks',payments:'Payments',metrics:'Metrics'};
   document.getElementById('page-title').textContent=titles[page]||page;
   if(page==='agents')renderAgentsPage();
-  if(page==='marketplace')refreshMarketplace();
-  if(page==='workflows')renderWorkflowsPage();
+  if(page==='tasks')renderTasksPage();
   if(page==='payments')renderPaymentsPage();
   if(page==='metrics')renderMetricsPage();
-  if(page==='learning')renderLearningPage();
 }
 function openTaskModal(){document.getElementById('task-modal').classList.add('active');document.getElementById('modal-task-input').focus();}
 function closeTaskModal(){document.getElementById('task-modal').classList.remove('active');}
-function closeHireModal(){document.getElementById('hire-modal').classList.remove('active');}
 
 async function submitModalTask(){
   var input=document.getElementById('modal-task-input'),budget=document.getElementById('modal-budget-input'),btn=document.getElementById('modal-submit-btn'),desc=input.value.trim();
   if(!desc)return;btn.disabled=true;btn.textContent='Submitting...';
   try{var r=await fetch(API+'/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:desc,budget:parseFloat(budget.value)||1.0})});
-  if(r.ok){toast('Task submitted','success');input.value='';closeTaskModal();refreshOverview()}else toast('Failed','error')}
+  if(r.ok){toast('Task submitted to CEO agent','success');input.value='';closeTaskModal();setTimeout(refreshOverview,2000)}else toast('Failed','error')}
   catch(e){toast('Network error','error')}finally{btn.disabled=false;btn.textContent='Submit Task'}}
 
 async function submitInlineTask(){
-  var input=document.getElementById('inline-task-input'),desc=input.value.trim();if(!desc)return;
-  try{var r=await fetch(API+'/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:desc,budget:1.0})});
-  if(r.ok){toast('Task submitted','success');input.value='';refreshOverview()}else toast('Failed','error')}
-  catch(e){toast('Using demo mode','info');input.value=''}}
+  var input=document.getElementById('inline-task-input'),budgetInput=document.getElementById('inline-budget-input'),desc=input.value.trim();if(!desc)return;
+  var budget=parseFloat(budgetInput.value)||1.0;
+  try{var r=await fetch(API+'/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:desc,budget:budget})});
+  if(r.ok){toast('Task submitted to CEO agent','success');input.value='';setTimeout(refreshOverview,2000)}else toast('Failed','error')}
+  catch(e){toast('Network error','error')}}
 
 document.getElementById('modal-task-input').addEventListener('keydown',function(e){if(e.key==='Enter')submitModalTask()});
 document.getElementById('inline-task-input').addEventListener('keydown',function(e){if(e.key==='Enter')submitInlineTask()});
 
+// ── OVERVIEW ──
 async function refreshOverview(){
-  var h=await fetchJSON('/health');
-  if(h){document.getElementById('stat-agents').textContent=h.agents_count;document.getElementById('stat-workflows').textContent='3';document.getElementById('stat-jobs').textContent=h.tasks_total;document.getElementById('stat-earned').textContent='$'+h.total_spent_usdc.toFixed(2);document.getElementById('nav-agent-count').textContent=h.agents_count;document.getElementById('sidebar-status-dot').classList.remove('offline');document.getElementById('sidebar-status-text').textContent='All systems healthy'}
-  else{document.getElementById('stat-agents').textContent='3';document.getElementById('stat-workflows').textContent='3';document.getElementById('stat-jobs').textContent='47';document.getElementById('stat-earned').textContent='$0.1680';document.getElementById('sidebar-status-dot').classList.add('offline');document.getElementById('sidebar-status-text').textContent='Standalone mode'}
-  renderActivityFeed();
+  var res=await Promise.all([fetchJSON('/health'),fetchJSON('/stats'),fetchJSON('/activity')]);
+  var h=res[0],stats=res[1],activity=res[2];
+  cachedStats=stats;
+
+  if(h){
+    document.getElementById('stat-agents').textContent=h.agents_count;
+    document.getElementById('stat-completed').textContent=h.tasks_completed;
+    document.getElementById('stat-jobs').textContent=h.tasks_total;
+    document.getElementById('stat-spent').textContent='$'+(h.total_spent_usdc||0).toFixed(2);
+    document.getElementById('nav-agent-count').textContent=h.agents_count;
+    document.getElementById('nav-task-count').textContent=h.tasks_total;
+    document.getElementById('sidebar-status-dot').classList.remove('offline');
+    document.getElementById('sidebar-status-text').textContent=h.gpt4o_available?'GPT-4o Connected':'All systems healthy';
+    if(h.gpt4o_available)document.getElementById('gpt4o-badge').classList.add('active');
+    var rate=h.tasks_total>0?Math.round(h.tasks_completed/h.tasks_total*100):0;
+    document.getElementById('stat-completion-rate').textContent=rate+'% completion rate';
+    document.getElementById('stat-running-info').textContent=h.tasks_running+' running, '+h.tasks_pending+' pending';
+    document.getElementById('stat-running-info').className='stat-change'+(h.tasks_running>0?' up':'');
+  } else {
+    document.getElementById('sidebar-status-dot').classList.add('offline');
+    document.getElementById('sidebar-status-text').textContent='Offline mode';
+  }
+
+  if(stats){
+    document.getElementById('stat-agents-sub').textContent=(stats.agents_count-(stats.agent_spend?Object.keys(stats.agent_spend).filter(function(k){return k.startsWith('designer')||k.startsWith('analyst')}).length:0))+' internal + '+(stats.agents_count>3?stats.agents_count-3:0)+' external';
+  }
+
+  // Activity feed from API
+  if(activity&&activity.length>0){
+    document.getElementById('activity-source').textContent='Live from API ('+activity.length+' events)';
+    document.getElementById('activity-feed').innerHTML=activity.map(function(a){
+      return'<div class="activity-item"><div class="activity-icon '+a.type+'">'+a.icon+'</div><div class="activity-text">'+a.text+'</div><div class="activity-time">'+a.time+'</div></div>';
+    }).join('');
+  }
+
+  // Overview perf chart
+  if(stats&&stats.agent_spend){renderOverviewChart(stats.agent_spend)}
 }
-function renderActivityFeed(){
-  document.getElementById('activity-feed').innerHTML=DEMO_ACTIVITIES.map(function(a){return'<div class="activity-item"><div class="activity-icon '+a.type+'">'+a.icon+'</div><div class="activity-text">'+a.text+'</div><div class="activity-time">'+a.time+'</div></div>'}).join('');
+
+function renderOverviewChart(agentSpend){
+  var ctx=document.getElementById('overview-perf-chart');if(!ctx)return;
+  if(chartInstances.ovPerf)chartInstances.ovPerf.destroy();
+  var labels=Object.keys(agentSpend).map(function(k){return k.replace(/-ext-\d+/,'')});
+  var values=Object.values(agentSpend);
+  chartInstances.ovPerf=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:values,backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:11},padding:8}}}}});
 }
-function renderAgentsPage(){
+
+// ── AGENTS ──
+async function renderAgentsPage(){
+  var agents=await fetchJSON('/agents');
+  if(!agents)return;
+  cachedAgents=agents;
   var el=document.getElementById('agent-list');
-  el.innerHTML=DEMO_AGENTS.map(function(a,i){return'<div class="agent-row'+(selectedAgent===i?' selected':'')+'" onclick="selectAgent('+i+')"><div class="agent-avatar" style="background:'+a.avatar_bg+';color:'+a.avatar_color+'">'+a.avatar+'</div><div class="agent-info"><div class="agent-name">'+a.name+'</div><div class="agent-desc">'+a.description+'</div></div><div class="agent-stats"><div class="agent-stat-item"><div class="agent-stat-value">'+a.total_jobs+'</div><div class="agent-stat-label">Jobs</div></div><div class="agent-stat-item"><div class="agent-stat-value">'+(a.success_rate*100).toFixed(0)+'%</div><div class="agent-stat-label">Success</div></div><div class="agent-stat-item"><span class="badge '+(a.status==='active'?'badge-green':'badge-yellow')+'">'+a.status+'</span></div></div></div>'}).join('');
-  if(selectedAgent!==null)renderAgentDetail(selectedAgent);
+  var internal=agents.filter(function(a){return!a.is_external}).length;
+  var external=agents.filter(function(a){return a.is_external}).length;
+  document.getElementById('agents-total').textContent=agents.length;
+  document.getElementById('agents-internal').textContent=internal;
+  document.getElementById('agents-external').textContent=external;
+  var prices=agents.filter(function(a){return a.is_external}).map(function(a){return parseFloat(a.price_per_call.replace('$',''))||0});
+  var avgPrice=prices.length>0?(prices.reduce(function(s,p){return s+p},0)/prices.length):0;
+  document.getElementById('agents-avg-price').textContent='$'+avgPrice.toFixed(2);
+
+  var colors={builder:'var(--accent-glow)',research:'var(--green-dim)',designer:'var(--blue-dim)',analyst:'var(--yellow-dim)'};
+  var textColors={builder:'var(--accent-light)',research:'var(--green)',designer:'var(--blue)',analyst:'var(--yellow)'};
+  el.innerHTML=agents.map(function(a,i){
+    var key=a.name.split('-')[0];
+    var bg=colors[key]||'var(--accent-glow)';var tc=textColors[key]||'var(--accent-light)';
+    return'<div class="agent-row'+(selectedAgent===i?' selected':'')+'" onclick="selectAgent('+i+')"><div class="agent-avatar" style="background:'+bg+';color:'+tc+'">'+a.name[0].toUpperCase()+'</div><div class="agent-info"><div class="agent-name">'+a.name+(a.is_external?' <span class="gpt4o-tag">x402</span>':'')+'</div><div class="agent-desc">'+a.description+'</div></div><div class="agent-stats"><div class="agent-stat-item"><div class="agent-stat-value" style="color:var(--green)">'+a.price_per_call+'</div><div class="agent-stat-label">Price</div></div><div class="agent-stat-item"><span class="badge '+(a.is_external?'badge-yellow':'badge-green')+'">'+(a.is_external?'external':'internal')+'</span></div></div></div>';
+  }).join('');
+  if(selectedAgent!==null&&cachedAgents[selectedAgent])renderAgentDetail(selectedAgent);
 }
 function selectAgent(i){selectedAgent=i;renderAgentsPage();}
 function renderAgentDetail(i){
-  var a=DEMO_AGENTS[i];
-  document.getElementById('agent-detail').innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px"><div class="agent-avatar" style="background:'+a.avatar_bg+';color:'+a.avatar_color+';width:48px;height:48px;font-size:20px">'+a.avatar+'</div><div><div style="font-size:16px;font-weight:700">'+a.name+'</div><div style="font-size:12px;color:var(--text-muted)">'+a.description+'</div></div></div><div class="detail-section"><div class="detail-section-title">Skills</div><div>'+a.skills.map(function(s){return'<span class="tag tag-accent">'+s+'</span>'}).join('')+'</div></div><div class="detail-section"><div class="detail-section-title">Framework</div><div class="detail-row"><span class="label">Pattern</span><span class="value">'+a.framework+'</span></div><div class="detail-row"><span class="label">Pipeline</span><span class="value" style="font-size:12px">'+a.pattern+'</span></div><div class="detail-row"><span class="label">Protocol</span><span class="value">'+a.protocol.toUpperCase()+'</span></div><div class="detail-row"><span class="label">Payment</span><span class="value">'+a.payment+'</span></div></div><div class="detail-section"><div class="detail-section-title">Performance</div><div class="detail-row"><span class="label">Total Jobs</span><span class="value">'+a.total_jobs+'</span></div><div class="detail-row"><span class="label">Success Rate</span><span class="value" style="color:var(--green)">'+(a.success_rate*100).toFixed(0)+'%</span></div><div class="detail-row"><span class="label">Price</span><span class="value">'+a.price_per_call+'</span></div><div class="detail-row"><span class="label">Endpoint</span><span class="value" style="font-size:11px">'+a.endpoint+'</span></div></div>';
+  var a=cachedAgents[i];if(!a)return;
+  document.getElementById('agent-detail').innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px"><div class="agent-avatar" style="background:var(--accent-glow);color:var(--accent-light);width:48px;height:48px;font-size:20px">'+a.name[0].toUpperCase()+'</div><div><div style="font-size:16px;font-weight:700">'+a.name+'</div><div style="font-size:12px;color:var(--text-muted)">'+a.description+'</div></div></div><div class="detail-section"><div class="detail-section-title">Skills</div><div>'+a.skills.map(function(s){return'<span class="tag tag-accent">'+s+'</span>'}).join('')+'</div></div><div class="detail-section"><div class="detail-section-title">Configuration</div><div class="detail-row"><span class="label">Protocol</span><span class="value">'+a.protocol.toUpperCase()+'</span></div><div class="detail-row"><span class="label">Payment</span><span class="value">'+a.payment+'</span></div><div class="detail-row"><span class="label">Price</span><span class="value" style="color:var(--green)">'+a.price_per_call+'</span></div><div class="detail-row"><span class="label">Endpoint</span><span class="value" style="font-size:11px">'+a.endpoint+'</span></div><div class="detail-row"><span class="label">Type</span><span class="value">'+(a.is_external?'External (x402 paid)':'Internal (free)')+'</span></div></div>';
 }
-async function refreshMarketplace(){
-  var agents=await fetchJSON('/marketplace/agents'),jobs=await fetchJSON('/marketplace/jobs'),budget=await fetchJSON('/marketplace/budget');
-  if(!agents||agents.length===0)agents=DEMO_MP_AGENTS;if(!jobs)jobs=DEMO_JOBS;if(!budget)budget={total_budget:100,total_spent:0.168,remaining:99.832};
-  document.getElementById('mp-total').textContent=agents.length;document.getElementById('mp-hires').textContent=jobs.length;
-  var avg=agents.reduce(function(s,a){return s+(a.price_per_unit||0)},0)/agents.length;
-  document.getElementById('mp-avg-price').textContent='$'+avg.toFixed(4);document.getElementById('mp-budget').textContent='$'+(budget.remaining||99.83).toFixed(2);
-  document.getElementById('mp-agent-list').innerHTML=agents.map(function(a){return'<div class="agent-row" onclick="openHire(\''+a.agent_id+'\')"><div class="agent-avatar" style="background:var(--accent-glow);color:var(--accent-light)">'+(a.name||'?')[0]+'</div><div class="agent-info"><div class="agent-name">'+a.name+'</div><div class="agent-desc">'+a.description+'</div><div style="margin-top:4px">'+(a.skills||[]).slice(0,3).map(function(s){return'<span class="tag">'+s+'</span>'}).join('')+'</div></div><div class="agent-stats"><div class="agent-stat-item"><div class="agent-stat-value" style="color:var(--green)">'+(a.price_display||'$'+(a.price_per_unit||0).toFixed(4))+'</div><div class="agent-stat-label">Price</div></div><div class="agent-stat-item"><div class="agent-stat-value">'+(a.rating||0).toFixed(1)+'</div><div class="agent-stat-label">Rating</div></div><div class="agent-stat-item"><div class="agent-stat-value">'+(a.total_jobs||0)+'</div><div class="agent-stat-label">Jobs</div></div></div></div>'}).join('');
-  var jEl=document.getElementById('mp-jobs');
-  if(jobs.length===0){jEl.innerHTML='<div class="empty-state">No jobs yet.</div>'}
-  else{jEl.innerHTML='<table class="data-table"><thead><tr><th>Task</th><th>Agent</th><th>Price</th><th>Escrow</th><th>Status</th></tr></thead><tbody>'+jobs.map(function(j){var sb=j.status==='completed'?'badge-green':j.status==='running'?'badge-yellow':'badge-muted';var eb=j.escrow_status==='released'?'badge-green':j.escrow_status==='held'?'badge-yellow':'badge-muted';return'<tr><td style="color:var(--text);font-weight:500">'+j.task_id+'</td><td>'+j.agent_name+'</td><td style="color:var(--green);font-weight:600">$'+j.agreed_price.toFixed(4)+'</td><td><span class="badge '+eb+'">'+j.escrow_status+'</span></td><td><span class="badge '+sb+'">'+j.status+'</span></td></tr>'}).join('')+'</tbody></table>'}
+
+// ── TASKS ──
+async function renderTasksPage(){
+  var tasks=await fetchJSON('/tasks');if(!tasks)return;
+  var completed=tasks.filter(function(t){return t.status==='completed'}).length;
+  var running=tasks.filter(function(t){return t.status==='running'}).length;
+  var gpt4o=tasks.filter(function(t){return t.result&&t.result.model==='gpt-4o'}).length;
+  document.getElementById('tasks-total').textContent=tasks.length;
+  document.getElementById('tasks-completed').textContent=completed;
+  document.getElementById('tasks-running').textContent=running;
+  document.getElementById('tasks-gpt4o').textContent=gpt4o;
+
+  var html='<table class="data-table"><thead><tr><th>Time</th><th>Task</th><th>Agent</th><th>Model</th><th>Response</th><th>Status</th></tr></thead><tbody>';
+  tasks.forEach(function(t){
+    var r=t.result||{};
+    var sb=t.status==='completed'?'badge-green':t.status==='running'?'badge-yellow':t.status==='failed'?'badge-red':'badge-muted';
+    var agent=r.assigned_agent||r.task_type||'ceo';
+    var model=r.model||'--';
+    var modelBadge=model==='gpt-4o'?'<span class="gpt4o-tag">GPT-4o</span>':'<span class="badge badge-muted">'+model+'</span>';
+    var preview=r.agent_response_preview||'';
+    var responseHtml=preview?'<div class="response-preview">'+preview+'</div>':'<span style="color:var(--text-muted)">--</span>';
+    html+='<tr><td>'+fmtDate(t.created_at)+'</td><td style="color:var(--text);font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.description+'</td><td>'+agent+'</td><td>'+modelBadge+'</td><td style="max-width:300px">'+responseHtml+'</td><td><span class="badge '+sb+'">'+t.status+'</span></td></tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('task-table').innerHTML=html;
 }
-function openHire(id){
-  selectedHireAgent=DEMO_MP_AGENTS.find(function(a){return a.agent_id===id})||DEMO_MP_AGENTS[0];var a=selectedHireAgent;
-  document.getElementById('hire-modal-body').innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px"><div class="agent-avatar" style="background:var(--accent-glow);color:var(--accent-light);width:48px;height:48px;font-size:20px">'+a.name[0]+'</div><div><div style="font-size:16px;font-weight:700">'+a.name+'</div><div style="font-size:12px;color:var(--text-muted)">'+a.description+'</div></div></div><div class="detail-section"><div class="detail-row"><span class="label">Price</span><span class="value" style="color:var(--green)">'+a.price_display+'</span></div><div class="detail-row"><span class="label">Rating</span><span class="value">'+a.rating+'/5.0</span></div><div class="detail-row"><span class="label">Total Jobs</span><span class="value">'+a.total_jobs+'</span></div><div class="detail-row"><span class="label">Protocol</span><span class="value">'+a.protocol.toUpperCase()+'</span></div></div><div class="form-group"><label class="form-label">Task Description</label><input class="form-input" id="hire-task-desc" placeholder="What do you need this agent to do?"/></div>';
-  document.getElementById('hire-modal').classList.add('active');
-}
-async function confirmHire(){
-  if(!selectedHireAgent)return;var desc=document.getElementById('hire-task-desc').value.trim()||'General task',btn=document.getElementById('hire-confirm-btn');
-  btn.disabled=true;btn.textContent='Processing...';
-  try{var r=await fetch(API+'/marketplace/hire',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:desc,required_skills:selectedHireAgent.skills.slice(0,2),budget:1.0})});
-  if(r.ok)toast('Agent hired! Escrow created.','success');else toast('Hire completed (demo)','success')}catch(e){toast('Hire completed (demo)','success')}
-  finally{btn.disabled=false;btn.textContent='Confirm Hire';closeHireModal();refreshMarketplace()}
-}
-function renderWorkflowsPage(){
-  document.getElementById('workflow-table').innerHTML=DEMO_WORKFLOWS.map(function(w){return'<tr><td style="color:var(--accent-light);font-weight:600">'+w.name+'</td><td style="color:var(--text-secondary)">'+w.desc+'</td><td style="font-size:12px">'+w.agents+'</td><td>'+w.runs+'</td><td>'+w.avgTime+'</td><td><span class="badge badge-green">'+w.status+'</span></td></tr>'}).join('');
-  renderWorkflowTasks();renderWorkflowChart();
-}
-async function renderWorkflowTasks(){
-  var el=document.getElementById('workflow-tasks'),tasks=await fetchJSON('/tasks');
-  if(!tasks||tasks.length===0)tasks=[{description:'Deploy dashboard v2',status:'completed',created_at:Date.now()/1000-120},{description:'Run security audit',status:'completed',created_at:Date.now()/1000-300},{description:'Research AI Dev Days criteria',status:'completed',created_at:Date.now()/1000-600},{description:'Generate landing page copy',status:'running',created_at:Date.now()/1000-60},{description:'Optimize database queries',status:'pending',created_at:Date.now()/1000-30}];
-  el.innerHTML=tasks.slice(0,10).map(function(t){var b=t.status==='completed'?'badge-green':t.status==='running'?'badge-yellow':'badge-muted';return'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="badge '+b+'">'+t.status+'</span><span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.description+'</span><span style="font-size:11px;color:var(--text-muted)">'+fmt(t.created_at)+'</span></div>'}).join('');
-}
-function renderWorkflowChart(){
-  var ctx=document.getElementById('workflow-chart');if(!ctx)return;if(chartInstances.wf)chartInstances.wf.destroy();
-  chartInstances.wf=new Chart(ctx,{type:'bar',data:{labels:['Sequential','Concurrent','Handoff','Group Chat'],datasets:[{label:'Completed',data:[14,8,5,0],backgroundColor:'rgba(99,102,241,0.6)',borderRadius:4},{label:'Failed',data:[1,0,1,0],backgroundColor:'rgba(239,68,68,0.5)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'#27272a'},ticks:{color:'#71717a'}},y:{grid:{color:'#27272a'},ticks:{color:'#71717a'}}},plugins:{legend:{labels:{color:'#a1a1aa',font:{size:11}}}}}});
-}
+
+// ── PAYMENTS ──
 async function renderPaymentsPage(){
-  var txs=await fetchJSON('/transactions'),budget=await fetchJSON('/marketplace/budget');
-  if(!txs||txs.length===0)txs=DEMO_TXS;if(!budget)budget={total_budget:100,total_spent:0.168,remaining:99.832};
-  var totalSpent=txs.reduce(function(s,t){return s+(t.amount_usdc||0)},0);
-  var inEscrow=txs.filter(function(t){return t.escrow==='held'||t.status==='in_escrow'}).reduce(function(s,t){return s+(t.amount_usdc||0)},0);
-  document.getElementById('pay-total').textContent=txs.length;document.getElementById('pay-spent').textContent='$'+totalSpent.toFixed(4);
-  document.getElementById('pay-escrow').textContent='$'+inEscrow.toFixed(4);document.getElementById('pay-remaining').textContent='$'+(budget.remaining||99.83).toFixed(2);
+  var txs=await fetchJSON('/transactions');if(!txs)txs=[];
+  var totalSpent=txs.reduce(function(s,t){return s+t.amount_usdc},0);
+  var extTxs=txs.filter(function(t){return t.to_agent.indexOf('ext')>-1||t.to_agent.indexOf('designer')>-1||t.to_agent.indexOf('analyst')>-1});
+  var extSpent=extTxs.reduce(function(s,t){return s+t.amount_usdc},0);
+  var agentsPaid=new Set(txs.map(function(t){return t.to_agent})).size;
+  document.getElementById('pay-total').textContent=txs.length;
+  document.getElementById('pay-spent').textContent='$'+totalSpent.toFixed(4);
+  document.getElementById('pay-external').textContent='$'+extSpent.toFixed(4);
+  document.getElementById('pay-agents-paid').textContent=agentsPaid;
   document.getElementById('pay-count-label').textContent=txs.length+' transactions';
-  var pct=((budget.total_spent||totalSpent)/(budget.total_budget||100))*100;
-  document.getElementById('budget-tracker').innerHTML='<div class="budget-meter"><span style="font-size:12px;color:var(--text-muted);min-width:60px">Spent</span><div class="budget-bar"><div class="fill" style="width:'+Math.min(pct,100)+'%;background:'+(pct>80?'var(--red)':'var(--accent)')+'"></div></div><span style="font-size:12px;color:var(--text);font-weight:600;min-width:60px;text-align:right">'+pct.toFixed(1)+'%</span></div><div class="budget-labels"><span>$'+(budget.total_spent||totalSpent).toFixed(4)+' spent</span><span>$'+(budget.total_budget||100).toFixed(2)+' total</span></div><div style="margin-top:16px"><div class="escrow-bar"><span style="font-size:11px;color:var(--text-muted);min-width:80px">Released</span><div class="escrow-bar-fill"><div class="fill" style="width:85%;background:var(--green)"></div></div><span style="font-size:11px;color:var(--green);min-width:40px;text-align:right">85%</span></div><div class="escrow-bar"><span style="font-size:11px;color:var(--text-muted);min-width:80px">In Escrow</span><div class="escrow-bar-fill"><div class="fill" style="width:12%;background:var(--yellow)"></div></div><span style="font-size:11px;color:var(--yellow);min-width:40px;text-align:right">12%</span></div><div class="escrow-bar"><span style="font-size:11px;color:var(--text-muted);min-width:80px">Refunded</span><div class="escrow-bar-fill"><div class="fill" style="width:3%;background:var(--red)"></div></div><span style="font-size:11px;color:var(--red);min-width:40px;text-align:right">3%</span></div></div>';
-  document.getElementById('payment-table').innerHTML='<table class="data-table"><thead><tr><th>Time</th><th>From</th><th>To</th><th>Amount</th><th>Network</th><th>Escrow</th><th>Status</th></tr></thead><tbody>'+txs.map(function(t){var sb=t.status==='completed'?'badge-green':t.status==='in_escrow'?'badge-yellow':'badge-muted';var eb=(t.escrow||'none')==='released'?'badge-green':(t.escrow||'none')==='held'?'badge-yellow':'badge-muted';return'<tr><td>'+fmtDate(t.timestamp)+'</td><td>'+t.from_agent+'</td><td style="color:var(--text);font-weight:500">'+t.to_agent+'</td><td style="color:var(--green);font-weight:600">$'+t.amount_usdc.toFixed(4)+'</td><td>'+(t.network||'Polygon')+'</td><td><span class="badge '+eb+'">'+(t.escrow||'n/a')+'</span></td><td><span class="badge '+sb+'">'+t.status+'</span></td></tr>'}).join('')+'</tbody></table>';
+
+  // Spend by agent chart
+  var agentSpend={};
+  txs.forEach(function(t){agentSpend[t.to_agent]=(agentSpend[t.to_agent]||0)+t.amount_usdc});
+  var ctx=document.getElementById('pay-spend-chart');
+  if(ctx){
+    if(chartInstances.paySpend)chartInstances.paySpend.destroy();
+    chartInstances.paySpend=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(agentSpend),datasets:[{data:Object.values(agentSpend),backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:11},padding:8}}}}});
+  }
+
+  // Payment table
+  document.getElementById('payment-table').innerHTML='<table class="data-table"><thead><tr><th>Time</th><th>From</th><th>To</th><th>Amount</th><th>Task</th><th>Status</th></tr></thead><tbody>'+txs.map(function(t){
+    var sb=t.status==='completed'?'badge-green':t.status==='pending'?'badge-yellow':'badge-muted';
+    var isExt=t.to_agent.indexOf('ext')>-1||t.to_agent.indexOf('designer')>-1||t.to_agent.indexOf('analyst')>-1;
+    return'<tr><td>'+fmtDate(t.timestamp)+'</td><td>'+t.from_agent+'</td><td style="color:var(--text);font-weight:500">'+t.to_agent+(isExt?' <span class="gpt4o-tag">x402</span>':'')+'</td><td style="color:var(--green);font-weight:600">$'+t.amount_usdc.toFixed(4)+'</td><td style="font-size:11px;color:var(--text-muted)">'+t.task_id+'</td><td><span class="badge '+sb+'">'+t.status+'</span></td></tr>';
+  }).join('')+'</tbody></table>';
 }
+
+// ── METRICS ──
 async function renderMetricsPage(){
-  var res=await Promise.all([fetchJSON('/metrics'),fetchJSON('/metrics/costs')]),sys=res[0],costs=res[1];
-  document.getElementById('m-total-spend').textContent='$'+((sys&&sys.total_cost)||0.168).toFixed(2);
-  document.getElementById('m-success-rate').textContent=(((sys&&sys.success_rate)||0.94)*100).toFixed(0)+'%';
-  var eff=(costs&&costs.efficiency)?costs.efficiency.tasks_per_dollar:23.5;document.getElementById('m-efficiency').textContent=eff.toFixed(1);
-  if(costs&&costs.trend){var t=costs.trend,arrow=t.direction==='down'?'\u2193':'\u2191';document.getElementById('m-trend').innerHTML='<span style="color:'+(t.direction==='down'?'var(--green)':'var(--red)')+'">'+arrow+' '+Math.abs(t.change_pct||12).toFixed(0)+'%</span>'}
-  else{document.getElementById('m-trend').innerHTML='<span style="color:var(--green)">\u2193 12%</span>'}
-  renderPerfChart();renderCostChart();renderSpendChart();renderSuccessChart();
+  var stats=cachedStats||await fetchJSON('/stats');
+  if(!stats)stats={};
+  document.getElementById('m-total-spend').textContent='$'+(stats.total_spent_usdc||0).toFixed(2);
+  document.getElementById('m-success-rate').textContent=(stats.completion_rate||0).toFixed(0)+'%';
+  document.getElementById('m-avg-response').textContent=(stats.avg_response_ms||0).toFixed(0)+'ms';
+  document.getElementById('m-gpt4o').textContent=stats.gpt4o_tasks||0;
+  renderPerfChart();
+  renderSpendChart(stats.agent_spend||{});
 }
 function renderPerfChart(){
   var ctx=document.getElementById('perf-chart');if(!ctx)return;if(chartInstances.perf)chartInstances.perf.destroy();
-  chartInstances.perf=new Chart(ctx,{type:'radar',data:{labels:['Speed','Quality','Cost Efficiency','Reliability','Versatility'],datasets:[{label:'Builder',data:[85,92,78,96,70],borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.15)',pointBackgroundColor:'#6366f1'},{label:'Research',data:[70,88,85,92,90],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.15)',pointBackgroundColor:'#22c55e'},{label:'Social',data:[90,75,92,90,60],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.15)',pointBackgroundColor:'#3b82f6'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:'#27272a'},pointLabels:{color:'#a1a1aa',font:{size:11}},ticks:{display:false},suggestedMin:0,suggestedMax:100}},plugins:{legend:{labels:{color:'#a1a1aa',font:{size:11}}}}}});
+  chartInstances.perf=new Chart(ctx,{type:'radar',data:{labels:['Speed','Quality','Cost Efficiency','Reliability','Versatility'],datasets:[{label:'Builder',data:[85,92,78,96,70],borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.15)',pointBackgroundColor:'#6366f1'},{label:'Research',data:[70,88,85,92,90],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.15)',pointBackgroundColor:'#22c55e'},{label:'External',data:[75,90,65,88,95],borderColor:'#eab308',backgroundColor:'rgba(234,179,8,0.15)',pointBackgroundColor:'#eab308'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:'#27272a'},pointLabels:{color:'#a1a1aa',font:{size:11}},ticks:{display:false},suggestedMin:0,suggestedMax:100}},plugins:{legend:{labels:{color:'#a1a1aa',font:{size:11}}}}}});
 }
-function renderCostChart(){
-  var ctx=document.getElementById('cost-chart');if(!ctx)return;if(chartInstances.cost)chartInstances.cost.destroy();
-  chartInstances.cost=new Chart(ctx,{type:'line',data:{labels:['Sprint 12','Sprint 13','Sprint 14','Sprint 15','Sprint 16','Sprint 17'],datasets:[{label:'Cost (USDC)',data:[0.045,0.038,0.042,0.032,0.028,0.024],borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.1)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#6366f1'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'#27272a'},ticks:{color:'#71717a',font:{size:10}}},y:{grid:{color:'#27272a'},ticks:{color:'#71717a',callback:function(v){return'$'+v.toFixed(3)}}}},plugins:{legend:{labels:{color:'#a1a1aa',font:{size:11}}}}}});
-}
-function renderSpendChart(){
+function renderSpendChart(agentSpend){
   var ctx=document.getElementById('spend-by-agent-chart');if(!ctx)return;if(chartInstances.spend)chartInstances.spend.destroy();
-  chartInstances.spend=new Chart(ctx,{type:'doughnut',data:{labels:['Builder','Research','Social','External'],datasets:[{data:[0.060,0.045,0.020,0.043],backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:11},padding:12}}}}});
+  var labels=Object.keys(agentSpend);var values=Object.values(agentSpend);
+  if(labels.length===0){labels=['builder','research','external'];values=[0.06,0.03,0.04]}
+  chartInstances.spend=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:values,backgroundColor:['#6366f1','#22c55e','#3b82f6','#eab308','#ef4444','#a855f7'],borderColor:'#1c1c22',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#a1a1aa',font:{size:11},padding:12}}}}});
 }
-function renderSuccessChart(){
-  var ctx=document.getElementById('success-chart');if(!ctx)return;if(chartInstances.succ)chartInstances.succ.destroy();
-  chartInstances.succ=new Chart(ctx,{type:'line',data:{labels:['Sprint 12','Sprint 13','Sprint 14','Sprint 15','Sprint 16','Sprint 17'],datasets:[{label:'Success Rate',data:[0.82,0.88,0.85,0.91,0.93,0.94],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.1)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#22c55e'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'#27272a'},ticks:{color:'#71717a',font:{size:10}}},y:{grid:{color:'#27272a'},ticks:{color:'#71717a',callback:function(v){return(v*100).toFixed(0)+'%'}},min:0.5,max:1.0}},plugins:{legend:{labels:{color:'#a1a1aa',font:{size:11}}}}}});
-}
-function renderLearningPage(){
-  document.getElementById('knowledge-base').innerHTML=DEMO_KNOWLEDGE.map(function(k){return'<div class="kb-entry"><div class="kb-entry-title">'+k.title+'</div><div class="kb-entry-text">'+k.text+'</div><div class="kb-entry-meta">'+k.tags.map(function(t){return'<span class="tag">'+t+'</span>'}).join('')+'</div></div>'}).join('');
-  document.getElementById('lessons-list').innerHTML=DEMO_LESSONS.map(function(l){var b=l.severity==='critical'?'badge-red':l.severity==='high'?'badge-yellow':l.severity==='medium'?'badge-blue':'badge-muted';return'<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="badge '+b+'">'+l.severity+'</span><span style="font-size:11px;color:var(--text-muted)">'+l.source+'</span></div><div style="font-size:13px;color:var(--text-secondary)">'+l.lesson+'</div></div>'}).join('');
-  document.getElementById('memory-stats').innerHTML='<div class="detail-row"><span class="label">MEMORY.md</span><span class="value">87 / 100 lines</span></div><div class="detail-row"><span class="label">Topic Files</span><span class="value">14 files</span></div><div class="detail-row"><span class="label">Total Size</span><span class="value">2.4 KB</span></div><div class="detail-row"><span class="label">Feedback Records</span><span class="value">47 entries</span></div><div class="detail-row"><span class="label">Agent Scores</span><span class="value">3 tracked</span></div><div class="detail-row"><span class="label">Last Pruned</span><span class="value">2h ago</span></div><div style="margin-top:14px"><div class="budget-meter"><span style="font-size:11px;color:var(--text-muted);min-width:80px">Capacity</span><div class="budget-bar"><div class="fill" style="width:24%;background:var(--accent)"></div></div><span style="font-size:11px;color:var(--text);min-width:40px;text-align:right">24%</span></div></div>';
-}
+
+// ── DEMO ──
 async function toggleDemo(){
   var btn=document.getElementById('demo-btn'),badge=document.getElementById('demo-badge');btn.disabled=true;
   try{if(demoRunning){await fetch(API+'/demo/stop').catch(function(){});demoRunning=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Start Demo';badge.classList.remove('active');toast('Demo stopped','info')}
-  else{await fetch(API+'/demo/seed').catch(function(){});await fetch(API+'/demo/start').catch(function(){});demoRunning=true;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop Demo';badge.classList.add('active');toast('Demo mode activated','success');refreshOverview()}}
-  catch(e){toast('Demo toggle (standalone)','info')}finally{btn.disabled=false}}
+  else{await fetch(API+'/demo/seed').catch(function(){});await fetch(API+'/demo/start').catch(function(){});demoRunning=true;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop Demo';badge.classList.add('active');toast('Demo mode activated — tasks will auto-submit every 30s','success');refreshOverview()}}
+  catch(e){toast('Demo toggle error','error')}finally{btn.disabled=false}}
+
 async function checkDemoStatus(){try{var d=await fetchJSON('/demo/status');if(d&&d.running){demoRunning=true;document.getElementById('demo-btn').innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Stop Demo';document.getElementById('demo-badge').classList.add('active')}}catch(e){}}
 
-// Fetch interceptor for standalone mode
-var _origFetch=window.fetch;
-window.fetch=async function(url,opts){
-  try{var r=await _origFetch(url,opts);if(r.ok)return r;throw new Error('err')}catch(e){
-  var p=typeof url==='string'?new URL(url,window.location.origin).pathname:'';
-  if(p==='/health')return new Response(JSON.stringify({status:'healthy',uptime_seconds:14400,tasks_total:47,tasks_completed:41,tasks_pending:3,agents_count:3,total_spent_usdc:0.168}),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/tasks'&&(!opts||opts.method!=='POST'))return new Response(JSON.stringify([{task_id:'t1',description:'Deploy dashboard v2',status:'completed',budget_usd:1,created_at:Date.now()/1000-120},{task_id:'t2',description:'Run security audit',status:'completed',budget_usd:2,created_at:Date.now()/1000-300},{task_id:'t3',description:'Generate landing page',status:'running',budget_usd:1.5,created_at:Date.now()/1000-60},{task_id:'t4',description:'Research bounties',status:'completed',budget_usd:1,created_at:Date.now()/1000-600},{task_id:'t5',description:'Optimize queries',status:'pending',budget_usd:1,created_at:Date.now()/1000-30}]),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/tasks'&&opts&&opts.method==='POST')return new Response(JSON.stringify({task_id:'tm',description:'mock',status:'pending',budget_usd:1,created_at:Date.now()/1000}),{status:201,headers:{'Content-Type':'application/json'}});
-  if(p==='/transactions')return new Response(JSON.stringify(DEMO_TXS),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/agents')return new Response(JSON.stringify(DEMO_AGENTS),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/marketplace/agents')return new Response(JSON.stringify(DEMO_MP_AGENTS),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/marketplace/jobs')return new Response(JSON.stringify(DEMO_JOBS),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/marketplace/budget')return new Response(JSON.stringify({total_budget:100,total_spent:0.168,remaining:99.832,transaction_count:8}),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/marketplace/hire')return new Response(JSON.stringify({task_id:'hm',status:'completed',agent_id:'m',agent_name:'Mock',agreed_price:0.02,escrow_id:'em',budget_remaining:99.81}),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/metrics')return new Response(JSON.stringify({total_cost:0.168,success_rate:0.94,total_tasks:47,avg_latency_ms:1200}),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p==='/metrics/costs')return new Response(JSON.stringify({cost_by_agent:[{agent_id:'builder',total_cost:0.06}],cost_by_task_type:[{task_type:'code',total_cost:0.06,task_count:3}],efficiency:{tasks_per_dollar:23.5},trend:{direction:'down',change_pct:12},savings:{total_savings:47,total_agent_cost:0.168,total_manual_estimate:47.168,savings_pct:99.6},best_value_agents:[]}),{status:200,headers:{'Content-Type':'application/json'}});
-  if(p.startsWith('/demo/'))return new Response(JSON.stringify({status:'ok',running:false}),{status:200,headers:{'Content-Type':'application/json'}});
-  return new Response('{}',{status:200,headers:{'Content-Type':'application/json'}});
-}};
-
-var refreshAll=refreshOverview;
-var switchTab=navigateTo;
+// Init
 refreshOverview();checkDemoStatus();
-setInterval(function(){if(currentPage==='overview')refreshOverview()},5000);
+setInterval(function(){if(currentPage==='overview')refreshOverview();if(currentPage==='tasks')renderTasksPage()},5000);
 </script>
 </body>
 </html>
