@@ -882,6 +882,64 @@ async def sdk_info():
     return info
 
 
+# ── MCP Server REST endpoints ──────────────────────────────────────────────
+
+
+@app.get("/mcp/tools")
+async def mcp_list_tools():
+    """List all available MCP tools with their input schemas.
+
+    Provides a REST-based discovery mechanism for HireWire's MCP capabilities.
+    Clients can use this to understand what tools are available before invoking them.
+    """
+    from src.mcp_server import MCP_TOOLS
+    return {
+        "server": "hirewire",
+        "tool_count": len(MCP_TOOLS),
+        "tools": [
+            {
+                "name": t.name,
+                "description": t.description,
+                "inputSchema": t.inputSchema,
+            }
+            for t in MCP_TOOLS
+        ],
+    }
+
+
+@app.post("/mcp/invoke")
+async def mcp_invoke_tool(body: dict[str, Any]):
+    """Invoke an MCP tool by name with arguments.
+
+    Body: {"tool": "create_task", "arguments": {"description": "Build a landing page", "budget": 5.0}}
+
+    Returns the tool's response as JSON.
+    """
+    from src.mcp_server import _HANDLERS
+
+    tool_name = body.get("tool", "")
+    arguments = body.get("arguments", {})
+
+    if not tool_name:
+        raise HTTPException(status_code=400, detail="'tool' field is required")
+
+    handler = _HANDLERS.get(tool_name)
+    if handler is None:
+        available = list(_HANDLERS.keys())
+        raise HTTPException(
+            status_code=404,
+            detail=f"Unknown tool: '{tool_name}'. Available tools: {available}",
+        )
+
+    try:
+        result_str = handler(arguments)
+        import json as _json
+        result = _json.loads(result_str)
+        return {"tool": tool_name, "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Tool execution failed: {str(e)}")
+
+
 @app.post("/sdk/orchestrate")
 async def sdk_orchestrate(body: dict[str, Any]):
     """Run a task through the Microsoft Agent Framework SDK orchestration.

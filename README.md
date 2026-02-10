@@ -83,6 +83,13 @@ Radar chart comparing Builder, Research, and External agents across Speed, Quali
 - **Application Insights** — observability, tracing, and telemetry
 - **Container Registry** — Docker image storage and management
 
+### MCP Server
+- **Native MCP protocol** — expose all HireWire capabilities as MCP tools for external agents
+- **10 MCP tools** — create_task, get_task, list_tasks, hire_agent, list_agents, marketplace_search, check_budget, check_payment_status, pay_agent, get_metrics
+- **Dual transport** — stdio (for Claude Desktop, local clients) and SSE (for remote HTTP clients)
+- **REST bridge** — `/mcp/tools` and `/mcp/invoke` endpoints for HTTP-based tool discovery and invocation
+- **SDK integration** — 11 Agent Framework SDK tools via `@tool` decorator + `ChatAgent.as_mcp_server()`
+
 ### Dashboard & API
 - **FastAPI server** — REST API for task submission, agent listing, payment history, and metrics
 - **Real-time metrics** — cost analysis, agent performance scoring, trend tracking
@@ -112,6 +119,12 @@ python3 -m pytest tests/ -q
 
 # Start the API server
 uvicorn src.api.main:app --port 8000
+
+# Start MCP server (stdio for Claude Desktop / local clients)
+python3 -m src.mcp_server
+
+# Start MCP server (SSE for remote clients)
+python3 -m src.mcp_server --transport sse --port 8090
 
 # Run interactive demo
 python3 demo/run_demo.py all
@@ -180,6 +193,8 @@ curl http://localhost:8000/demo
 | `/metrics/agents` | `GET` | Per-agent performance metrics |
 | `/metrics/costs` | `GET` | Cost analysis, efficiency, ROI |
 | `/demo` | `GET` | Run a pre-configured demo scenario |
+| `/mcp/tools` | `GET` | List all available MCP tools with schemas |
+| `/mcp/invoke` | `POST` | Invoke an MCP tool by name with arguments |
 | `/demo/seed` | `GET` | Populate database with demo data |
 | `/demo/start` | `GET` | Start continuous demo runner |
 | `/demo/stop` | `GET` | Stop demo runner |
@@ -200,9 +215,10 @@ hirewire/
 │   ├── learning/            # Feedback, scoring, Thompson sampling optimizer
 │   ├── demo/                # Demo runner, data seeder
 │   ├── mcp_servers/         # Registry MCP, Payment Hub MCP, A2A, Tool servers
+│   ├── mcp_server.py        # Standalone MCP server (stdio + SSE)
 │   ├── storage.py           # SQLite persistence layer
 │   └── config.py            # Multi-provider configuration
-├── tests/                   # 728 tests across 24 test files
+├── tests/                   # 857 tests across 24 test files
 ├── demo/                    # 3 runnable demo scenarios with CLI
 ├── scripts/                 # Deployment and utility scripts
 ├── ARCHITECTURE.md          # Detailed system design
@@ -214,7 +230,7 @@ hirewire/
 ## Testing
 
 ```bash
-# Run all tests (728 passing)
+# Run all tests (857 passing)
 python3 -m pytest tests/ -q
 
 # Specific test suites

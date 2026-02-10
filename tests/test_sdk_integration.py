@@ -425,11 +425,11 @@ class TestSDKOrchestrator:
 
 class TestMCPTools:
     def test_hirewire_sdk_tools_count(self):
-        assert len(HIREWIRE_SDK_TOOLS) == 5
+        assert len(HIREWIRE_SDK_TOOLS) == 11
 
     def test_tool_info(self):
         info = get_mcp_tool_info()
-        assert len(info) == 5
+        assert len(info) == 11
         for t in info:
             assert "name" in t
             assert "description" in t
