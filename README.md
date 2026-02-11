@@ -106,6 +106,33 @@ Radar chart comparing Builder, Research, and External agents across Speed, Quali
 - **Skill matching** — find discovered agents by capability query
 - **Full interop stack** — Agent Framework SDK + MCP Server + A2A Protocol
 
+### GitHub Copilot Agent Mode
+HireWire's MCP server makes all capabilities available to [GitHub Copilot Agent Mode](https://docs.github.com/en/copilot/using-github-copilot/using-copilot-agent-mode). Copilot can use MCP tools as actions — connect HireWire's MCP server and Copilot gains the ability to orchestrate agents, manage tasks, and process payments directly from your IDE.
+
+**Available MCP tools in Copilot Agent Mode:**
+- `hire_agent` — discover and hire agents from the marketplace
+- `create_task` / `get_task` / `list_tasks` — manage multi-agent tasks
+- `marketplace_search` — find agents by skill or capability
+- `pay_agent` — process x402 USDC micropayments to agents
+- `check_budget` / `check_payment_status` — monitor spending
+- `get_metrics` — retrieve agent performance analytics
+
+**Setup:**
+```json
+// .vscode/mcp.json
+{
+  "servers": {
+    "hirewire": {
+      "command": "python",
+      "args": ["-m", "src.mcp_server"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
+```
+
+With this configuration, ask Copilot things like *"Hire an agent to review this PR"* or *"Check the budget for our agent tasks"* and it will invoke HireWire's tools automatically.
+
 ### Dashboard & API
 - **FastAPI server** — REST API for task submission, agent listing, payment history, and metrics
 - **Real-time metrics** — cost analysis, agent performance scoring, trend tracking

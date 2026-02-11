@@ -1111,14 +1111,18 @@ async def sdk_orchestrate(body: dict[str, Any]):
 
 
 @app.get("/.well-known/agent.json")
-async def a2a_agent_card():
+async def a2a_agent_card(request: Request):
     """A2A agent card discovery endpoint.
 
     Returns HireWire's agent card per the Google A2A specification.
     External agents fetch this to discover HireWire's capabilities.
+    Dynamically sets the base URL from the incoming request so the card
+    works correctly in any deployment (local, Azure, tunnel, etc.).
     """
-    from src.integrations.a2a_protocol import a2a_server
-    return a2a_server.get_agent_card_dict()
+    from src.integrations.a2a_protocol import generate_hirewire_agent_card
+    base_url = str(request.base_url).rstrip("/")
+    card = generate_hirewire_agent_card(base_url=base_url)
+    return card.to_dict()
 
 
 @app.post("/a2a")
