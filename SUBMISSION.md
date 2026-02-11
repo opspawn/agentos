@@ -156,7 +156,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed system design and [docs/ar
 
 ## Items Already Complete
 
-- [x] Azure deployment live and healthy (uptime: 27+ hours)
+- [x] Azure deployment live and healthy (uptime: 28+ hours, GPT-4o + CosmosDB connected)
 - [x] 1,293 tests passing
 - [x] Demo video recorded (1:43, 1080p, H.264)
 - [x] README with all judge-facing sections

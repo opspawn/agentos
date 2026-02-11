@@ -2,7 +2,7 @@
 
 **Microsoft AI Agent Hackathon — AI Dev Days 2026**
 **Submission Deadline: March 15, 2026 (11:59 PM PT)**
-**Last verified: Sprint 42 (Feb 11, 2026)**
+**Last verified: Sprint 43 (Feb 11, 2026)**
 
 ## GitHub Repository
 - [x] Repo public and polished: [github.com/opspawn/hirewire](https://github.com/opspawn/hirewire)
@@ -27,7 +27,7 @@
 - [x] Demo scenarios: landing-page, research, agent-hiring, showcase
 
 ## Tests
-- [x] 1293 tests passing (`python3 -m pytest tests/ -q`) — verified Sprint 42
+- [x] 1293 tests passing (`python3 -m pytest tests/ -q`) — verified Sprint 43
 - [x] 33 test files covering agents, workflows, marketplace, payments, API, Foundry, A2A, MCP
 - [x] 8 azure-marked tests correctly deselected (require live credentials)
 
