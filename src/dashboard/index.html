@@ -177,6 +177,26 @@
   .toast.info { border-left: 3px solid var(--accent); }
   @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
   @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  .page { animation: fadeIn 0.25s ease-out; }
+  .stat-card { transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .card { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .loading-skeleton { background: linear-gradient(90deg, var(--card) 25%, var(--card-hover) 50%, var(--card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; height: 20px; }
+  .loading-skeleton.lg { height: 32px; width: 60px; }
+  .loading-skeleton.bar { height: 12px; width: 100%; margin-bottom: 8px; }
+  .nav-item { transition: all 0.2s ease; }
+  .kanban-card { transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease; }
+  .kanban-card:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+  .gauge-bar-fill { transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+  .badge { transition: all 0.2s ease; }
+  .azure-footer { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 16px; background: var(--bg-secondary); border-top: 1px solid var(--border); font-size: 10px; color: var(--text-muted); letter-spacing: 0.03em; flex-shrink: 0; }
+  .azure-footer .footer-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .azure-footer .footer-badge.azure { background: var(--blue-dim); color: var(--blue); }
+  .azure-footer .footer-badge.cosmos { background: var(--purple-dim); color: var(--purple); }
+  .azure-footer .footer-badge.framework { background: var(--accent-glow); color: var(--accent-light); }
   /* Orchestration view */
   .orch-flow { display: flex; align-items: center; justify-content: center; gap: 0; padding: 20px 10px; overflow-x: auto; }
   .orch-node { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 100px; }
@@ -448,6 +468,13 @@
         </div>
       </div>
     </div>
+    <div class="azure-footer">
+      <span>Powered by</span>
+      <span class="footer-badge azure">Azure OpenAI GPT-4o</span>
+      <span class="footer-badge cosmos">Cosmos DB</span>
+      <span class="footer-badge framework">MS Agent Framework</span>
+      <span>&middot; HireWire v2.0 &middot; Microsoft AI Dev Days 2026</span>
+    </div>
   </div>
 </div>
 
@@ -495,12 +522,78 @@
 </div>
 <div class="toast-container" id="toast-container"></div>
 <script>
-var API=window.location.origin,currentPage='overview',selectedAgent=null,demoRunning=false,chartInstances={},cachedAgents=[],cachedStats=null;
+var API=window.location.origin,currentPage='overview',selectedAgent=null,demoRunning=false,chartInstances={},cachedAgents=[],cachedStats=null,offlineMode=false;
+
+// ── STANDALONE DEMO DATA (renders without backend) ──
+var DEMO_DATA={
+  health:{agents_count:5,tasks_total:12,tasks_completed:9,tasks_running:1,tasks_pending:2,total_spent_usdc:7.2341,gpt4o_available:true,status:'healthy'},
+  stats:{agents_count:5,total_spent_usdc:7.2341,completion_rate:75,avg_response_ms:1247,gpt4o_tasks:9,agent_spend:{builder:1.82,research:2.31,'designer-ext-001':1.65,'analyst-ext-001':1.44}},
+  activity:[
+    {type:'green',icon:'\u2713',text:'<strong>research-agent</strong> completed "Analyze competitor pricing across top 5 AI agent platforms" via <strong>GPT-4o</strong>',time:'2m ago'},
+    {type:'blue',icon:'\u2192',text:'CEO dispatched task to <strong>builder-agent</strong>: "Build landing page component with responsive design"',time:'5m ago'},
+    {type:'accent',icon:'$',text:'<strong>x402 payment</strong> of $1.25 USDC to designer-ext-001 settled on-chain',time:'8m ago'},
+    {type:'green',icon:'\u2713',text:'<strong>builder-agent</strong> completed "Deploy FastAPI microservice to Azure Container Apps" via <strong>GPT-4o</strong>',time:'12m ago'},
+    {type:'yellow',icon:'\u26A0',text:'HITL approval requested: hire <strong>analyst-ext-001</strong> for $2.00 USDC competitive analysis',time:'15m ago'},
+    {type:'blue',icon:'\u2192',text:'CEO dispatched parallel tasks to <strong>research-agent</strong> and <strong>builder-agent</strong>',time:'18m ago'},
+    {type:'accent',icon:'$',text:'<strong>x402 payment</strong> of $0.85 USDC to analyst-ext-001 settled on-chain',time:'22m ago'},
+    {type:'green',icon:'\u2713',text:'<strong>research-agent</strong> completed "Survey agent memory architectures" via <strong>GPT-4o</strong>',time:'25m ago'}
+  ],
+  agents:[
+    {name:'ceo-agent',description:'Coordinator: decomposes tasks, selects agents, manages budget',skills:['orchestration','task-decomposition','budget-management','agent-selection'],protocol:'agent-framework',payment:'internal',price_per_call:'$0.00',endpoint:'/agents/ceo',is_external:false},
+    {name:'builder-agent',description:'Developer: writes code, deploys services, runs tests',skills:['python','fastapi','docker','azure-deployment','testing'],protocol:'agent-framework',payment:'internal',price_per_call:'$0.00',endpoint:'/agents/builder',is_external:false},
+    {name:'research-agent',description:'Analyst: competitive research, market analysis, data gathering',skills:['web-search','analysis','report-generation','summarization'],protocol:'agent-framework',payment:'internal',price_per_call:'$0.00',endpoint:'/agents/research',is_external:false},
+    {name:'designer-ext-001',description:'External UI/UX designer specializing in dashboards and data visualization',skills:['ui-design','figma','css','visualization','responsive'],protocol:'a2a',payment:'x402',price_per_call:'$1.25',endpoint:'https://agents.example.com/designer',is_external:true},
+    {name:'analyst-ext-001',description:'External market analyst providing competitive intelligence and pricing analysis',skills:['market-analysis','pricing','competitive-intel','forecasting'],protocol:'a2a',payment:'x402',price_per_call:'$0.85',endpoint:'https://agents.example.com/analyst',is_external:true}
+  ],
+  tasks:[
+    {task_id:'task-001',description:'Analyze competitor pricing across top 5 AI agent platforms',status:'completed',created_at:Date.now()/1000-120,result:{assigned_agent:'research-agent',model:'gpt-4o',estimated_cost:0.85,agent_response_preview:'Competitive analysis of 5 AI agent platforms: AutoGPT ($0/call, open-source), CrewAI ($0.02/call), LangChain Agents ($0.01-0.05/call), Microsoft Autogen ($0/call, Azure costs), SuperAGI ($0.03/call). Key finding: no platform offers real USDC agent-to-agent payments...'}},
+    {task_id:'task-002',description:'Build landing page component with responsive design',status:'completed',created_at:Date.now()/1000-300,result:{assigned_agent:'builder-agent',model:'gpt-4o',estimated_cost:0.0,agent_response_preview:'Created responsive landing page using Tailwind CSS with dark mode support. Components: hero section, feature grid, pricing table, CTA. Deployed to Azure Container Apps at hirewire-api.purplecliff...'}},
+    {task_id:'task-003',description:'Design dashboard wireframes for agent marketplace',status:'completed',created_at:Date.now()/1000-480,result:{assigned_agent:'designer-ext-001',model:'gpt-4o',estimated_cost:1.25,x402_payment:true,hitl_approval_id:'hitl-001',agent_response_preview:'Dashboard wireframes completed: 7 sections (Overview, Orchestration, Pipeline, Tasks, Payments, Metrics, Governance). Dark theme with indigo accent...'}},
+    {task_id:'task-004',description:'Survey agent memory architectures and recommend approach',status:'completed',created_at:Date.now()/1000-600,result:{assigned_agent:'research-agent',model:'gpt-4o',estimated_cost:0.85,agent_response_preview:'Surveyed 4 memory architectures: A-Mem (reflective), MemGPT (tiered), CMA (colony), custom file-based. Recommendation: hybrid approach with file-based persistence for simplicity...'}},
+    {task_id:'task-005',description:'Deploy FastAPI microservice to Azure Container Apps',status:'completed',created_at:Date.now()/1000-900,result:{assigned_agent:'builder-agent',model:'gpt-4o',estimated_cost:0.0,agent_response_preview:'Deployed HireWire API to Azure Container Apps. Endpoint: hirewire-api.purplecliff-500810ff.eastus.azurecontainerapps.io. Health check passing. 60+ REST endpoints active...'}},
+    {task_id:'task-006',description:'Analyze market size for AI agent hiring platforms',status:'completed',created_at:Date.now()/1000-1200,result:{assigned_agent:'analyst-ext-001',model:'gpt-4o',estimated_cost:0.85,x402_payment:true,hitl_approval_id:'hitl-002',agent_response_preview:'AI agent market projected at $65B by 2028 (Gartner). Agent hiring/marketplace segment estimated at $2-4B. Key growth drivers: enterprise multi-agent adoption...'}},
+    {task_id:'task-007',description:'Create unit tests for marketplace module',status:'completed',created_at:Date.now()/1000-1500,result:{assigned_agent:'builder-agent',model:'gpt-4o',estimated_cost:0.0,agent_response_preview:'Created 47 test cases for marketplace module covering: agent registration, skill matching, hiring workflow, budget management, payment verification. All tests passing...'}},
+    {task_id:'task-008',description:'Evaluate Azure Cosmos DB vs PostgreSQL for agent persistence',status:'completed',created_at:Date.now()/1000-1800,result:{assigned_agent:'research-agent',model:'gpt-4o',estimated_cost:0.85,agent_response_preview:'Cosmos DB recommended for hackathon: serverless pricing ($0.25/million RU), global distribution, JSON-native, Azure-native integration. PostgreSQL better for production cost at scale...'}},
+    {task_id:'task-009',description:'Design x402 payment protocol integration with escrow',status:'completed',created_at:Date.now()/1000-2100,result:{assigned_agent:'designer-ext-001',model:'gpt-4o',estimated_cost:1.25,x402_payment:true,hitl_approval_id:'hitl-003',agent_response_preview:'x402 escrow flow: 1) CEO reserves USDC in escrow smart contract 2) EIP-712 signed payment proof sent to external agent 3) Agent verifies proof, executes task 4) Settlement releases funds on completion...'}},
+    {task_id:'task-010',description:'Build real-time metrics dashboard with Chart.js',status:'running',created_at:Date.now()/1000-60,result:{assigned_agent:'builder-agent',model:'gpt-4o',estimated_cost:0.0}},
+    {task_id:'task-011',description:'Research Microsoft Agent Framework SDK best practices',status:'pending',created_at:Date.now()/1000-30,result:{}},
+    {task_id:'task-012',description:'Generate competitive positioning document',status:'pending',created_at:Date.now()/1000-10,result:{}}
+  ],
+  transactions:[
+    {from_agent:'ceo-agent',to_agent:'designer-ext-001',amount_usdc:1.25,task_id:'task-003',status:'completed',timestamp:Date.now()/1000-480},
+    {from_agent:'ceo-agent',to_agent:'analyst-ext-001',amount_usdc:0.85,task_id:'task-006',status:'completed',timestamp:Date.now()/1000-1200},
+    {from_agent:'ceo-agent',to_agent:'designer-ext-001',amount_usdc:1.25,task_id:'task-009',status:'completed',timestamp:Date.now()/1000-2100},
+    {from_agent:'ceo-agent',to_agent:'research-agent',amount_usdc:0.85,task_id:'task-001',status:'completed',timestamp:Date.now()/1000-120},
+    {from_agent:'ceo-agent',to_agent:'research-agent',amount_usdc:0.85,task_id:'task-004',status:'completed',timestamp:Date.now()/1000-600},
+    {from_agent:'ceo-agent',to_agent:'builder-agent',amount_usdc:0.42,task_id:'task-002',status:'completed',timestamp:Date.now()/1000-300},
+    {from_agent:'ceo-agent',to_agent:'analyst-ext-001',amount_usdc:0.85,task_id:'task-008',status:'completed',timestamp:Date.now()/1000-1800},
+    {from_agent:'ceo-agent',to_agent:'builder-agent',amount_usdc:0.48,task_id:'task-007',status:'completed',timestamp:Date.now()/1000-1500},
+    {from_agent:'ceo-agent',to_agent:'builder-agent',amount_usdc:0.44,task_id:'task-005',status:'completed',timestamp:Date.now()/1000-900}
+  ],
+  approvals:{stats:{pending:1,approved:4,rejected:1,auto_approved:3},pending:[{request_id:'hitl-pending-001',action:'Hire analyst-ext-001',description:'Competitive pricing analysis for enterprise segment — external agent, x402 payment required',cost_usdc:2.0,created_at:Date.now()/1000-60}],all:[
+    {action:'Hire designer-ext-001',cost_usdc:1.25,status:'approved',reviewer:'dashboard_user',created_at:Date.now()/1000-480},
+    {action:'Hire analyst-ext-001',cost_usdc:0.85,status:'approved',reviewer:'auto_policy',created_at:Date.now()/1000-1200},
+    {action:'Hire designer-ext-001',cost_usdc:1.25,status:'auto_approved',reviewer:'auto_policy',created_at:Date.now()/1000-2100},
+    {action:'Deploy to production',cost_usdc:0.0,status:'auto_approved',reviewer:'auto_policy',created_at:Date.now()/1000-900},
+    {action:'Hire unknown-agent-007',cost_usdc:5.0,status:'rejected',reviewer:'dashboard_user',created_at:Date.now()/1000-3000},
+    {action:'Budget increase to $50',cost_usdc:50.0,status:'auto_approved',reviewer:'auto_policy',created_at:Date.now()/1000-3600},
+    {action:'Hire analyst-ext-001',cost_usdc:2.0,status:'pending',reviewer:'--',created_at:Date.now()/1000-60}
+  ]},
+  safety:{status:{total_checked:24,flagged:2,blocked:0,safe:21,warnings:3,resumes_checked:8,job_postings_checked:16},bias:{fairness_score:0.94,total_decisions:18,flagged_decisions:1,bias_indicators:{gender:0,age:0,ethnicity:0,disability:1},recommendations:['Continue monitoring disability-related language in job postings','Consider adding skill-blind evaluation for initial agent screening','All content safety checks passing — no blocked content detected']}}
+};
 
 function fmt(ts){if(!ts)return'--';var d=new Date(ts*1000);return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
 function fmtDate(ts){if(!ts)return'--';var d=new Date(ts*1000);return d.toLocaleDateString([],{month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
 function toast(msg,type){type=type||'info';var c=document.getElementById('toast-container'),el=document.createElement('div');el.className='toast '+type;el.textContent=msg;c.appendChild(el);setTimeout(function(){el.style.animation='fadeOut 0.3s ease';setTimeout(function(){el.remove()},300)},3000);}
-async function fetchJSON(path){try{var r=await fetch(API+path);if(!r.ok)return null;return await r.json()}catch(e){return null}}
+async function fetchJSON(path){
+  try{var r=await fetch(API+path,{signal:AbortSignal.timeout(3000)});if(!r.ok)throw new Error('not ok');offlineMode=false;return await r.json()}
+  catch(e){
+    offlineMode=true;
+    // Fallback to demo data for standalone mode
+    var map={'/health':DEMO_DATA.health,'/stats':DEMO_DATA.stats,'/activity':DEMO_DATA.activity,'/agents':DEMO_DATA.agents,'/tasks':DEMO_DATA.tasks,'/transactions':DEMO_DATA.transactions,'/approvals/stats':DEMO_DATA.approvals.stats,'/approvals/pending':DEMO_DATA.approvals.pending,'/approvals/all':DEMO_DATA.approvals.all,'/responsible-ai/status':DEMO_DATA.safety.status,'/responsible-ai/bias-report':DEMO_DATA.safety.bias};
+    return map[path]||null;
+  }
+}
 
 function navigateTo(page){
   currentPage=page;
@@ -550,7 +643,12 @@ async function refreshOverview(){
     document.getElementById('nav-agent-count').textContent=h.agents_count;
     document.getElementById('nav-task-count').textContent=h.tasks_total;
     document.getElementById('sidebar-status-dot').classList.remove('offline');
-    document.getElementById('sidebar-status-text').textContent=h.gpt4o_available?'GPT-4o Connected':'All systems healthy';
+    if(offlineMode){
+      document.getElementById('sidebar-status-text').textContent='Demo Mode (standalone)';
+      document.getElementById('demo-badge').classList.add('active');
+    } else {
+      document.getElementById('sidebar-status-text').textContent=h.gpt4o_available?'GPT-4o Connected':'All systems healthy';
+    }
     if(h.gpt4o_available)document.getElementById('gpt4o-badge').classList.add('active');
     var rate=h.tasks_total>0?Math.round(h.tasks_completed/h.tasks_total*100):0;
     document.getElementById('stat-completion-rate').textContent=rate+'% completion rate';
@@ -827,9 +925,28 @@ async function runLiveDemo(){
   activateStage(1);
 
   try{
-    var r=await fetch(API+'/demo/live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_index:liveDemoIndex})});
-    if(!r.ok)throw new Error('API error '+r.status);
-    var data=await r.json();
+    var data;
+    if(!offlineMode){
+      var r=await fetch(API+'/demo/live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_index:liveDemoIndex}),signal:AbortSignal.timeout(5000)});
+      if(!r.ok)throw new Error('API error '+r.status);
+      data=await r.json();
+    } else {
+      // Standalone demo simulation
+      var demoTasks=[
+        {desc:'Analyze competitor pricing across top 5 AI agent platforms',agent:'research-agent',cost:0.8500,model:'gpt-4o',preview:'Competitive analysis of 5 AI agent platforms: AutoGPT ($0/call), CrewAI ($0.02/call), LangChain Agents ($0.01-0.05/call), Microsoft Autogen ($0/call), SuperAGI ($0.03/call). Key finding: no platform offers real USDC agent-to-agent payments. HireWire is uniquely positioned as the first marketplace with x402 protocol integration.'},
+        {desc:'Build responsive landing page for HireWire product launch',agent:'builder-agent',cost:0.0000,model:'gpt-4o',preview:'Created landing page with hero section, feature grid (4 differentiators), pricing table, and CTA. Tech: Tailwind CSS, responsive breakpoints, dark mode support. Deployed to Azure Container Apps. Load time: 1.2s. Lighthouse score: 94.'},
+        {desc:'Design escrow payment flow for x402 agent settlements',agent:'designer-ext-001',cost:1.2500,model:'gpt-4o',preview:'Designed 6-step escrow flow: (1) CEO reserves USDC, (2) EIP-712 signature generated, (3) Proof sent to external agent, (4) Agent verifies and executes, (5) Result validated, (6) Settlement released. Includes rollback on failure and dispute resolution.'}
+      ];
+      var dt=demoTasks[liveDemoIndex%3];
+      data={description:dt.desc,agent:dt.agent,cost_usdc:dt.cost,model:dt.model,response_preview:dt.preview,task_id:'demo-'+Date.now(),total_ms:Math.round(800+Math.random()*1200),stages:[
+        {stage:1,detail:'CEO received and parsed task',duration_ms:Math.round(50+Math.random()*100)},
+        {stage:2,detail:'Skill matching: '+dt.agent+' selected (score: 0.94)',duration_ms:Math.round(100+Math.random()*200)},
+        {stage:3,detail:'$'+dt.cost.toFixed(2)+' USDC reserved in escrow',duration_ms:Math.round(30+Math.random()*70)},
+        {stage:4,detail:'GPT-4o generating response via Azure OpenAI',duration_ms:Math.round(400+Math.random()*600)},
+        {stage:5,detail:'x402 settlement: $'+dt.cost.toFixed(2)+' USDC released',duration_ms:Math.round(80+Math.random()*120)},
+        {stage:6,detail:'Result delivered to CEO, task marked complete',duration_ms:Math.round(20+Math.random()*40)}
+      ]};
+    }
 
     document.getElementById('pipeline-task-text').textContent=data.description;
 
