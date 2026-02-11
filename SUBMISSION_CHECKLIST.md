@@ -19,7 +19,8 @@
 - [x] `demo/record_demo.py` runs all 8 stages end-to-end (--fast mode verified)
 - [x] `demo/DEMO_TRANSCRIPT.md` — full output formatted for video script reference
 - [x] Dashboard works standalone (no server needed) with demo data
-- [ ] Demo video recorded and uploaded
+- [x] Demo video recorded: docs/demo/hirewire-demo-v2.mp4 (1:43, 1920x1080, H.264)
+- [ ] Demo video uploaded to YouTube/Vimeo (Sean)
 - [x] Demo scenarios: landing-page, research, agent-hiring, showcase
 
 ## Tests
