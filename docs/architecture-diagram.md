@@ -10,6 +10,7 @@ flowchart TB
         end
 
         AOI["🧠 Azure OpenAI<br/>GPT-4o"]
+        Foundry["🏭 AI Foundry<br/>Agent Service"]
         Cosmos["💾 Azure Cosmos DB<br/>Persistent Storage"]
         AppInsights["📈 Application Insights<br/>Monitoring & Tracing"]
         ContentSafety["🛡️ Azure Content Safety<br/>RAI Guardrails"]
@@ -65,6 +66,7 @@ flowchart TB
     API --> Interop
 
     AgentFramework --> AOI
+    AgentFramework --> Foundry
     AgentFramework --> Marketplace
     Marketplace --> Hiring
     Hiring --> External
@@ -91,7 +93,7 @@ flowchart TB
     classDef governance fill:#eab308,stroke:#ca8a04,color:white
     classDef external fill:#a855f7,stroke:#9333ea,color:white
 
-    class AOI,Cosmos,AppInsights,ContentSafety azure
+    class AOI,Foundry,Cosmos,AppInsights,ContentSafety azure
     class CEO,Builder,Research,Social agent
     class Escrow,Verify,Ledger payment
     class HITL,RAI,Audit governance

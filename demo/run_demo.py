@@ -97,6 +97,11 @@ async def _run_agent_hiring() -> dict:
     return await run_agent_hiring_scenario()
 
 
+async def _run_showcase() -> dict:
+    from demo.scenario_showcase import run_showcase_scenario
+    return await run_showcase_scenario()
+
+
 async def _run_all() -> list[dict]:
     results = []
     print(f"{_BOLD}{_YELLOW}Running all demo scenarios …{_RESET}\n")
@@ -124,6 +129,7 @@ SCENARIOS = {
     "landing-page": ("Build a Landing Page", _run_landing_page),
     "research": ("Parallel Research", _run_research),
     "agent-hiring": ("Agent Hiring", _run_agent_hiring),
+    "showcase": ("Showcase Mode", _run_showcase),
     "all": ("All Scenarios", None),  # handled specially
 }
 

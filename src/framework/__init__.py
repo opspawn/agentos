@@ -25,6 +25,14 @@ from src.framework.orchestrator import (
 from src.framework.mcp_tools import MCPToolDescriptor, MCPToolRegistry
 from src.framework.a2a import A2AAgentCard, A2AServer, A2AClient, A2ATaskBatch
 from src.framework.azure_llm import AzureLLMProvider, get_azure_llm, azure_available
+from src.framework.foundry_agent import (
+    FoundryAgentProvider,
+    FoundryAgentConfig,
+    FoundryAgentInstance,
+    get_foundry_provider,
+    foundry_available,
+    create_hirewire_foundry_agents,
+)
 
 __all__ = [
     "AgentFrameworkAgent",
@@ -47,4 +55,10 @@ __all__ = [
     "AzureLLMProvider",
     "get_azure_llm",
     "azure_available",
+    "FoundryAgentProvider",
+    "FoundryAgentConfig",
+    "FoundryAgentInstance",
+    "get_foundry_provider",
+    "foundry_available",
+    "create_hirewire_foundry_agents",
 ]

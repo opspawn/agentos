@@ -746,6 +746,18 @@ async def demo_status():
     return _demo_runner.status()
 
 
+@app.post("/demo/showcase")
+async def demo_showcase():
+    """Run the full showcase demo — all HireWire features in a curated sequence.
+
+    Returns structured pipeline stages so the frontend can animate each step.
+    Stages: Agent Creation -> Marketplace -> CEO Analysis -> Sequential Workflow
+    -> External Hiring + x402 -> Concurrent Execution -> Foundry -> Summary.
+    """
+    from demo.scenario_showcase import run_showcase_scenario
+    return await run_showcase_scenario()
+
+
 # ── Live Demo Pipeline endpoint ──────────────────────────────────────────────
 
 LIVE_DEMO_TASKS = [
@@ -909,6 +921,105 @@ async def sdk_info():
     info = get_sdk_info()
     info["mcp_tools"] = get_mcp_tool_info()
     return info
+
+
+# ── Foundry Agent Service endpoints ────────────────────────────────────────
+
+
+@app.get("/foundry/info")
+async def foundry_info():
+    """Return Azure AI Foundry Agent Service status and agent list."""
+    from src.framework.foundry_agent import get_foundry_provider, foundry_available
+    info = get_foundry_provider().get_info()
+    info["foundry_configured"] = foundry_available()
+    return info
+
+
+@app.post("/foundry/agents", status_code=201)
+async def foundry_create_agent(body: dict[str, Any]):
+    """Create a new agent in the Foundry Agent Service.
+
+    Body: {"name": "Builder", "description": "...", "instructions": "..."}
+    """
+    from src.framework.foundry_agent import (
+        get_foundry_provider,
+        FoundryAgentConfig,
+    )
+    name = body.get("name", "")
+    if not name:
+        raise HTTPException(status_code=400, detail="'name' is required")
+
+    config = FoundryAgentConfig(
+        name=name,
+        description=body.get("description", f"HireWire {name} agent"),
+        instructions=body.get("instructions", f"You are {name}."),
+        model_deployment=body.get("model_deployment", "gpt-4o"),
+    )
+    provider = get_foundry_provider()
+    instance = provider.create_agent(config)
+    return instance.agent_card
+
+
+@app.get("/foundry/agents")
+async def foundry_list_agents(capability: str | None = None):
+    """List agents registered with the Foundry Agent Service."""
+    from src.framework.foundry_agent import get_foundry_provider
+    provider = get_foundry_provider()
+    return {"agents": provider.discover_agents(capability)}
+
+
+@app.post("/foundry/invoke")
+async def foundry_invoke_agent(body: dict[str, Any]):
+    """Invoke a Foundry-hosted agent with a task.
+
+    Body: {"agent_id": "...", "task": "...", "thread_id": "..."}
+    """
+    from src.framework.foundry_agent import get_foundry_provider
+    agent_id = body.get("agent_id", "")
+    task = body.get("task", "")
+    if not agent_id:
+        raise HTTPException(status_code=400, detail="'agent_id' is required")
+    if not task:
+        raise HTTPException(status_code=400, detail="'task' is required")
+
+    provider = get_foundry_provider()
+    result = await provider.invoke_agent(
+        agent_id=agent_id,
+        task=task,
+        thread_id=body.get("thread_id"),
+        context=body.get("context"),
+    )
+    if result.get("status") == "error":
+        raise HTTPException(status_code=404, detail=result.get("error", "Agent not found"))
+    return result
+
+
+@app.post("/foundry/setup")
+async def foundry_setup_agents():
+    """Create the standard HireWire agent roster in Foundry.
+
+    Creates CEO, Builder, Research, and Analyst agents and returns their cards.
+    """
+    from src.framework.foundry_agent import (
+        get_foundry_provider,
+        create_hirewire_foundry_agents,
+    )
+    provider = get_foundry_provider()
+    agents = create_hirewire_foundry_agents(provider)
+    return {
+        "status": "created",
+        "agents": {
+            name: inst.agent_card for name, inst in agents.items()
+        },
+    }
+
+
+@app.get("/foundry/health")
+async def foundry_health():
+    """Check Foundry Agent Service connectivity."""
+    from src.framework.foundry_agent import get_foundry_provider
+    provider = get_foundry_provider()
+    return provider.check_connection()
 
 
 # ── MCP Server REST endpoints ──────────────────────────────────────────────

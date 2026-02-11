@@ -51,13 +51,60 @@ class TestParallelResearchScenario:
         assert "competitor" in result["task"].lower()
 
 
+class TestShowcaseScenario:
+    @pytest.mark.asyncio
+    async def test_showcase_completes(self):
+        from demo.scenario_showcase import run_showcase_scenario
+
+        result = await run_showcase_scenario()
+
+        assert result["workflow"] == "showcase"
+        assert result["status"] == "completed"
+        assert result["total_elapsed_s"] >= 0
+        assert result["budget"]["allocated"] == 10.0
+        assert len(result["stages"]) == 8
+
+    @pytest.mark.asyncio
+    async def test_showcase_stages_have_required_fields(self):
+        from demo.scenario_showcase import run_showcase_scenario
+
+        result = await run_showcase_scenario()
+
+        for stage in result["stages"]:
+            assert "stage" in stage
+            assert "name" in stage
+            assert "duration_ms" in stage
+            assert stage["duration_ms"] >= 0
+
+    @pytest.mark.asyncio
+    async def test_showcase_includes_foundry(self):
+        from demo.scenario_showcase import run_showcase_scenario
+
+        result = await run_showcase_scenario()
+
+        foundry_stage = [s for s in result["stages"] if s["name"] == "Foundry Agent Service"]
+        assert len(foundry_stage) == 1
+        assert foundry_stage[0]["foundry_agents"] == 4
+
+    @pytest.mark.asyncio
+    async def test_showcase_includes_x402(self):
+        from demo.scenario_showcase import run_showcase_scenario
+
+        result = await run_showcase_scenario()
+
+        hiring_stage = [s for s in result["stages"] if "x402" in s["name"]]
+        assert len(hiring_stage) == 1
+        # In mock mode without external server, hiring may fail — that's OK
+        assert hiring_stage[0]["status"] in ("completed", "failed")
+
+
 class TestRunDemoCLI:
     def test_parser_accepts_valid_scenarios(self):
         from demo.run_demo import build_parser
 
         parser = build_parser()
 
-        for scenario in ("landing-page", "research", "all"):
+        for scenario in ("landing-page", "research", "showcase", "all"):
             args = parser.parse_args([scenario])
             assert args.scenario == scenario
 
