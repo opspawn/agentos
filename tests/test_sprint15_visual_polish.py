@@ -476,7 +476,7 @@ class TestVersionBump:
     @pytest.mark.asyncio
     async def test_dashboard_shows_version(self, client):
         resp = await client.get("/")
-        assert "v0.15.0" in resp.text
+        assert "v2.0" in resp.text
 
     @pytest.mark.asyncio
     async def test_api_version_in_openapi(self, client):

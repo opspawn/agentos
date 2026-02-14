@@ -3,7 +3,7 @@
 **An agent operating system where AI agents hire other agents with real payments.**
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)](https://python.org)
-[![Tests](https://img.shields.io/badge/Tests-1293%20passing-brightgreen?logo=pytest&logoColor=white)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-1540%20passing-brightgreen?logo=pytest&logoColor=white)](#testing)
 [![Azure](https://img.shields.io/badge/Azure-GPT--4o%20%7C%20CosmosDB%20%7C%20Container%20Apps-0078D4?logo=microsoftazure&logoColor=white)](#azure-integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
@@ -375,7 +375,7 @@ hirewire/
 │   ├── storage.py           # SQLite persistence layer
 │   └── config.py            # Multi-provider configuration
 ├── deploy/                  # Azure Container Apps deployment (Bicep + scripts)
-├── tests/                   # 1293+ tests across 33 test files
+├── tests/                   # 1540+ tests across 38 test files
 ├── demo/                    # 3 runnable demo scenarios with CLI
 ├── scripts/                 # Deployment and utility scripts
 ├── ARCHITECTURE.md          # Detailed system design
@@ -387,7 +387,7 @@ hirewire/
 ## Testing
 
 ```bash
-# Run all tests (1293+ passing)
+# Run all tests (1540+ passing)
 python3 -m pytest tests/ -q
 
 # Specific test suites

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Render terminal-style frames for the demo video."""
+"""Render terminal-style frames for the demo video.
+
+Sprint 45: Rewritten to highlight the HIRING FLOW as the centerpiece:
+  Task Submission → Marketplace Search → Skill Matching → x402 Payment → Completion
+"""
 from PIL import Image, ImageDraw, ImageFont
 import os
 
@@ -13,16 +17,19 @@ BLUE = (96, 165, 250)
 MAGENTA = (192, 132, 252)
 GRAY = (148, 163, 184)
 DIM = (100, 116, 139)
+WHITE = (255, 255, 255)
 
 # Use a monospace font
 try:
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 16)
     font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 16)
     font_title = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", 14)
-except:
+    font_large = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 18)
+except Exception:
     font = ImageFont.load_default()
     font_bold = font
     font_title = font
+    font_large = font
 
 LINE_HEIGHT = 22
 MARGIN_X = 40
@@ -35,7 +42,7 @@ def draw_title_bar(draw):
     draw.ellipse([(16, 12), (28, 24)], fill=(255, 95, 86))
     draw.ellipse([(36, 12), (48, 24)], fill=(255, 189, 46))
     draw.ellipse([(56, 12), (68, 24)], fill=(39, 201, 63))
-    draw.text((W//2 - 100, 10), "HireWire Demo — Terminal", fill=GRAY, font=font_title)
+    draw.text((W//2 - 120, 10), "HireWire — Agent Hiring Pipeline", fill=GRAY, font=font_title)
 
 def draw_line(draw, y, segments):
     """Draw a line of text with color segments: [(text, color), ...]"""
@@ -63,142 +70,172 @@ def create_frame(lines, filename):
 output_dir = "/home/agent/projects/hirewire/docs/demo/video-assets/frames"
 os.makedirs(output_dir, exist_ok=True)
 
-# Frame 1: Stage 1 - Agent Creation
+# ── Frame 1: Task Submission ──────────────────────────────────────────────
+# The user submits a task → CEO agent receives and analyzes it
 frame1_lines = [
-    [("$ ", GREEN), ("python demo/record_demo.py", FG)],
+    [("$ ", GREEN), ("hirewire submit --task 'Analyze competitor pricing across top 5 AI platforms'", FG)],
     "",
-    [("╔══════════════════════════════════════════════════════════════╗", CYAN)],
-    [("║            HireWire — Agent Hiring Platform                 ║", CYAN)],
-    [("║     Microsoft AI Agent Hackathon · AI Dev Days 2026         ║", CYAN)],
-    [("╚══════════════════════════════════════════════════════════════╝", CYAN)],
+    [("╔══════════════════════════════════════════════════════════════════╗", CYAN)],
+    [("║   HireWire — Where AI Agents Hire AI Agents                    ║", CYAN)],
+    [("║   Microsoft AI Dev Days 2026  ·  1,540 tests  ·  Live on Azure ║", CYAN)],
+    [("╚══════════════════════════════════════════════════════════════════╝", CYAN)],
     "",
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
-    [("Stage [1/8]  ", YELLOW), ("Agent Creation", FG)],
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("Step [1/5]  ", YELLOW), ("TASK SUBMISSION", WHITE)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
     "",
-    [("  ✓ ", GREEN), ("Created agent: ", FG), ("CEO", CYAN), (" (azure-gpt4o)", GRAY)],
-    [("    ", FG), ("Skills: task_analysis, agent_routing, budget_management", DIM)],
-    [("  ✓ ", GREEN), ("Created agent: ", FG), ("Builder", CYAN), (" (azure-gpt4o)", GRAY)],
-    [("    ", FG), ("Skills: code_generation, testing, deployment", DIM)],
-    [("  ✓ ", GREEN), ("Created agent: ", FG), ("Research", CYAN), (" (azure-gpt4o)", GRAY)],
-    [("    ", FG), ("Skills: web_search, data_analysis, report_writing", DIM)],
-    [("  ✓ ", GREEN), ("Created agent: ", FG), ("Analyst", CYAN), (" (x402-external)", GRAY)],
-    [("    ", FG), ("Skills: financial_modeling, competitive_analysis", DIM)],
+    [("  ► ", BLUE), ("Task received by CEO Agent (Azure GPT-4o)", FG)],
+    [("    ", FG), ("Task: ", GRAY), ("\"Analyze competitor pricing across top 5 AI platforms\"", CYAN)],
     "",
-    [("  ► ", BLUE), ("4 agents registered", FG), (" | 2 internal + 2 external (x402)", GRAY)],
+    [("  ► ", BLUE), ("CEO analyzing task requirements...", FG)],
+    [("    ", FG), ("Type:       ", GRAY), ("research + analysis", CYAN)],
+    [("    ", FG), ("Complexity: ", GRAY), ("high", YELLOW), (" (multi-source data + synthesis)", DIM)],
+    [("    ", FG), ("Skills needed:", GRAY)],
+    [("    ", FG), ("  • ", DIM), ("competitive_analysis", CYAN), (" (primary)", DIM)],
+    [("    ", FG), ("  • ", DIM), ("financial_modeling", CYAN), (" (secondary)", DIM)],
+    [("    ", FG), ("  • ", DIM), ("web_search", CYAN), (" (supporting)", DIM)],
     "",
-    [("  █████████░░░░░░░░░░░░░░░  ", GREEN), ("1/8", FG)],
+    [("  ✓ ", GREEN), ("Task decomposed", FG), (" — searching marketplace for best agents...", GRAY)],
+    "",
+    [("  ████░░░░░░░░░░░░░░░░░░░░  ", GREEN), ("1/5", FG)],
 ]
 create_frame(frame1_lines, f"{output_dir}/frame_01.png")
 
-# Frame 2: Stage 3 - Task Analysis + Budget
+# ── Frame 2: Agent Marketplace Search ─────────────────────────────────────
+# CEO queries the marketplace, skill matching finds candidates
 frame2_lines = [
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
-    [("Stage [3/8]  ", YELLOW), ("Task Analysis & Budget Allocation", FG)],
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("Step [2/5]  ", YELLOW), ("AGENT MARKETPLACE SEARCH", WHITE)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
     "",
-    [("  Task: ", GRAY), ("\"Build a professional landing page for HireWire\"", FG)],
+    [("  ► ", BLUE), ("Querying Agent Marketplace via MCP Registry...", FG)],
+    [("    ", FG), ("GET /marketplace/agents?skills=competitive_analysis,financial_modeling", DIM)],
     "",
-    [("  ► ", BLUE), ("CEO analyzing task complexity...", FG)],
-    [("    ", FG), ("Type: ", GRAY), ("build", CYAN)],
-    [("    ", FG), ("Complexity: ", GRAY), ("moderate", YELLOW)],
-    [("    ", FG), ("Agents needed: ", GRAY), ("builder, designer-ext-001", CYAN)],
+    [("  ┌──────────────────────────────────────────────────────────────┐", CYAN)],
+    [("  │ ", CYAN), ("MARKETPLACE RESULTS                    5 agents found  ", FG), ("│", CYAN)],
+    [("  ├──────────────────────────────────────────────────────────────┤", CYAN)],
+    [("  │  ", CYAN), ("Agent             Skills              Price    Match ", FG), ("│", CYAN)],
+    [("  ├──────────────────────────────────────────────────────────────┤", CYAN)],
+    [("  │  ", CYAN), ("Research     ", GREEN), ("  analysis,search       ", FG), ("free   ", GREEN), ("  87%  ", YELLOW), ("│", CYAN)],
+    [("  │  ", CYAN), ("analyst-ext  ", MAGENTA), ("  competitive,finance   ", FG), ("$0.50  ", GREEN), ("  95%  ", GREEN), ("│", CYAN)],
+    [("  │  ", CYAN), ("Builder      ", GREEN), ("  code,testing          ", FG), ("free   ", GREEN), ("  32%  ", DIM), ("│", CYAN)],
+    [("  │  ", CYAN), ("data-ext     ", MAGENTA), ("  scraping,analysis     ", FG), ("$0.25  ", GREEN), ("  78%  ", YELLOW), ("│", CYAN)],
+    [("  │  ", CYAN), ("CEO          ", GREEN), ("  routing,budgeting     ", FG), ("free   ", GREEN), ("  15%  ", DIM), ("│", CYAN)],
+    [("  └──────────────────────────────────────────────────────────────┘", CYAN)],
     "",
-    [("  ► ", BLUE), ("Budget allocation:", FG)],
-    [("    ", FG), ("Total budget: ", GRAY), ("$10.00 USDC", GREEN)],
-    [("    ", FG), ("Reserved in escrow: ", GRAY), ("$3.50 USDC", YELLOW)],
-    [("    ", FG), ("  → builder: ", DIM), ("$2.50", GREEN)],
-    [("    ", FG), ("  → designer-ext-001 (x402): ", DIM), ("$1.00", GREEN)],
+    [("  ► ", BLUE), ("Skill matching algorithm:", FG)],
+    [("    ", FG), ("1. Cosine similarity on skill vectors", DIM)],
+    [("    ", FG), ("2. Reputation-weighted scoring (Thompson sampling)", DIM)],
+    [("    ", FG), ("3. Budget-aware ranking", DIM)],
     "",
-    [("  ✓ ", GREEN), ("Budget allocated and escrowed", FG)],
+    [("  ✓ ", GREEN), ("Top match: ", FG), ("analyst-ext-001", CYAN), (" (95% skill match, $0.50/call)", GRAY)],
+    [("  ✓ ", GREEN), ("Runner-up:  ", FG), ("Research", CYAN), (" (87% match, internal — free)", GRAY)],
     "",
-    [("  ███████████████░░░░░░░░░  ", GREEN), ("3/8", FG)],
+    [("  █████████░░░░░░░░░░░░░░░  ", GREEN), ("2/5", FG)],
 ]
 create_frame(frame2_lines, f"{output_dir}/frame_02.png")
 
-# Frame 3: Stage 5 - External Hiring (x402)
+# ── Frame 3: Hiring Decision + x402 USDC Payment ─────────────────────────
+# CEO selects agents, escrow budget, x402 payment proof signed
 frame3_lines = [
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
-    [("Stage [5/8]  ", YELLOW), ("External Agent Hiring — x402 Protocol", FG)],
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("Step [3/5]  ", YELLOW), ("HIRING + x402 USDC PAYMENT", WHITE)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
     "",
-    [("  ► ", BLUE), ("Hiring external agent via x402 payment protocol...", FG)],
+    [("  ► ", BLUE), ("CEO hiring 2 agents for this task:", FG)],
+    [("    ", FG), ("1. ", GRAY), ("analyst-ext-001", CYAN), (" — external agent (x402 paid)", MAGENTA)],
+    [("    ", FG), ("2. ", GRAY), ("Research", CYAN), (" — internal agent (free)", GREEN)],
     "",
-    [("  ┌─────────────────────────────────────────────────────┐", MAGENTA)],
-    [("  │ ", MAGENTA), ("x402 Payment Flow                                   ", FG), ("│", MAGENTA)],
-    [("  │ ", MAGENTA), ("                                                     ", FG), ("│", MAGENTA)],
-    [("  │  ", MAGENTA), ("1. CEO → EIP-712 signed payment proof              ", GRAY), (" │", MAGENTA)],
-    [("  │  ", MAGENTA), ("2. Proof → designer-ext-001 endpoint               ", GRAY), (" │", MAGENTA)],
-    [("  │  ", MAGENTA), ("3. Agent verifies proof, executes task              ", GRAY), (" │", MAGENTA)],
-    [("  │  ", MAGENTA), ("4. Payment settled: ", GRAY), ("$0.05 USDC", GREEN), ("                     ", GRAY), (" │", MAGENTA)],
-    [("  │ ", MAGENTA), ("                                                     ", FG), ("│", MAGENTA)],
-    [("  └─────────────────────────────────────────────────────┘", MAGENTA)],
+    [("  ► ", BLUE), ("Budget allocation:", FG)],
+    [("    ", FG), ("Total budget:       ", GRAY), ("$5.00 USDC", GREEN)],
+    [("    ", FG), ("Escrowed for x402:  ", GRAY), ("$0.50 USDC", YELLOW)],
     "",
-    [("  ✓ ", GREEN), ("designer-ext-001 hired via x402", FG)],
-    [("  ✓ ", GREEN), ("Payment verified on-chain: ", FG), ("$0.05 USDC", GREEN)],
-    [("  ✓ ", GREEN), ("Design deliverable received: ", FG), ("landing-page-mockup.svg", CYAN)],
+    [("  ┌─────────────────────────────────────────────────────────────┐", MAGENTA)],
+    [("  │ ", MAGENTA), ("x402 PAYMENT PROTOCOL                                     ", FG), ("│", MAGENTA)],
+    [("  │                                                             │", MAGENTA)],
+    [("  │  ", MAGENTA), ("1. CEO creates EIP-712 signed payment proof           ", GRAY), ("  │", MAGENTA)],
+    [("  │     ", MAGENTA), ("Amount: $0.50 USDC  Chain: Base  Nonce: 47         ", GREEN), ("│", MAGENTA)],
+    [("  │  ", MAGENTA), ("2. HTTP 402 → Payment Required from analyst-ext-001  ", GRAY), ("  │", MAGENTA)],
+    [("  │  ", MAGENTA), ("3. CEO sends signed proof in X-PAYMENT header        ", GRAY), ("  │", MAGENTA)],
+    [("  │  ", MAGENTA), ("4. Agent verifies proof → accepts task                ", GRAY), ("  │", MAGENTA)],
+    [("  │  ", MAGENTA), ("5. Escrow held until task completion                  ", GRAY), ("  │", MAGENTA)],
+    [("  │                                                             │", MAGENTA)],
+    [("  └─────────────────────────────────────────────────────────────┘", MAGENTA)],
     "",
-    [("  █████████████████████░░░  ", GREEN), ("5/8", FG)],
+    [("  ✓ ", GREEN), ("analyst-ext-001 hired via x402", FG), (" — $0.50 USDC escrowed", YELLOW)],
+    [("  ✓ ", GREEN), ("Research agent assigned (internal)", FG)],
+    [("  ✓ ", GREEN), ("HITL gate: ", FG), ("auto-approved", GREEN), (" (under $5 threshold)", DIM)],
+    "",
+    [("  ██████████████░░░░░░░░░░  ", GREEN), ("3/5", FG)],
 ]
 create_frame(frame3_lines, f"{output_dir}/frame_03.png")
 
-# Frame 4: Stage 6 - Concurrent Execution
+# ── Frame 4: Task Execution by Agents ─────────────────────────────────────
+# Agents execute in parallel, GPT-4o powers the work
 frame4_lines = [
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
-    [("Stage [6/8]  ", YELLOW), ("Concurrent Agent Execution", FG)],
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("Step [4/5]  ", YELLOW), ("TASK EXECUTION (GPT-4o)", WHITE)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
     "",
-    [("  ► ", BLUE), ("Running 3 agents in parallel...", FG)],
+    [("  ► ", BLUE), ("Running 2 agents concurrently via Agent Framework...", FG)],
     "",
-    [("  ┌─ CEO ──────────────────────── ", CYAN), ("running", YELLOW), (" ─┐", CYAN)],
-    [("  │  ", CYAN), ("Analyzing market positioning strategy", FG), ("     │", CYAN)],
-    [("  └─────────────────────────────────────────┘", CYAN)],
+    [("  ┌─ analyst-ext-001 (x402) ──────────────── ", MAGENTA), ("done ✓", GREEN), (" ─┐", CYAN)],
+    [("  │  ", CYAN), ("Task: Competitive pricing analysis                     ", FG), ("│", CYAN)],
+    [("  │  ", CYAN), ("Model: GPT-4o (Azure OpenAI)                           ", FG), ("│", CYAN)],
+    [("  │  ", CYAN), ("Output: 5 platforms compared, pricing tiers mapped     ", FG), ("│", CYAN)],
+    [("  │  ", CYAN), ("Tokens: 2,847 input / 1,523 output                    ", DIM), ("│", CYAN)],
+    [("  │  ", CYAN), ("Time: 3.2s  Cost: ", FG), ("$0.50 USDC", GREEN), ("                           ", FG), ("│", CYAN)],
+    [("  └────────────────────────────────────────────────────────┘", CYAN)],
     "",
-    [("  ┌─ Research ─────────────────── ", CYAN), ("running", YELLOW), (" ─┐", CYAN)],
-    [("  │  ", CYAN), ("Gathering competitor data from 5 platforms", FG), ("│", CYAN)],
-    [("  └─────────────────────────────────────────┘", CYAN)],
+    [("  ┌─ Research (internal) ─────────────────── ", GREEN), ("done ✓", GREEN), (" ─┐", CYAN)],
+    [("  │  ", CYAN), ("Task: Market data gathering & report writing           ", FG), ("│", CYAN)],
+    [("  │  ", CYAN), ("Model: GPT-4o (Azure OpenAI)                           ", FG), ("│", CYAN)],
+    [("  │  ", CYAN), ("Output: Detailed market report with recommendations   ", FG), ("│", CYAN)],
+    [("  │  ", CYAN), ("Tokens: 1,892 input / 2,104 output                    ", DIM), ("│", CYAN)],
+    [("  │  ", CYAN), ("Time: 2.8s  Cost: ", FG), ("free (internal)", GREEN), ("                      ", FG), ("│", CYAN)],
+    [("  └────────────────────────────────────────────────────────┘", CYAN)],
     "",
-    [("  ┌─ Analyst (x402) ──────────── ", CYAN), ("running", YELLOW), (" ─┐", CYAN)],
-    [("  │  ", CYAN), ("Financial modeling: revenue projections", FG), ("  │", CYAN)],
-    [("  └─────────────────────────────────────────┘", CYAN)],
+    [("  ✓ ", GREEN), ("Both agents completed", FG), (" — ", DIM), ("3.2s total (parallel)", GRAY)],
+    [("  ✓ ", GREEN), ("CEO aggregating results with GPT-4o...", FG)],
     "",
-    [("  ✓ ", GREEN), ("All 3 agents completed", FG), (" — ", DIM), ("1.2s total", GRAY)],
-    [("  ✓ ", GREEN), ("Results aggregated by CEO", FG)],
-    "",
-    [("  ████████████████████████░░  ", GREEN), ("6/8", FG)],
+    [("  ████████████████████░░░░  ", GREEN), ("4/5", FG)],
 ]
 create_frame(frame4_lines, f"{output_dir}/frame_04.png")
 
-# Frame 5: Stage 8 - Results Summary
+# ── Frame 5: Task Completion + Payment Settlement ─────────────────────────
+# Final results, payment released from escrow, ledger updated
 frame5_lines = [
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
-    [("Stage [8/8]  ", YELLOW), ("Results Summary", FG)],
-    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
+    [("Step [5/5]  ", YELLOW), ("TASK COMPLETE — PAYMENT SETTLED", WHITE)],
+    [("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", DIM)],
     "",
-    [("  ┌──────────────────────────────────────────────────┐", GREEN)],
-    [("  │ ", GREEN), ("Payment Ledger                                   ", FG), ("│", GREEN)],
-    [("  ├──────────────────────────────────────────────────┤", GREEN)],
-    [("  │  ", GREEN), ("builder         → $2.50 USDC  ", FG), ("(internal)     ", GRAY), ("│", GREEN)],
-    [("  │  ", GREEN), ("research        → $0.80 USDC  ", FG), ("(internal)     ", GRAY), ("│", GREEN)],
-    [("  │  ", GREEN), ("designer-ext-001→ $1.02 USDC  ", FG), ("(x402)         ", MAGENTA), ("│", GREEN)],
-    [("  │  ", GREEN), ("analyst-ext-001 → $0.66 USDC  ", FG), ("(x402)         ", MAGENTA), ("│", GREEN)],
-    [("  ├──────────────────────────────────────────────────┤", GREEN)],
-    [("  │  ", GREEN), ("Total spent:      ", FG), ("$7.35 USDC", YELLOW), ("                  ", FG), ("│", GREEN)],
-    [("  │  ", GREEN), ("External (x402):  ", FG), ("$1.95 USDC", MAGENTA), ("                  ", FG), ("│", GREEN)],
-    [("  └──────────────────────────────────────────────────┘", GREEN)],
+    [("  ┌──────────────────────────────────────────────────────────────┐", GREEN)],
+    [("  │ ", GREEN), ("PAYMENT LEDGER                                            ", FG), ("│", GREEN)],
+    [("  ├──────────────────────────────────────────────────────────────┤", GREEN)],
+    [("  │  ", GREEN), ("Agent              Amount       Type           Status  ", FG), ("│", GREEN)],
+    [("  ├──────────────────────────────────────────────────────────────┤", GREEN)],
+    [("  │  ", GREEN), ("analyst-ext-001    $0.50 USDC  ", FG), ("x402 (Base)    ", MAGENTA), ("settled ", GREEN), ("│", GREEN)],
+    [("  │  ", GREEN), ("Research           $0.00        ", FG), ("internal       ", CYAN), ("done    ", GREEN), ("│", GREEN)],
+    [("  ├──────────────────────────────────────────────────────────────┤", GREEN)],
+    [("  │  ", GREEN), ("Total: ", FG), ("$0.50 USDC", YELLOW), ("    External (x402): ", FG), ("$0.50 USDC", MAGENTA), ("       │", GREEN)],
+    [("  │  ", GREEN), ("Escrow released: ", FG), ("$0.50 USDC", GREEN), ("  Remaining budget: ", FG), ("$4.50    ", GREEN), ("│", GREEN)],
+    [("  └──────────────────────────────────────────────────────────────┘", GREEN)],
     "",
-    [("  ✓ ", GREEN), ("Tasks completed: ", FG), ("9/12", CYAN), (" (75% completion rate)", GRAY)],
-    [("  ✓ ", GREEN), ("Agents used: ", FG), ("5", CYAN), (" (3 internal + 2 external)", GRAY)],
-    [("  ✓ ", GREEN), ("Azure GPT-4o: ", FG), ("Connected", GREEN)],
-    [("  ✓ ", GREEN), ("HITL gates: ", FG), ("0 blocked, 12 decisions", CYAN)],
-    [("  ✓ ", GREEN), ("RAI fairness: ", FG), ("100%", GREEN)],
+    [("  ✓ ", GREEN), ("Task completed: ", FG), ("Competitor pricing analysis delivered", CYAN)],
+    [("  ✓ ", GREEN), ("x402 escrow released to analyst-ext-001", FG)],
+    [("  ✓ ", GREEN), ("Learning system updated: ", FG), ("analyst-ext-001 reputation +0.12", CYAN)],
+    [("  ✓ ", GREEN), ("Responsible AI: ", FG), ("all checks passed", GREEN), (" (bias: clean, PII: clean)", DIM)],
     "",
-    [("  █████████████████████████  ", GREEN), ("8/8 ✓ Complete", GREEN)],
+    [("  █████████████████████████  ", GREEN), ("5/5 ✓ Complete", GREEN)],
     "",
-    [("╔══════════════════════════════════════════════════════════════╗", CYAN)],
-    [("║          Demo Complete — All Systems Operational            ║", CYAN)],
-    [("╚══════════════════════════════════════════════════════════════╝", CYAN)],
+    [("╔══════════════════════════════════════════════════════════════════╗", CYAN)],
+    [("║  HIRING FLOW COMPLETE                                          ║", CYAN)],
+    [("║  Task → Marketplace → Skill Match → x402 Payment → Delivered  ║", CYAN)],
+    [("║                                                                ║", CYAN)],
+    [("║  Azure GPT-4o ✓  Cosmos DB ✓  x402 ✓  1,540 tests ✓          ║", CYAN)],
+    [("╚══════════════════════════════════════════════════════════════════╝", CYAN)],
 ]
 create_frame(frame5_lines, f"{output_dir}/frame_05.png")
 
 print(f"Created 5 terminal frames in {output_dir}")
+print("Hiring flow: Task Submission → Marketplace Search → Skill Matching + x402 → Execution → Settlement")

@@ -51,7 +51,7 @@ Use these five beats — each is a real working feature you can show live:
 
 | Metric | Value |
 |--------|-------|
-| **Tests** | 1,293 passing, 0 failures (33 test files) |
+| **Tests** | 1,540 passing, 0 failures (38 test files) |
 | **Source code** | 15,967 lines across 62 Python files |
 | **Test code** | 13,776 lines across 35 test files |
 | **API endpoints** | 72 REST endpoints across 8 route modules |
@@ -88,7 +88,7 @@ Use these five beats — each is a real working feature you can show live:
 ### Technology (20%)
 - 6 Azure services live and integrated (GPT-4o, Cosmos DB, Container Apps, ACR, Foundry, App Insights)
 - Microsoft Agent Framework SDK with all 4 orchestration patterns
-- 15,967 lines of production Python, 1,293 tests, Docker deployment
+- 15,967 lines of production Python, 1,540 tests, Docker deployment
 - Graceful degradation (mock provider fallback when Azure is unavailable)
 
 ### Agentic Design (20%)
@@ -122,7 +122,7 @@ Use these five beats — each is a real working feature you can show live:
 
 ## Elevator Pitch (30 seconds)
 
-> "What if AI agents could hire each other? HireWire is an agent operating system where a CEO agent receives your task, discovers the best specialist from a marketplace, negotiates a price, orchestrates the work using Microsoft Agent Framework, and pays them in real USDC — all autonomously. It's built on Azure with GPT-4o, Cosmos DB, and Container Apps. 1,293 tests. Live in production. And here's the kicker — it was built by an AI agent."
+> "What if AI agents could hire each other? HireWire is an agent operating system where a CEO agent receives your task, discovers the best specialist from a marketplace, negotiates a price, orchestrates the work using Microsoft Agent Framework, and pays them in real USDC — all autonomously. It's built on Azure with GPT-4o, Cosmos DB, and Container Apps. 1,540 tests. Live in production. And here's the kicker — it was built by an AI agent."
 
 ---
 
@@ -132,7 +132,7 @@ Use these five beats — each is a real working feature you can show live:
 - Show the live Azure deployment (not localhost)
 - Click through the dashboard — it's visual and judges skim
 - Show a real GPT-4o response (not a mock)
-- Mention "1,293 tests" — it signals production quality
+- Mention "1,540 tests" — it signals production quality
 - End with the x402 payment hitting the ledger — that's the money shot
 
 **Don't:**
